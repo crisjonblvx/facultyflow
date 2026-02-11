@@ -556,9 +556,20 @@
 
         // Canvas Connection
         async function connectCanvas() {
-            // Trim whitespace from inputs
-            const url = document.getElementById('canvasUrl').value.trim();
-            const token = document.getElementById('canvasToken').value.trim();
+            // Aggressively clean inputs - remove ALL whitespace, newlines, tabs
+            const rawUrl = document.getElementById('canvasUrl').value;
+            const rawToken = document.getElementById('canvasToken').value;
+
+            const url = rawUrl.replace(/\s/g, ''); // Remove ALL whitespace
+            const token = rawToken.replace(/\s/g, ''); // Remove ALL whitespace
+
+            console.log('=== Canvas Connection Debug ===');
+            console.log('Raw URL length:', rawUrl.length);
+            console.log('Cleaned URL length:', url.length);
+            console.log('Raw token length:', rawToken.length);
+            console.log('Cleaned token length:', token.length);
+            console.log('Token starts with:', token.substring(0, 20) + '...');
+            console.log('URL:', url);
 
             if (!url || !token) {
                 alert('Please enter both Canvas URL and API token');
@@ -566,6 +577,8 @@
             }
 
             try {
+                console.log('Sending request to:', `${API_URL}/api/v2/canvas/connect`);
+
                 const response = await fetch(`${API_URL}/api/v2/canvas/connect`, {
                     method: 'POST',
                     headers: {
@@ -575,9 +588,13 @@
                     body: JSON.stringify({ canvas_url: url, access_token: token })
                 });
 
+                console.log('Response status:', response.status);
+
                 const result = await response.json();
+                console.log('Response body:', result);
 
                 if (response.ok) {
+                    console.log('✅ Connection successful!');
                     document.getElementById('connectionStatus').textContent = '✓ Connected';
                     document.getElementById('connectionStatus').className = 'status-badge connected';
                     document.getElementById('connectionForm').classList.add('hidden');
@@ -585,11 +602,13 @@
                     document.getElementById('connectedUrl').textContent = url;
                     loadCourses();
                 } else {
+                    console.error('❌ Connection failed:', result.detail);
                     // Show detailed error message
-                    alert('Canvas Connection Failed:\n\n' + result.detail + '\n\nPlease check:\n- Canvas URL is correct\n- API token is valid and not expired\n- Token has proper permissions');
+                    alert('Canvas Connection Failed:\n\n' + result.detail + '\n\nDebug Info (check console for details):\n- URL: ' + url + '\n- Token length: ' + token.length + ' chars\n\nOpen browser console (F12) for more details.');
                 }
             } catch (error) {
-                alert('Network Error: ' + error.message + '\n\nPlease check your internet connection and try again.');
+                console.error('❌ Network error:', error);
+                alert('Network Error: ' + error.message + '\n\nPlease check:\n- Internet connection\n- Backend is running\n- CORS is configured\n\nOpen browser console (F12) for details.');
             }
         }
 

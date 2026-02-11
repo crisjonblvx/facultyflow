@@ -531,13 +531,21 @@ async def connect_canvas_v2(
     Saves encrypted credentials to database
     """
     try:
-        # Trim whitespace from inputs
-        canvas_url = request.canvas_url.strip()
-        access_token = request.access_token.strip()
+        # Aggressively clean inputs - remove ALL whitespace including hidden chars
+        import re
+        canvas_url = re.sub(r'\s+', '', request.canvas_url)  # Remove all whitespace
+        access_token = re.sub(r'\s+', '', request.access_token)  # Remove all whitespace
+
+        print(f"=== Canvas Connection Attempt ===")
+        print(f"URL: {canvas_url}")
+        print(f"Token length: {len(access_token)}")
+        print(f"Token preview: {access_token[:20]}...")
 
         # Test the connection
         canvas_auth = CanvasAuth(canvas_url, access_token)
         success, user_data, error_message = canvas_auth.test_connection()
+
+        print(f"Connection test result: success={success}, error={error_message}")
 
         if not success:
             raise HTTPException(
