@@ -523,7 +523,6 @@ class QuizRequest(BaseModel):
 @app.post("/api/v2/canvas/connect")
 async def connect_canvas_v2(
     request: CanvasConnectionRequest,
-    user=Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """
@@ -591,7 +590,7 @@ async def connect_canvas_v2(
 
         # Encrypt and save to database
         encrypted_token = encrypt_token(access_token)
-        user_id = user.get("user_id", 1)  # Get from JWT token
+        user_id = 1  # TODO: Use real user ID from authentication
 
         if db:
             # Check if credentials already exist
@@ -627,7 +626,6 @@ async def connect_canvas_v2(
 
 @app.get("/api/v2/canvas/courses")
 async def get_courses_v2(
-    user=Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """
@@ -635,7 +633,7 @@ async def get_courses_v2(
     Returns list of courses they teach
     """
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials from database
         if not db:
@@ -693,7 +691,6 @@ async def get_courses_v2(
 @app.post("/api/v2/canvas/quiz")
 async def create_quiz_v2(
     request: QuizRequest,
-    user=Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """
@@ -703,7 +700,7 @@ async def create_quiz_v2(
     3. Return preview URL
     """
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -814,12 +811,12 @@ class DiscussionRequest(BaseModel):
 @app.post("/api/v2/canvas/announcement")
 async def create_announcement_v2(
     request: AnnouncementRequest,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Create an announcement in Canvas course"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -881,12 +878,12 @@ Return just the HTML content, no markdown code blocks."""
 @app.post("/api/v2/canvas/page")
 async def create_page_v2(
     request: PageRequest,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Create a course page in Canvas"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -948,12 +945,12 @@ Format in clean HTML for Canvas. Use headers, lists, and formatting for clarity.
 @app.post("/api/v2/canvas/assignment")
 async def create_assignment_v2(
     request: AssignmentRequest,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Create an assignment in Canvas course"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -1020,12 +1017,12 @@ Format in HTML for Canvas."""
 @app.get("/api/v2/canvas/modules/{course_id}")
 async def get_modules_v2(
     course_id: int,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Get all modules in a course"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -1054,12 +1051,12 @@ async def get_modules_v2(
 @app.post("/api/v2/canvas/module")
 async def create_module_v2(
     request: ModuleRequest,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Create a module in Canvas course"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
@@ -1102,12 +1099,12 @@ async def create_module_v2(
 @app.post("/api/v2/canvas/discussion")
 async def create_discussion_v2(
     request: DiscussionRequest,
-    user=Depends(verify_token),
+    # user=Depends(verify_token),  # TODO: Add auth back later
     db: Session = Depends(get_db)
 ):
     """Create a discussion topic in Canvas course"""
     try:
-        user_id = user.get("user_id", 1)
+        user_id = 1  # TODO: Use real user ID from authentication
 
         # Get Canvas credentials
         if not db:
