@@ -18,13 +18,25 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 from jose import jwt
+from sqlalchemy.orm import Session
+
+# FacultyFlow v2.0 imports
+from .database import init_db, get_db, CanvasCredentials, UserCourse
+from .canvas_client import CanvasClient
+from .canvas_auth import CanvasAuth, encrypt_token, decrypt_token
 
 # Initialize FastAPI
 app = FastAPI(
     title="FacultyFlow API",
     description="AI Course Builder for Canvas",
-    version="1.0.0"
+    version="2.0.0"
 )
+
+# Database initialization on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables on startup"""
+    init_db()
 
 # CORS middleware
 app.add_middleware(
@@ -492,6 +504,231 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "bonita": "online"
     }
+
+# ============================================================================
+# FACULTYFLOW V2.0 - CANVAS INTEGRATION
+# ============================================================================
+
+class CanvasConnectionRequest(BaseModel):
+    canvas_url: str
+    access_token: str
+
+class QuizRequest(BaseModel):
+    course_id: int
+    topic: str
+    num_questions: int = 10
+    difficulty: str = "medium"
+    due_date: Optional[str] = None
+
+@app.post("/api/v2/canvas/connect")
+async def connect_canvas_v2(
+    request: CanvasConnectionRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Phase 1: Connect professor's Canvas account
+    Saves encrypted credentials to database
+    """
+    try:
+        # Test the connection
+        canvas_auth = CanvasAuth(request.canvas_url, request.access_token)
+        success, user_data = canvas_auth.test_connection()
+
+        if not success:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid Canvas credentials. Please check your URL and API token."
+            )
+
+        # Encrypt and save to database
+        encrypted_token = encrypt_token(request.access_token)
+        user_id = user.get("user_id", 1)  # Get from JWT token
+
+        if db:
+            # Check if credentials already exist
+            existing = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+
+            if existing:
+                # Update existing
+                existing.canvas_url = request.canvas_url
+                existing.access_token_encrypted = encrypted_token
+                existing.last_verified = datetime.utcnow()
+            else:
+                # Create new
+                credentials = CanvasCredentials(
+                    user_id=user_id,
+                    canvas_url=request.canvas_url,
+                    access_token_encrypted=encrypted_token
+                )
+                db.add(credentials)
+
+            db.commit()
+
+        return {
+            "status": "connected",
+            "canvas_url": request.canvas_url,
+            "user_name": user_data.get("name") if user_data else "Unknown"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v2/canvas/courses")
+async def get_courses_v2(
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Phase 1: Get professor's Canvas courses
+    Returns list of courses they teach
+    """
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials from database
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+
+        if not credentials:
+            raise HTTPException(
+                status_code=404,
+                detail="Canvas not connected. Please connect your Canvas account first."
+            )
+
+        # Decrypt token and fetch courses
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        courses = canvas_client.get_user_courses()
+
+        # Cache courses in database
+        for course in courses:
+            existing = db.query(UserCourse).filter_by(
+                user_id=user_id,
+                course_id=course["id"]
+            ).first()
+
+            if existing:
+                existing.course_name = course["name"]
+                existing.course_code = course.get("course_code")
+                existing.total_students = course.get("total_students")
+                existing.synced_at = datetime.utcnow()
+            else:
+                user_course = UserCourse(
+                    user_id=user_id,
+                    course_id=course["id"],
+                    course_name=course["name"],
+                    course_code=course.get("course_code"),
+                    total_students=course.get("total_students")
+                )
+                db.add(user_course)
+
+        db.commit()
+
+        return {
+            "courses": courses,
+            "total": len(courses)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/quiz")
+async def create_quiz_v2(
+    request: QuizRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Phase 2: Create quiz in Canvas course
+    1. Generate quiz with Bonita AI
+    2. Upload to Canvas
+    3. Return preview URL
+    """
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+
+        if not credentials:
+            raise HTTPException(
+                status_code=404,
+                detail="Canvas not connected"
+            )
+
+        # Step 1: Generate quiz with Bonita AI
+        print(f"🧠 Generating quiz on: {request.topic}")
+        quiz_data = bonita.generate_quiz(1, request.topic)
+
+        # Step 2: Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        quiz_title = f"Quiz: {request.topic}"
+        quiz_id = canvas_client.create_quiz(
+            course_id=request.course_id,
+            quiz_data={
+                "title": quiz_title,
+                "quiz_type": "assignment",
+                "time_limit": 20,
+                "allowed_attempts": 1,
+                "points_possible": request.num_questions * 10,
+                "due_at": request.due_date
+            }
+        )
+
+        if not quiz_id:
+            raise HTTPException(status_code=500, detail="Failed to create quiz in Canvas")
+
+        # Step 3: Add questions
+        for i, question in enumerate(quiz_data.get("questions", []), 1):
+            canvas_client.add_quiz_question(
+                course_id=request.course_id,
+                quiz_id=quiz_id,
+                question_data={
+                    "name": f"Question {i}",
+                    "text": question["question_text"],
+                    "type": "multiple_choice_question",
+                    "points": 10,
+                    "answers": [
+                        {
+                            "answer_text": ans["text"],
+                            "answer_weight": 100 if ans.get("correct") else 0
+                        }
+                        for ans in question["answers"]
+                    ]
+                }
+            )
+
+        # Return success with preview URL
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/quizzes/{quiz_id}"
+
+        return {
+            "status": "success",
+            "quiz_id": quiz_id,
+            "quiz_title": quiz_title,
+            "questions_added": len(quiz_data.get("questions", [])),
+            "preview_url": preview_url,
+            "message": "Quiz created successfully! Review and publish in Canvas."
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
 # RUN SERVER
