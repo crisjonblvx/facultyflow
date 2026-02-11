@@ -293,3 +293,111 @@ class CanvasClient:
                 }
             }
         )
+
+    # ==========================================================================
+    # MODULES
+    # ==========================================================================
+
+    def get_modules(self, course_id: int) -> List[Dict]:
+        """
+        Get all modules in a course
+
+        Args:
+            course_id: Canvas course ID
+
+        Returns:
+            list: List of module objects
+        """
+        modules = self._make_request(
+            method="GET",
+            endpoint=f"/api/v1/courses/{course_id}/modules"
+        )
+        return modules if modules else []
+
+    def create_module(self, course_id: int, module_data: Dict) -> Optional[Dict]:
+        """
+        Create a module in a course
+
+        Args:
+            course_id: Canvas course ID
+            module_data: Module dict with keys:
+                - name: Module name (e.g., "Week 1")
+                - position: Module position (1, 2, 3...)
+
+        Returns:
+            dict: Module object if successful, None if failed
+        """
+        return self._make_request(
+            method="POST",
+            endpoint=f"/api/v1/courses/{course_id}/modules",
+            data={
+                "module": {
+                    "name": module_data["name"],
+                    "position": module_data.get("position", 1)
+                }
+            }
+        )
+
+    def add_module_item(
+        self,
+        course_id: int,
+        module_id: int,
+        item_data: Dict
+    ) -> Optional[Dict]:
+        """
+        Add an item to a module
+
+        Args:
+            course_id: Canvas course ID
+            module_id: Canvas module ID
+            item_data: Item dict with keys:
+                - type: Item type ("Assignment", "Quiz", "Page", "Discussion", "File")
+                - content_id: ID of the content (assignment_id, quiz_id, etc.)
+                - title: Item title
+
+        Returns:
+            dict: Module item object if successful, None if failed
+        """
+        return self._make_request(
+            method="POST",
+            endpoint=f"/api/v1/courses/{course_id}/modules/{module_id}/items",
+            data={
+                "module_item": {
+                    "type": item_data["type"],
+                    "content_id": item_data["content_id"],
+                    "title": item_data.get("title", "")
+                }
+            }
+        )
+
+    # ==========================================================================
+    # DISCUSSIONS
+    # ==========================================================================
+
+    def create_discussion(
+        self,
+        course_id: int,
+        discussion_data: Dict
+    ) -> Optional[Dict]:
+        """
+        Create a discussion topic (not an announcement)
+
+        Args:
+            course_id: Canvas course ID
+            discussion_data: Discussion dict with keys:
+                - title: Discussion title
+                - message: Discussion message (HTML allowed)
+
+        Returns:
+            dict: Discussion object if successful, None if failed
+        """
+        return self._make_request(
+            method="POST",
+            endpoint=f"/api/v1/courses/{course_id}/discussion_topics",
+            data={
+                "title": discussion_data["title"],
+                "message": discussion_data["message"],
+                "is_announcement": False,  # Regular discussion
+                "published": False  # Draft first
+            }
+        )

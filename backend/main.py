@@ -730,6 +730,393 @@ async def create_quiz_v2(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+class AnnouncementRequest(BaseModel):
+    course_id: int
+    topic: str
+    details: Optional[str] = None
+
+
+class PageRequest(BaseModel):
+    course_id: int
+    title: str
+    topic: str
+
+
+class AssignmentRequest(BaseModel):
+    course_id: int
+    title: str
+    description: str
+    points: int = 100
+    due_date: Optional[str] = None
+
+
+class ModuleRequest(BaseModel):
+    course_id: int
+    name: str
+    position: Optional[int] = None
+
+
+class DiscussionRequest(BaseModel):
+    course_id: int
+    topic: str
+    prompt: str
+
+
+@app.post("/api/v2/canvas/announcement")
+async def create_announcement_v2(
+    request: AnnouncementRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Create an announcement in Canvas course"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        # Generate announcement with AI
+        print(f"📢 Generating announcement on: {request.topic}")
+
+        system = "You are Bonita, helping professors create course announcements."
+        prompt = f"""Create a professional course announcement about: {request.topic}
+
+{f'Additional details: {request.details}' if request.details else ''}
+
+Make it:
+- Professional but friendly
+- Clear and concise (2-3 paragraphs max)
+- Action-oriented if needed
+- Formatted in HTML for Canvas
+
+Return just the HTML content, no markdown code blocks."""
+
+        announcement_html, _ = bonita.call_claude(prompt, system)
+
+        # Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.create_announcement(
+            course_id=request.course_id,
+            announcement_data={
+                "title": request.topic,
+                "message": announcement_html
+            }
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to create announcement")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/discussion_topics/{result['id']}"
+
+        return {
+            "status": "success",
+            "announcement_id": result["id"],
+            "title": request.topic,
+            "preview_url": preview_url,
+            "message": "Announcement posted successfully!"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/page")
+async def create_page_v2(
+    request: PageRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Create a course page in Canvas"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        # Generate page content with AI
+        print(f"📄 Generating page: {request.title}")
+
+        system = "You are Bonita, creating educational course pages."
+        prompt = f"""Create a course page titled: {request.title}
+
+Topic: {request.topic}
+
+Create comprehensive page content including:
+- Overview section
+- Key concepts (3-5 bullet points)
+- Learning objectives
+- Resources or examples if relevant
+
+Format in clean HTML for Canvas. Use headers, lists, and formatting for clarity."""
+
+        page_html, _ = bonita.call_claude(prompt, system)
+
+        # Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.create_page(
+            course_id=request.course_id,
+            page_data={
+                "title": request.title,
+                "content": page_html
+            }
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to create page")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/pages/{result['url']}"
+
+        return {
+            "status": "success",
+            "page_url": result["url"],
+            "title": request.title,
+            "preview_url": preview_url,
+            "message": "Page created successfully! Review and publish in Canvas."
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/assignment")
+async def create_assignment_v2(
+    request: AssignmentRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Create an assignment in Canvas course"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        # Generate assignment description with AI if needed
+        description = request.description
+        if len(description) < 50:  # If description is too short, expand it with AI
+            print(f"📝 Enhancing assignment description with AI")
+
+            system = "You are Bonita, creating assignment descriptions for professors."
+            prompt = f"""Create a detailed assignment description for: {request.title}
+
+Brief description: {description}
+
+Include:
+- Assignment overview (what students will do)
+- Learning objectives
+- Submission requirements
+- Grading criteria
+
+Format in HTML for Canvas."""
+
+            description, _ = bonita.call_claude(prompt, system)
+
+        # Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.create_assignment(
+            course_id=request.course_id,
+            assignment_data={
+                "title": request.title,
+                "description": description,
+                "points": request.points,
+                "due_date": request.due_date
+            }
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to create assignment")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/assignments/{result['id']}"
+
+        return {
+            "status": "success",
+            "assignment_id": result["id"],
+            "title": request.title,
+            "points": request.points,
+            "preview_url": preview_url,
+            "message": "Assignment created successfully! Review and publish in Canvas."
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v2/canvas/modules/{course_id}")
+async def get_modules_v2(
+    course_id: int,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Get all modules in a course"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        modules = canvas_client.get_modules(course_id)
+
+        return {
+            "modules": modules,
+            "total": len(modules)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/module")
+async def create_module_v2(
+    request: ModuleRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Create a module in Canvas course"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.create_module(
+            course_id=request.course_id,
+            module_data={
+                "name": request.name,
+                "position": request.position
+            }
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to create module")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/modules"
+
+        return {
+            "status": "success",
+            "module_id": result["id"],
+            "name": request.name,
+            "preview_url": preview_url,
+            "message": f"Module '{request.name}' created successfully!"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/discussion")
+async def create_discussion_v2(
+    request: DiscussionRequest,
+    user=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Create a discussion topic in Canvas course"""
+    try:
+        user_id = user.get("user_id", 1)
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        # Generate discussion content with AI
+        print(f"💬 Generating discussion: {request.topic}")
+
+        system = "You are Bonita, creating discussion prompts for courses."
+        prompt = f"""Create a discussion topic titled: {request.topic}
+
+Prompt: {request.prompt}
+
+Create an engaging discussion post that:
+- Provides context for the discussion
+- Asks thought-provoking questions (3-4 questions)
+- Encourages student participation
+- Is formatted in HTML for Canvas
+
+Keep it concise but meaningful."""
+
+        discussion_html, _ = bonita.call_claude(prompt, system)
+
+        # Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.create_discussion(
+            course_id=request.course_id,
+            discussion_data={
+                "title": request.topic,
+                "message": discussion_html
+            }
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to create discussion")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/discussion_topics/{result['id']}"
+
+        return {
+            "status": "success",
+            "discussion_id": result["id"],
+            "title": request.topic,
+            "preview_url": preview_url,
+            "message": "Discussion created successfully! Review and publish in Canvas."
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ============================================================================
 # RUN SERVER
 # ============================================================================
