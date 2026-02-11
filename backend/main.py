@@ -21,9 +21,9 @@ from jose import jwt
 from sqlalchemy.orm import Session
 
 # FacultyFlow v2.0 imports
-from .database import init_db, get_db, CanvasCredentials, UserCourse
-from .canvas_client import CanvasClient
-from .canvas_auth import CanvasAuth, encrypt_token, decrypt_token
+from database import init_db, get_db, CanvasCredentials, UserCourse
+from canvas_client import CanvasClient
+from canvas_auth import CanvasAuth, encrypt_token, decrypt_token
 
 # Initialize FastAPI
 app = FastAPI(
