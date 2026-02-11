@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "name": "facultyflow",
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/landing-page.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/dashboard.html"
+    },
+    {
+      "src": "/landing-page.html",
+      "dest": "/landing-page.html"
+    },
+    {
+      "src": "/dashboard.html",
+      "dest": "/dashboard.html"
+    }
+  ]
+}
