@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FacultyFlow v2.0</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --purple: #667eea;
+            --coral: #FF6B35;
+            --dark: #1a1a1a;
+            --gray: #666666;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            padding: 2rem 0;
+        }
+
+        .logo {
+            padding: 0 2rem 2rem;
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .logo span {
+            color: var(--purple);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 0.75rem 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .nav-item:hover {
+            background: var(--light-gray);
+            color: var(--purple);
+        }
+
+        .nav-item.active {
+            background: var(--light-gray);
+            color: var(--purple);
+            border-right: 3px solid var(--purple);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--gray);
+        }
+
+        /* Canvas Connection Card */
+        .connection-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .connection-card h2 {
+            font-family: var(--font-display);
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .status-badge.connected {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .status-badge.disconnected {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-body);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--purple);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-body);
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        /* Courses Grid */
+        .courses-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .course-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .course-card:hover {
+            border-color: var(--purple);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .course-card.selected {
+            border-color: var(--purple);
+            background: #f5f3ff;
+        }
+
+        .course-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-code {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Quiz Creator */
+        .quiz-creator {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .quiz-creator.active {
+            display: block;
+        }
+
+        .quiz-preview {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                Faculty<span>Flow</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active">📊 Dashboard</li>
+                <li class="nav-item">📝 Create Quiz</li>
+                <li class="nav-item">📢 Announcements</li>
+                <li class="nav-item">📄 Pages</li>
+                <li class="nav-item">⚙️ Settings</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Welcome to FacultyFlow v2.0</h1>
+                <p>Your daily Canvas tasks, simplified with AI</p>
+            </div>
+
+            <!-- Canvas Connection -->
+            <div id="canvasConnection" class="connection-card">
+                <h2>Canvas Connection <span id="connectionStatus" class="status-badge disconnected">Not Connected</span></h2>
+
+                <div id="connectionForm">
+                    <p style="margin-bottom: 1.5rem; color: var(--gray);">
+                        Connect your Canvas account to get started. You'll need your Canvas URL and API token.
+                        <a href="https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273" target="_blank" style="color: var(--purple);">How to get API token →</a>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="canvasUrl">Canvas URL</label>
+                        <input
+                            type="text"
+                            id="canvasUrl"
+                            placeholder="https://vuu.instructure.com"
+                            value="https://vuu.instructure.com"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="canvasToken">Canvas API Token</label>
+                        <input
+                            type="password"
+                            id="canvasToken"
+                            placeholder="Paste your Canvas API token here"
+                        >
+                    </div>
+
+                    <button class="btn btn-primary" onclick="connectCanvas()">Connect Canvas</button>
+                </div>
+
+                <div id="connectedInfo" class="hidden">
+                    <p style="color: var(--success); margin-bottom: 1rem;">
+                        ✓ Connected to <strong id="connectedUrl"></strong>
+                    </p>
+                    <button class="btn btn-secondary" onclick="disconnectCanvas()">Disconnect</button>
+                </div>
+            </div>
+
+            <!-- Courses Section -->
+            <div id="coursesSection" class="courses-section hidden">
+                <h2>Your Courses</h2>
+                <p style="color: var(--gray); margin-bottom: 1rem;">Select a course to get started</p>
+                <div id="coursesGrid" class="courses-grid"></div>
+            </div>
+
+            <!-- Quiz Creator -->
+            <div id="quizCreator" class="quiz-creator">
+                <h2>Create Quiz</h2>
+                <p style="color: var(--gray); margin-bottom: 1.5rem;">
+                    Selected Course: <strong id="selectedCourseName"></strong>
+                </p>
+
+                <div id="quizAlert"></div>
+
+                <div class="form-group">
+                    <label for="quizTopic">Quiz Topic</label>
+                    <input
+                        type="text"
+                        id="quizTopic"
+                        placeholder="e.g., Content Creation Strategies"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="numQuestions">Number of Questions</label>
+                    <input
+                        type="number"
+                        id="numQuestions"
+                        value="10"
+                        min="5"
+                        max="20"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="difficulty">Difficulty</label>
+                    <select id="difficulty" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dueDate">Due Date (Optional)</label>
+                    <input
+                        type="datetime-local"
+                        id="dueDate"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;"
+                    >
+                </div>
+
+                <button class="btn btn-primary" onclick="createQuiz()">Generate & Upload Quiz</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_URL = 'https://facultyflow-production.up.railway.app';
+        let selectedCourse = null;
+        let authToken = 'dummy-token'; // TODO: Implement proper auth
+
+        // Connect Canvas
+        async function connectCanvas() {
+            const url = document.getElementById('canvasUrl').value;
+            const token = document.getElementById('canvasToken').value;
+
+            if (!url || !token) {
+                alert('Please enter both Canvas URL and API token');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/connect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        canvas_url: url,
+                        access_token: token
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Update UI
+                    document.getElementById('connectionStatus').textContent = '✓ Connected';
+                    document.getElementById('connectionStatus').className = 'status-badge connected';
+                    document.getElementById('connectionForm').classList.add('hidden');
+                    document.getElementById('connectedInfo').classList.remove('hidden');
+                    document.getElementById('connectedUrl').textContent = url;
+
+                    // Load courses
+                    loadCourses();
+                } else {
+                    alert('Failed to connect: ' + result.detail);
+                }
+            } catch (error) {
+                alert('Error connecting to Canvas: ' + error.message);
+            }
+        }
+
+        // Load Courses
+        async function loadCourses() {
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/courses`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayCourses(result.courses);
+                    document.getElementById('coursesSection').classList.remove('hidden');
+                } else {
+                    alert('Failed to load courses: ' + result.detail);
+                }
+            } catch (error) {
+                alert('Error loading courses: ' + error.message);
+            }
+        }
+
+        // Display Courses
+        function displayCourses(courses) {
+            const grid = document.getElementById('coursesGrid');
+            grid.innerHTML = '';
+
+            courses.forEach(course => {
+                const card = document.createElement('div');
+                card.className = 'course-card';
+                card.innerHTML = `
+                    <div class="course-name">${course.name}</div>
+                    <div class="course-code">${course.course_code || 'No code'}</div>
+                    <div class="course-meta">
+                        <span>📚 ${course.total_students || 0} students</span>
+                    </div>
+                `;
+                card.onclick = () => selectCourse(course, card);
+                grid.appendChild(card);
+            });
+        }
+
+        // Select Course
+        function selectCourse(course, cardElement) {
+            // Remove previous selection
+            document.querySelectorAll('.course-card').forEach(c => c.classList.remove('selected'));
+
+            // Select this course
+            cardElement.classList.add('selected');
+            selectedCourse = course;
+
+            // Show quiz creator
+            document.getElementById('quizCreator').classList.add('active');
+            document.getElementById('selectedCourseName').textContent = course.name;
+        }
+
+        // Create Quiz
+        async function createQuiz() {
+            if (!selectedCourse) {
+                alert('Please select a course first');
+                return;
+            }
+
+            const topic = document.getElementById('quizTopic').value;
+            const numQuestions = document.getElementById('numQuestions').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const dueDate = document.getElementById('dueDate').value;
+
+            if (!topic) {
+                alert('Please enter a quiz topic');
+                return;
+            }
+
+            // Show loading
+            const alertDiv = document.getElementById('quizAlert');
+            alertDiv.className = 'alert alert-info';
+            alertDiv.innerHTML = '🧠 Generating quiz with AI... This may take a minute.';
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/quiz`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        topic: topic,
+                        num_questions: parseInt(numQuestions),
+                        difficulty: difficulty,
+                        due_date: dueDate || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success!
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.innerHTML = `
+                        ✅ Quiz created successfully!<br>
+                        <strong>${result.quiz_title}</strong> with ${result.questions_added} questions<br>
+                        <a href="${result.preview_url}" target="_blank" style="color: var(--purple);">
+                            Preview and publish in Canvas →
+                        </a>
+                    `;
+
+                    // Clear form
+                    document.getElementById('quizTopic').value = '';
+                } else {
+                    alertDiv.className = 'alert alert-error';
+                    alertDiv.innerHTML = '❌ Failed to create quiz: ' + result.detail;
+                }
+            } catch (error) {
+                alertDiv.className = 'alert alert-error';
+                alertDiv.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+
+        // Disconnect Canvas
+        function disconnectCanvas() {
+            document.getElementById('connectionStatus').textContent = 'Not Connected';
+            document.getElementById('connectionStatus').className = 'status-badge disconnected';
+            document.getElementById('connectionForm').classList.remove('hidden');
+            document.getElementById('connectedInfo').classList.add('hidden');
+            document.getElementById('coursesSection').classList.add('hidden');
+            document.getElementById('quizCreator').classList.remove('active');
+            selectedCourse = null;
+        }
+    </script>
+</body>
+</html>
