@@ -320,24 +320,37 @@
                 <div id="connectionForm">
                     <p style="margin-bottom: 1.5rem; color: var(--gray);">
                         Connect your Canvas account to get started.
-                        <a href="https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273" target="_blank" style="color: var(--purple);">How to get API token →</a>
                     </p>
 
                     <div class="form-group">
                         <label for="canvasUrl">Canvas URL</label>
-                        <input type="text" id="canvasUrl" placeholder="https://vuu.instructure.com" value="https://vuu.instructure.com">
+                        <input type="text" id="canvasUrl" placeholder="https://vuu.instructure.com" value="https://vuu.instructure.com" oninput="updateCanvasInstructions()">
+                        <div id="schoolDetection" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--success); display: none;">
+                            ✅ <span id="schoolName"></span> detected!
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="canvasToken">Canvas API Token</label>
                         <input type="password" id="canvasToken" placeholder="Paste your Canvas API token here">
-                        <small style="color: #666; font-size: 0.85rem; margin-top: 0.5rem; display: block;">
-                            💡 To create a Canvas API token:<br>
-                            1. Go to Canvas → Account → Settings → Approved Integrations<br>
-                            2. Click "+ New Access Token"<br>
-                            3. Copy the full token (typically 50-70 characters)<br>
-                            4. Paste it here (no quotes or extra spaces)
-                        </small>
+
+                        <!-- Dynamic Instructions -->
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 0.75rem; border-left: 3px solid var(--purple);">
+                            <div style="font-weight: 600; color: var(--dark); margin-bottom: 0.5rem; font-size: 0.95rem;">
+                                📝 How to get your Canvas API token:
+                            </div>
+                            <ol style="margin: 0.5rem 0 0.75rem 1.2rem; color: #555; font-size: 0.875rem; line-height: 1.6;">
+                                <li>Click the button below to open <span id="instructionSchoolName">your Canvas</span> Settings</li>
+                                <li>Scroll to "Approved Integrations"</li>
+                                <li>Click "+ New Access Token"</li>
+                                <li>Set purpose: "FacultyFlow"</li>
+                                <li>Click "Generate Token"</li>
+                                <li>Copy the entire token and paste it above</li>
+                            </ol>
+                            <button id="openCanvasSettingsBtn" onclick="openCanvasSettings()" class="btn" style="background: var(--purple); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600;">
+                                🔗 Open <span id="buttonSchoolName">Canvas</span> Settings
+                            </button>
+                        </div>
                     </div>
 
                     <button class="btn btn-primary" onclick="connectCanvas()">Connect Canvas</button>
@@ -507,6 +520,80 @@
         const API_URL = 'https://facultyflow-production.up.railway.app';
         let selectedCourse = null;
         let authToken = 'dummy-token';
+
+        // School Name Mapping for Better UX
+        function getSchoolName(canvasUrl) {
+            const urlMap = {
+                'vuu.instructure.com': 'Virginia Union University (VUU)',
+                'howard.instructure.com': 'Howard University',
+                'spelman.instructure.com': 'Spelman College',
+                'morehouse.instructure.com': 'Morehouse College',
+                'yale.instructure.com': 'Yale University',
+                'harvard.instructure.com': 'Harvard University',
+                'mit.instructure.com': 'MIT',
+                'stanford.instructure.com': 'Stanford University',
+                'columbia.instructure.com': 'Columbia University',
+                'ncat.instructure.com': 'North Carolina A&T State University',
+                'famu.instructure.com': 'Florida A&M University',
+                'hampton.instructure.com': 'Hampton University',
+                'tuskegee.instructure.com': 'Tuskegee University',
+                'bcuedu.instructure.com': 'Bethune-Cookman University',
+                'xula.instructure.com': 'Xavier University of Louisiana',
+                // More schools can be added here
+            };
+
+            return urlMap[canvasUrl] || 'Canvas';
+        }
+
+        // Update Canvas instructions based on entered URL
+        function updateCanvasInstructions() {
+            const urlInput = document.getElementById('canvasUrl').value.trim();
+
+            // Clean URL (remove https://, http://, trailing slashes)
+            const cleanUrl = urlInput.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+            // Validate it's a Canvas instance
+            const isCanvas = cleanUrl.includes('instructure.com');
+
+            if (isCanvas && cleanUrl) {
+                const schoolName = getSchoolName(cleanUrl);
+                const shortName = schoolName !== 'Canvas' ? schoolName.split('(')[0].trim() : 'your school';
+
+                // Show school detection
+                document.getElementById('schoolDetection').style.display = 'block';
+                document.getElementById('schoolName').textContent = schoolName;
+
+                // Update instruction text
+                document.getElementById('instructionSchoolName').textContent = shortName;
+                document.getElementById('buttonSchoolName').textContent = shortName;
+
+                // Enable the button
+                document.getElementById('openCanvasSettingsBtn').disabled = false;
+            } else {
+                // Hide school detection if invalid
+                document.getElementById('schoolDetection').style.display = 'none';
+                document.getElementById('instructionSchoolName').textContent = 'your Canvas';
+                document.getElementById('buttonSchoolName').textContent = 'Canvas';
+            }
+        }
+
+        // Open user's specific Canvas settings page
+        function openCanvasSettings() {
+            const urlInput = document.getElementById('canvasUrl').value.trim();
+            const cleanUrl = urlInput.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+            if (cleanUrl.includes('instructure.com')) {
+                const settingsUrl = `https://${cleanUrl}/profile/settings`;
+                window.open(settingsUrl, '_blank');
+            } else {
+                alert('Please enter a valid Canvas URL first');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateCanvasInstructions();
+        });
 
         // Navigation
         function showSection(section) {
