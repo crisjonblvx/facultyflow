@@ -24,11 +24,7 @@
             --font-body: 'DM Sans', sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: var(--font-body);
@@ -36,7 +32,6 @@
             color: var(--dark);
         }
 
-        /* Dashboard Layout */
         .dashboard {
             display: grid;
             grid-template-columns: 260px 1fr;
@@ -48,6 +43,10 @@
             background: white;
             border-right: 1px solid rgba(0,0,0,0.05);
             padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         .logo {
@@ -59,13 +58,9 @@
             margin-bottom: 2rem;
         }
 
-        .logo span {
-            color: var(--purple);
-        }
+        .logo span { color: var(--purple); }
 
-        .nav-menu {
-            list-style: none;
-        }
+        .nav-menu { list-style: none; }
 
         .nav-item {
             padding: 0.75rem 2rem;
@@ -105,11 +100,9 @@
             margin-bottom: 0.5rem;
         }
 
-        .header p {
-            color: var(--gray);
-        }
+        .header p { color: var(--gray); }
 
-        /* Canvas Connection Card */
+        /* Connection Card */
         .connection-card {
             background: white;
             border-radius: 12px;
@@ -142,6 +135,7 @@
             color: var(--error);
         }
 
+        /* Form Styles */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -152,7 +146,9 @@
             font-weight: 600;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 0.75rem;
             border: 2px solid #e5e7eb;
@@ -161,7 +157,14 @@
             font-family: var(--font-body);
         }
 
-        .form-group input:focus {
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--purple);
         }
@@ -243,8 +246,8 @@
             color: var(--gray);
         }
 
-        /* Quiz Creator */
-        .quiz-creator {
+        /* Content Creator Sections */
+        .content-creator {
             background: white;
             border-radius: 12px;
             padding: 2rem;
@@ -252,27 +255,11 @@
             display: none;
         }
 
-        .quiz-creator.active {
+        .content-creator.active {
             display: block;
         }
 
-        .quiz-preview {
-            background: var(--light-gray);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-        }
-
-        .quiz-question {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
 
         .alert {
             padding: 1rem;
@@ -294,21 +281,28 @@
             background: #dbeafe;
             color: #1e40af;
         }
+
+        .selected-course-info {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">
-                Faculty<span>Flow</span>
-            </div>
+            <div class="logo">Faculty<span>Flow</span></div>
             <ul class="nav-menu">
-                <li class="nav-item active">📊 Dashboard</li>
-                <li class="nav-item">📝 Create Quiz</li>
-                <li class="nav-item">📢 Announcements</li>
-                <li class="nav-item">📄 Pages</li>
-                <li class="nav-item">⚙️ Settings</li>
+                <li class="nav-item active" onclick="showSection('courses')">📚 My Courses</li>
+                <li class="nav-item" onclick="showSection('quiz')">📝 Create Quiz</li>
+                <li class="nav-item" onclick="showSection('announcement')">📢 Announcement</li>
+                <li class="nav-item" onclick="showSection('assignment')">📋 Assignment</li>
+                <li class="nav-item" onclick="showSection('page')">📄 Page</li>
+                <li class="nav-item" onclick="showSection('discussion')">💬 Discussion</li>
+                <li class="nav-item" onclick="showSection('module')">📦 Modules</li>
             </ul>
         </aside>
 
@@ -325,27 +319,18 @@
 
                 <div id="connectionForm">
                     <p style="margin-bottom: 1.5rem; color: var(--gray);">
-                        Connect your Canvas account to get started. You'll need your Canvas URL and API token.
+                        Connect your Canvas account to get started.
                         <a href="https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273" target="_blank" style="color: var(--purple);">How to get API token →</a>
                     </p>
 
                     <div class="form-group">
                         <label for="canvasUrl">Canvas URL</label>
-                        <input
-                            type="text"
-                            id="canvasUrl"
-                            placeholder="https://vuu.instructure.com"
-                            value="https://vuu.instructure.com"
-                        >
+                        <input type="text" id="canvasUrl" placeholder="https://vuu.instructure.com" value="https://vuu.instructure.com">
                     </div>
 
                     <div class="form-group">
                         <label for="canvasToken">Canvas API Token</label>
-                        <input
-                            type="password"
-                            id="canvasToken"
-                            placeholder="Paste your Canvas API token here"
-                        >
+                        <input type="password" id="canvasToken" placeholder="Paste your Canvas API token here">
                     </div>
 
                     <button class="btn btn-primary" onclick="connectCanvas()">Connect Canvas</button>
@@ -367,37 +352,24 @@
             </div>
 
             <!-- Quiz Creator -->
-            <div id="quizCreator" class="quiz-creator">
+            <div id="quizCreator" class="content-creator">
                 <h2>Create Quiz</h2>
-                <p style="color: var(--gray); margin-bottom: 1.5rem;">
-                    Selected Course: <strong id="selectedCourseName"></strong>
-                </p>
-
+                <div class="selected-course-info" id="quizCourseInfo"></div>
                 <div id="quizAlert"></div>
 
                 <div class="form-group">
-                    <label for="quizTopic">Quiz Topic</label>
-                    <input
-                        type="text"
-                        id="quizTopic"
-                        placeholder="e.g., Content Creation Strategies"
-                    >
+                    <label>Quiz Topic</label>
+                    <input type="text" id="quizTopic" placeholder="e.g., Content Creation Strategies">
                 </div>
 
                 <div class="form-group">
-                    <label for="numQuestions">Number of Questions</label>
-                    <input
-                        type="number"
-                        id="numQuestions"
-                        value="10"
-                        min="5"
-                        max="20"
-                    >
+                    <label>Number of Questions</label>
+                    <input type="number" id="numQuestions" value="10" min="5" max="20">
                 </div>
 
                 <div class="form-group">
-                    <label for="difficulty">Difficulty</label>
-                    <select id="difficulty" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                    <label>Difficulty</label>
+                    <select id="difficulty">
                         <option value="easy">Easy</option>
                         <option value="medium" selected>Medium</option>
                         <option value="hard">Hard</option>
@@ -405,26 +377,184 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="dueDate">Due Date (Optional)</label>
-                    <input
-                        type="datetime-local"
-                        id="dueDate"
-                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;"
-                    >
+                    <label>Due Date (Optional)</label>
+                    <input type="datetime-local" id="dueDate">
                 </div>
 
                 <button class="btn btn-primary" onclick="createQuiz()">Generate & Upload Quiz</button>
+            </div>
+
+            <!-- Announcement Creator -->
+            <div id="announcementCreator" class="content-creator">
+                <h2>Create Announcement</h2>
+                <div class="selected-course-info" id="announcementCourseInfo"></div>
+                <div id="announcementAlert"></div>
+
+                <div class="form-group">
+                    <label>Announcement Topic</label>
+                    <input type="text" id="announcementTopic" placeholder="e.g., Upcoming Assignment Reminder">
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Details (Optional)</label>
+                    <textarea id="announcementDetails" placeholder="Any specific details to include..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="createAnnouncement()">Generate & Post Announcement</button>
+            </div>
+
+            <!-- Assignment Creator -->
+            <div id="assignmentCreator" class="content-creator">
+                <h2>Create Assignment</h2>
+                <div class="selected-course-info" id="assignmentCourseInfo"></div>
+                <div id="assignmentAlert"></div>
+
+                <div class="form-group">
+                    <label>Assignment Title</label>
+                    <input type="text" id="assignmentTitle" placeholder="e.g., Social Media Campaign Analysis">
+                </div>
+
+                <div class="form-group">
+                    <label>Description/Instructions</label>
+                    <textarea id="assignmentDescription" placeholder="Brief description or key requirements..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Points</label>
+                    <input type="number" id="assignmentPoints" value="100" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date (Optional)</label>
+                    <input type="datetime-local" id="assignmentDueDate">
+                </div>
+
+                <button class="btn btn-primary" onclick="createAssignment()">Generate & Create Assignment</button>
+            </div>
+
+            <!-- Page Creator -->
+            <div id="pageCreator" class="content-creator">
+                <h2>Create Course Page</h2>
+                <div class="selected-course-info" id="pageCourseInfo"></div>
+                <div id="pageAlert"></div>
+
+                <div class="form-group">
+                    <label>Page Title</label>
+                    <input type="text" id="pageTitle" placeholder="e.g., Week 1 Overview">
+                </div>
+
+                <div class="form-group">
+                    <label>Topic/Content</label>
+                    <textarea id="pageTopic" placeholder="What should this page cover?"></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="createPage()">Generate & Create Page</button>
+            </div>
+
+            <!-- Discussion Creator -->
+            <div id="discussionCreator" class="content-creator">
+                <h2>Create Discussion Topic</h2>
+                <div class="selected-course-info" id="discussionCourseInfo"></div>
+                <div id="discussionAlert"></div>
+
+                <div class="form-group">
+                    <label>Discussion Topic</label>
+                    <input type="text" id="discussionTopic" placeholder="e.g., Ethics in Social Media">
+                </div>
+
+                <div class="form-group">
+                    <label>Discussion Prompt</label>
+                    <textarea id="discussionPrompt" placeholder="What should students discuss?"></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="createDiscussion()">Generate & Create Discussion</button>
+            </div>
+
+            <!-- Module Creator -->
+            <div id="moduleCreator" class="content-creator">
+                <h2>Course Modules</h2>
+                <div class="selected-course-info" id="moduleCourseInfo"></div>
+                <div id="moduleAlert"></div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Create New Module</h3>
+                    <div class="form-group">
+                        <label>Module Name</label>
+                        <input type="text" id="moduleName" placeholder="e.g., Week 1: Introduction">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="number" id="modulePosition" value="1" min="1">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="createModule()">Create Module</button>
+                </div>
+
+                <div id="modulesList"></div>
             </div>
         </main>
     </div>
 
     <script>
-        // API Configuration
         const API_URL = 'https://facultyflow-production.up.railway.app';
         let selectedCourse = null;
-        let authToken = 'dummy-token'; // TODO: Implement proper auth
+        let authToken = 'dummy-token';
 
-        // Connect Canvas
+        // Navigation
+        function showSection(section) {
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all creators
+            document.querySelectorAll('.content-creator').forEach(el => el.classList.remove('active'));
+
+            // Show selected section
+            if (section === 'courses') {
+                document.getElementById('coursesSection').classList.remove('hidden');
+            } else {
+                document.getElementById('coursesSection').classList.add('hidden');
+                const creatorMap = {
+                    quiz: 'quizCreator',
+                    announcement: 'announcementCreator',
+                    assignment: 'assignmentCreator',
+                    page: 'pageCreator',
+                    discussion: 'discussionCreator',
+                    module: 'moduleCreator'
+                };
+                
+                if (creatorMap[section]) {
+                    if (!selectedCourse) {
+                        alert('Please select a course first');
+                        showSection('courses');
+                        return;
+                    }
+                    document.getElementById(creatorMap[section]).classList.add('active');
+                    updateCourseInfo(section);
+                }
+            }
+        }
+
+        function updateCourseInfo(section) {
+            if (!selectedCourse) return;
+            
+            const info = `📚 <strong>${selectedCourse.name}</strong> (${selectedCourse.course_code || 'No code'})`;
+            const infoIds = {
+                quiz: 'quizCourseInfo',
+                announcement: 'announcementCourseInfo',
+                assignment: 'assignmentCourseInfo',
+                page: 'pageCourseInfo',
+                discussion: 'discussionCourseInfo',
+                module: 'moduleCourseInfo'
+            };
+            
+            if (infoIds[section]) {
+                document.getElementById(infoIds[section]).innerHTML = info;
+            }
+        }
+
+        // Canvas Connection
         async function connectCanvas() {
             const url = document.getElementById('canvasUrl').value;
             const token = document.getElementById('canvasToken').value;
@@ -441,39 +571,30 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({
-                        canvas_url: url,
-                        access_token: token
-                    })
+                    body: JSON.stringify({ canvas_url: url, access_token: token })
                 });
 
                 const result = await response.json();
 
                 if (response.ok) {
-                    // Update UI
                     document.getElementById('connectionStatus').textContent = '✓ Connected';
                     document.getElementById('connectionStatus').className = 'status-badge connected';
                     document.getElementById('connectionForm').classList.add('hidden');
                     document.getElementById('connectedInfo').classList.remove('hidden');
                     document.getElementById('connectedUrl').textContent = url;
-
-                    // Load courses
                     loadCourses();
                 } else {
                     alert('Failed to connect: ' + result.detail);
                 }
             } catch (error) {
-                alert('Error connecting to Canvas: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 
-        // Load Courses
         async function loadCourses() {
             try {
                 const response = await fetch(`${API_URL}/api/v2/canvas/courses`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
 
                 const result = await response.json();
@@ -485,11 +606,10 @@
                     alert('Failed to load courses: ' + result.detail);
                 }
             } catch (error) {
-                alert('Error loading courses: ' + error.message);
+                alert('Error: ' + error.message);
             }
         }
 
-        // Display Courses
         function displayCourses(courses) {
             const grid = document.getElementById('coursesGrid');
             grid.innerHTML = '';
@@ -509,41 +629,20 @@
             });
         }
 
-        // Select Course
         function selectCourse(course, cardElement) {
-            // Remove previous selection
             document.querySelectorAll('.course-card').forEach(c => c.classList.remove('selected'));
-
-            // Select this course
             cardElement.classList.add('selected');
             selectedCourse = course;
-
-            // Show quiz creator
-            document.getElementById('quizCreator').classList.add('active');
-            document.getElementById('selectedCourseName').textContent = course.name;
         }
 
         // Create Quiz
         async function createQuiz() {
-            if (!selectedCourse) {
-                alert('Please select a course first');
-                return;
-            }
+            if (!selectedCourse) { alert('Select a course first'); return; }
 
             const topic = document.getElementById('quizTopic').value;
-            const numQuestions = document.getElementById('numQuestions').value;
-            const difficulty = document.getElementById('difficulty').value;
-            const dueDate = document.getElementById('dueDate').value;
+            if (!topic) { alert('Enter a quiz topic'); return; }
 
-            if (!topic) {
-                alert('Please enter a quiz topic');
-                return;
-            }
-
-            // Show loading
-            const alertDiv = document.getElementById('quizAlert');
-            alertDiv.className = 'alert alert-info';
-            alertDiv.innerHTML = '🧠 Generating quiz with AI... This may take a minute.';
+            showAlert('quizAlert', 'info', '🧠 Generating quiz...');
 
             try {
                 const response = await fetch(`${API_URL}/api/v2/canvas/quiz`, {
@@ -555,45 +654,261 @@
                     body: JSON.stringify({
                         course_id: selectedCourse.id,
                         topic: topic,
-                        num_questions: parseInt(numQuestions),
-                        difficulty: difficulty,
-                        due_date: dueDate || null
+                        num_questions: parseInt(document.getElementById('numQuestions').value),
+                        difficulty: document.getElementById('difficulty').value,
+                        due_date: document.getElementById('dueDate').value || null
                     })
                 });
 
                 const result = await response.json();
 
                 if (response.ok) {
-                    // Success!
-                    alertDiv.className = 'alert alert-success';
-                    alertDiv.innerHTML = `
-                        ✅ Quiz created successfully!<br>
-                        <strong>${result.quiz_title}</strong> with ${result.questions_added} questions<br>
-                        <a href="${result.preview_url}" target="_blank" style="color: var(--purple);">
-                            Preview and publish in Canvas →
-                        </a>
-                    `;
-
-                    // Clear form
+                    showAlert('quizAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">Preview in Canvas →</a>`);
                     document.getElementById('quizTopic').value = '';
                 } else {
-                    alertDiv.className = 'alert alert-error';
-                    alertDiv.innerHTML = '❌ Failed to create quiz: ' + result.detail;
+                    showAlert('quizAlert', 'error', '❌ ' + result.detail);
                 }
             } catch (error) {
-                alertDiv.className = 'alert alert-error';
-                alertDiv.innerHTML = '❌ Error: ' + error.message;
+                showAlert('quizAlert', 'error', '❌ Error: ' + error.message);
             }
         }
 
-        // Disconnect Canvas
+        // Create Announcement
+        async function createAnnouncement() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const topic = document.getElementById('announcementTopic').value;
+            if (!topic) { alert('Enter announcement topic'); return; }
+
+            showAlert('announcementAlert', 'info', '📢 Creating announcement...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/announcement`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        topic: topic,
+                        details: document.getElementById('announcementDetails').value || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('announcementAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+                    document.getElementById('announcementTopic').value = '';
+                    document.getElementById('announcementDetails').value = '';
+                } else {
+                    showAlert('announcementAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('announcementAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Create Assignment
+        async function createAssignment() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const title = document.getElementById('assignmentTitle').value;
+            const description = document.getElementById('assignmentDescription').value;
+            if (!title || !description) { alert('Enter title and description'); return; }
+
+            showAlert('assignmentAlert', 'info', '📋 Creating assignment...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/assignment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        title: title,
+                        description: description,
+                        points: parseInt(document.getElementById('assignmentPoints').value),
+                        due_date: document.getElementById('assignmentDueDate').value || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('assignmentAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+                    document.getElementById('assignmentTitle').value = '';
+                    document.getElementById('assignmentDescription').value = '';
+                } else {
+                    showAlert('assignmentAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('assignmentAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Create Page
+        async function createPage() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const title = document.getElementById('pageTitle').value;
+            const topic = document.getElementById('pageTopic').value;
+            if (!title || !topic) { alert('Enter title and topic'); return; }
+
+            showAlert('pageAlert', 'info', '📄 Creating page...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/page`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        title: title,
+                        topic: topic
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('pageAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+                    document.getElementById('pageTitle').value = '';
+                    document.getElementById('pageTopic').value = '';
+                } else {
+                    showAlert('pageAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('pageAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Create Discussion
+        async function createDiscussion() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const topic = document.getElementById('discussionTopic').value;
+            const prompt = document.getElementById('discussionPrompt').value;
+            if (!topic || !prompt) { alert('Enter topic and prompt'); return; }
+
+            showAlert('discussionAlert', 'info', '💬 Creating discussion...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/discussion`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        topic: topic,
+                        prompt: prompt
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('discussionAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+                    document.getElementById('discussionTopic').value = '';
+                    document.getElementById('discussionPrompt').value = '';
+                } else {
+                    showAlert('discussionAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('discussionAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Create Module
+        async function createModule() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const name = document.getElementById('moduleName').value;
+            if (!name) { alert('Enter module name'); return; }
+
+            showAlert('moduleAlert', 'info', '📦 Creating module...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/module`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        name: name,
+                        position: parseInt(document.getElementById('modulePosition').value)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('moduleAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+                    document.getElementById('moduleName').value = '';
+                    loadModules();
+                } else {
+                    showAlert('moduleAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('moduleAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        async function loadModules() {
+            if (!selectedCourse) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/modules/${selectedCourse.id}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayModules(result.modules);
+                }
+            } catch (error) {
+                console.error('Error loading modules:', error);
+            }
+        }
+
+        function displayModules(modules) {
+            const list = document.getElementById('modulesList');
+            if (modules.length === 0) {
+                list.innerHTML = '<p style="color: var(--gray);">No modules created yet.</p>';
+                return;
+            }
+
+            list.innerHTML = '<h3 style="margin-bottom: 1rem;">Existing Modules:</h3>';
+            modules.forEach(module => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 1rem; background: var(--light-gray); border-radius: 8px; margin-bottom: 0.5rem;';
+                div.innerHTML = `<strong>${module.name}</strong> (Position: ${module.position})`;
+                list.appendChild(div);
+            });
+        }
+
+        function showAlert(elementId, type, message) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+        }
+
         function disconnectCanvas() {
             document.getElementById('connectionStatus').textContent = 'Not Connected';
             document.getElementById('connectionStatus').className = 'status-badge disconnected';
             document.getElementById('connectionForm').classList.remove('hidden');
             document.getElementById('connectedInfo').classList.add('hidden');
             document.getElementById('coursesSection').classList.add('hidden');
-            document.getElementById('quizCreator').classList.remove('active');
             selectedCourse = null;
         }
     </script>
