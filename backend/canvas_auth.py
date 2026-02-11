@@ -40,28 +40,67 @@ class CanvasAuth:
             tuple: (success: bool, user_data: dict or None, error_message: str or None)
         """
         try:
+            # Enhanced debugging
+            print(f"=== Canvas API Connection Test ===")
+            print(f"URL: {self.base_url}/api/v1/users/self")
+            print(f"Token length: {len(self.access_token)}")
+            print(f"Token first 10 chars: {self.access_token[:10]}...")
+            print(f"Token last 10 chars: ...{self.access_token[-10:]}")
+
             response = requests.get(
                 f"{self.base_url}/api/v1/users/self",
                 headers=self.headers,
                 timeout=10
             )
 
-            print(f"Canvas API test response: {response.status_code}")
+            print(f"Canvas API response status: {response.status_code}")
+            print(f"Response headers: {dict(response.headers)}")
 
             if response.status_code == 200:
-                return True, response.json(), None
+                user_data = response.json()
+                print(f"✅ Success! Authenticated as: {user_data.get('name')}")
+                return True, user_data, None
             elif response.status_code == 401:
-                error_msg = "Invalid Canvas API token. Please check your token and try again."
-                print(f"Canvas auth failed: {response.text}")
+                error_details = response.text
+                print(f"❌ 401 Unauthorized")
+                print(f"Response body: {error_details}")
+
+                # Check if it's a WWW-Authenticate issue
+                www_auth = response.headers.get('WWW-Authenticate', '')
+                if 'Bearer' in www_auth:
+                    error_msg = "Invalid Canvas API token. The token format is correct, but Canvas rejected it. Please verify:\n1. Token was copied correctly\n2. Token hasn't expired\n3. Token has the required permissions"
+                else:
+                    error_msg = "Canvas authentication failed. Please check:\n1. Your Canvas URL is correct\n2. Your API token is valid\n3. Your token hasn't been revoked"
+
+                return False, None, error_msg
+            elif response.status_code == 403:
+                error_msg = "Access forbidden. Your Canvas token doesn't have sufficient permissions. Please create a new token with full access."
+                print(f"❌ 403 Forbidden: {response.text}")
+                return False, None, error_msg
+            elif response.status_code == 404:
+                error_msg = f"Canvas API endpoint not found. Please verify your Canvas URL: {self.base_url}"
+                print(f"❌ 404 Not Found: {response.text}")
                 return False, None, error_msg
             else:
-                error_msg = f"Canvas API error (status {response.status_code}): {response.text}"
-                print(error_msg)
+                error_msg = f"Canvas API error (HTTP {response.status_code}). Response: {response.text[:200]}"
+                print(f"❌ Error {response.status_code}: {response.text}")
                 return False, None, error_msg
 
+        except requests.exceptions.SSLError as e:
+            error_msg = f"SSL certificate error. Your Canvas URL may be incorrect: {str(e)}"
+            print(f"❌ SSL Error: {e}")
+            return False, None, error_msg
+        except requests.exceptions.ConnectionError as e:
+            error_msg = f"Cannot connect to Canvas at {self.base_url}. Please verify the URL is correct and Canvas is accessible."
+            print(f"❌ Connection Error: {e}")
+            return False, None, error_msg
+        except requests.exceptions.Timeout as e:
+            error_msg = "Connection to Canvas timed out. Please try again or check your network."
+            print(f"❌ Timeout: {e}")
+            return False, None, error_msg
         except requests.RequestException as e:
             error_msg = f"Connection test failed: {str(e)}"
-            print(error_msg)
+            print(f"❌ Request Exception: {e}")
             return False, None, error_msg
 
     def get_user_profile(self) -> Optional[Dict]:

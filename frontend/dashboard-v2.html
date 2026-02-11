@@ -331,6 +331,13 @@
                     <div class="form-group">
                         <label for="canvasToken">Canvas API Token</label>
                         <input type="password" id="canvasToken" placeholder="Paste your Canvas API token here">
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                            💡 To create a Canvas API token:<br>
+                            1. Go to Canvas → Account → Settings → Approved Integrations<br>
+                            2. Click "+ New Access Token"<br>
+                            3. Copy the full token (typically 50-70 characters)<br>
+                            4. Paste it here (no quotes or extra spaces)
+                        </small>
                     </div>
 
                     <button class="btn btn-primary" onclick="connectCanvas()">Connect Canvas</button>
@@ -563,22 +570,42 @@
             const url = rawUrl.replace(/\s/g, ''); // Remove ALL whitespace
             const token = rawToken.replace(/\s/g, ''); // Remove ALL whitespace
 
-            console.log('=== Canvas Connection Debug ===');
-            console.log('Raw URL length:', rawUrl.length);
-            console.log('Cleaned URL length:', url.length);
-            console.log('Raw token length:', rawToken.length);
-            console.log('Cleaned token length:', token.length);
-            console.log('Token starts with:', token.substring(0, 20) + '...');
-            console.log('URL:', url);
+            console.log('\n' + '='.repeat(60));
+            console.log('CANVAS CONNECTION DEBUG');
+            console.log('='.repeat(60));
+            console.log('Raw URL:', rawUrl);
+            console.log('Cleaned URL:', url);
+            console.log('Raw token length:', rawToken.length, 'chars');
+            console.log('Cleaned token length:', token.length, 'chars');
+            console.log('Token first 15 chars:', token.substring(0, 15) + '...');
+            console.log('Token last 10 chars:', '...' + token.substring(token.length - 10));
 
+            // Client-side validation
             if (!url || !token) {
                 alert('Please enter both Canvas URL and API token');
                 return;
             }
 
-            try {
-                console.log('Sending request to:', `${API_URL}/api/v2/canvas/connect`);
+            if (!url.startsWith('http')) {
+                alert('Canvas URL must start with https://\n\nExample: https://vuu.instructure.com');
+                return;
+            }
 
+            if (token.length < 20) {
+                alert(`Your token seems too short (${token.length} characters).\n\nCanvas API tokens are typically 50-70 characters long.\n\nPlease verify you copied the entire token.`);
+                return;
+            }
+
+            // Check for quotes or other suspicious characters
+            if (token.includes('"') || token.includes("'") || token.includes(' ')) {
+                alert('Your token contains invalid characters (quotes or spaces).\n\nPlease copy only the token itself, without quotes or extra characters.');
+                return;
+            }
+
+            console.log('✓ Client-side validation passed');
+            console.log('Sending request to:', `${API_URL}/api/v2/canvas/connect`);
+
+            try {
                 const response = await fetch(`${API_URL}/api/v2/canvas/connect`, {
                     method: 'POST',
                     headers: {
@@ -594,7 +621,9 @@
                 console.log('Response body:', result);
 
                 if (response.ok) {
-                    console.log('✅ Connection successful!');
+                    console.log('✅ CONNECTION SUCCESSFUL!');
+                    console.log('User:', result.user_name);
+                    alert(`✅ Successfully connected to Canvas!\n\nAuthenticated as: ${result.user_name}`);
                     document.getElementById('connectionStatus').textContent = '✓ Connected';
                     document.getElementById('connectionStatus').className = 'status-badge connected';
                     document.getElementById('connectionForm').classList.add('hidden');
@@ -602,9 +631,19 @@
                     document.getElementById('connectedUrl').textContent = url;
                     loadCourses();
                 } else {
-                    console.error('❌ Connection failed:', result.detail);
-                    // Show detailed error message
-                    alert('Canvas Connection Failed:\n\n' + result.detail + '\n\nDebug Info (check console for details):\n- URL: ' + url + '\n- Token length: ' + token.length + ' chars\n\nOpen browser console (F12) for more details.');
+                    console.error('❌ CONNECTION FAILED');
+                    console.error('Error details:', result.detail);
+
+                    // Show user-friendly error message
+                    let errorMsg = '❌ Canvas Connection Failed\n\n';
+                    errorMsg += result.detail + '\n\n';
+                    errorMsg += '📋 Debug Information:\n';
+                    errorMsg += `• URL: ${url}\n`;
+                    errorMsg += `• Token length: ${token.length} chars\n`;
+                    errorMsg += `• HTTP Status: ${response.status}\n\n`;
+                    errorMsg += 'Open browser console (F12) for detailed logs.';
+
+                    alert(errorMsg);
                 }
             } catch (error) {
                 console.error('❌ Network error:', error);

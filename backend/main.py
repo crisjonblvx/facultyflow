@@ -536,16 +536,52 @@ async def connect_canvas_v2(
         canvas_url = re.sub(r'\s+', '', request.canvas_url)  # Remove all whitespace
         access_token = re.sub(r'\s+', '', request.access_token)  # Remove all whitespace
 
-        print(f"=== Canvas Connection Attempt ===")
-        print(f"URL: {canvas_url}")
-        print(f"Token length: {len(access_token)}")
-        print(f"Token preview: {access_token[:20]}...")
+        print(f"\n{'='*60}")
+        print(f"CANVAS CONNECTION ATTEMPT")
+        print(f"{'='*60}")
+        print(f"Raw URL length: {len(request.canvas_url)}")
+        print(f"Cleaned URL: {canvas_url}")
+        print(f"Raw token length: {len(request.access_token)}")
+        print(f"Cleaned token length: {len(access_token)}")
+        print(f"Token first 15 chars: {access_token[:15]}...")
+        print(f"Token last 10 chars: ...{access_token[-10:]}")
+
+        # Validate URL format
+        if not canvas_url.startswith('http'):
+            print("❌ URL doesn't start with http")
+            raise HTTPException(
+                status_code=400,
+                detail="Canvas URL must start with https:// (example: https://vuu.instructure.com)"
+            )
+
+        # Validate token format (Canvas tokens are typically 50-70 characters)
+        if len(access_token) < 20:
+            print("❌ Token too short")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Canvas API token seems too short ({len(access_token)} chars). Typical tokens are 50-70 characters. Please check you copied the full token."
+            )
+
+        # Check for suspicious characters
+        if not re.match(r'^[A-Za-z0-9~_-]+$', access_token):
+            suspicious_chars = re.findall(r'[^A-Za-z0-9~_-]', access_token)
+            print(f"❌ Token contains suspicious characters: {suspicious_chars}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Canvas token contains invalid characters. Please copy only the token (no quotes, spaces, or special characters)."
+            )
+
+        print(f"✓ URL format valid")
+        print(f"✓ Token format valid")
+        print(f"Attempting Canvas API connection...")
 
         # Test the connection
         canvas_auth = CanvasAuth(canvas_url, access_token)
         success, user_data, error_message = canvas_auth.test_connection()
 
-        print(f"Connection test result: success={success}, error={error_message}")
+        print(f"\nConnection result: {'✅ SUCCESS' if success else '❌ FAILED'}")
+        if error_message:
+            print(f"Error: {error_message}")
 
         if not success:
             raise HTTPException(
