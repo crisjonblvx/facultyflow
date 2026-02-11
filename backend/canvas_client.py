@@ -81,6 +81,15 @@ class CanvasClient:
             elif response.status_code == 404:
                 print("ERROR: Not found - Resource doesn't exist")
                 return None
+            elif response.status_code == 400:
+                print(f"ERROR: Bad Request (400)")
+                print(f"Response: {response.text}")
+                try:
+                    error_data = response.json()
+                    print(f"Error details: {error_data}")
+                except:
+                    pass
+                return None
             elif response.status_code == 422:
                 print(f"ERROR: Validation error - {response.text}")
                 return None
@@ -89,6 +98,7 @@ class CanvasClient:
                 return None
             else:
                 print(f"ERROR: Unexpected status {response.status_code}")
+                print(f"Response: {response.text}")
                 return None
 
         except requests.RequestException as e:
