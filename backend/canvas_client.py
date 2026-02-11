@@ -10,7 +10,7 @@ Documentation: https://canvas.instructure.com/doc/api/
 import requests
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from .rate_limiter import RateLimiter
+from rate_limiter import RateLimiter
 
 
 class CanvasClient:
