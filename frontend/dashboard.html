@@ -596,6 +596,9 @@
     </div>
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // API Configuration
+        const API_URL = 'https://facultyflow-production.up.railway.app';
+
         const form = document.getElementById('courseForm');
         const buildStatus = document.getElementById('buildStatus');
         const successMessage = document.getElementById('successMessage');
@@ -625,7 +628,7 @@
 
             try {
                 // Call FacultyFlow API
-                const response = await fetch('/api/build-course', {
+                const response = await fetch(`${API_URL}/api/build-course`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
