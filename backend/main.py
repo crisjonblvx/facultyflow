@@ -17,7 +17,7 @@ import requests
 import hashlib
 import secrets
 from datetime import datetime, timedelta
-import jwt
+from jose import jwt
 
 # Initialize FastAPI
 app = FastAPI(
