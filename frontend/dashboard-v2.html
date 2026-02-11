@@ -556,8 +556,9 @@
 
         // Canvas Connection
         async function connectCanvas() {
-            const url = document.getElementById('canvasUrl').value;
-            const token = document.getElementById('canvasToken').value;
+            // Trim whitespace from inputs
+            const url = document.getElementById('canvasUrl').value.trim();
+            const token = document.getElementById('canvasToken').value.trim();
 
             if (!url || !token) {
                 alert('Please enter both Canvas URL and API token');
@@ -584,10 +585,11 @@
                     document.getElementById('connectedUrl').textContent = url;
                     loadCourses();
                 } else {
-                    alert('Failed to connect: ' + result.detail);
+                    // Show detailed error message
+                    alert('Canvas Connection Failed:\n\n' + result.detail + '\n\nPlease check:\n- Canvas URL is correct\n- API token is valid and not expired\n- Token has proper permissions');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                alert('Network Error: ' + error.message + '\n\nPlease check your internet connection and try again.');
             }
         }
 

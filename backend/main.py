@@ -531,18 +531,22 @@ async def connect_canvas_v2(
     Saves encrypted credentials to database
     """
     try:
+        # Trim whitespace from inputs
+        canvas_url = request.canvas_url.strip()
+        access_token = request.access_token.strip()
+
         # Test the connection
-        canvas_auth = CanvasAuth(request.canvas_url, request.access_token)
-        success, user_data = canvas_auth.test_connection()
+        canvas_auth = CanvasAuth(canvas_url, access_token)
+        success, user_data, error_message = canvas_auth.test_connection()
 
         if not success:
             raise HTTPException(
                 status_code=401,
-                detail="Invalid Canvas credentials. Please check your URL and API token."
+                detail=error_message or "Invalid Canvas credentials. Please check your URL and API token."
             )
 
         # Encrypt and save to database
-        encrypted_token = encrypt_token(request.access_token)
+        encrypted_token = encrypt_token(access_token)
         user_id = user.get("user_id", 1)  # Get from JWT token
 
         if db:
@@ -551,14 +555,14 @@ async def connect_canvas_v2(
 
             if existing:
                 # Update existing
-                existing.canvas_url = request.canvas_url
+                existing.canvas_url = canvas_url
                 existing.access_token_encrypted = encrypted_token
                 existing.last_verified = datetime.utcnow()
             else:
                 # Create new
                 credentials = CanvasCredentials(
                     user_id=user_id,
-                    canvas_url=request.canvas_url,
+                    canvas_url=canvas_url,
                     access_token_encrypted=encrypted_token
                 )
                 db.add(credentials)
@@ -567,7 +571,7 @@ async def connect_canvas_v2(
 
         return {
             "status": "connected",
-            "canvas_url": request.canvas_url,
+            "canvas_url": canvas_url,
             "user_name": user_data.get("name") if user_data else "Unknown"
         }
 

@@ -32,12 +32,12 @@ class CanvasAuth:
             "Content-Type": "application/json"
         }
 
-    def test_connection(self) -> tuple[bool, Optional[Dict]]:
+    def test_connection(self) -> tuple[bool, Optional[Dict], Optional[str]]:
         """
         Test if the Canvas API token is valid
 
         Returns:
-            tuple: (success: bool, user_data: dict or None)
+            tuple: (success: bool, user_data: dict or None, error_message: str or None)
         """
         try:
             response = requests.get(
@@ -46,14 +46,23 @@ class CanvasAuth:
                 timeout=10
             )
 
+            print(f"Canvas API test response: {response.status_code}")
+
             if response.status_code == 200:
-                return True, response.json()
+                return True, response.json(), None
+            elif response.status_code == 401:
+                error_msg = "Invalid Canvas API token. Please check your token and try again."
+                print(f"Canvas auth failed: {response.text}")
+                return False, None, error_msg
             else:
-                return False, None
+                error_msg = f"Canvas API error (status {response.status_code}): {response.text}"
+                print(error_msg)
+                return False, None, error_msg
 
         except requests.RequestException as e:
-            print(f"Connection test failed: {e}")
-            return False, None
+            error_msg = f"Connection test failed: {str(e)}"
+            print(error_msg)
+            return False, None, error_msg
 
     def get_user_profile(self) -> Optional[Dict]:
         """
