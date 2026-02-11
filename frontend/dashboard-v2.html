@@ -789,6 +789,13 @@
             const topic = document.getElementById('quizTopic').value;
             if (!topic) { alert('Enter a quiz topic'); return; }
 
+            // Convert datetime-local to ISO 8601 format for Canvas
+            const dueDateInput = document.getElementById('dueDate').value;
+            let dueDate = null;
+            if (dueDateInput) {
+                dueDate = dueDateInput + ':00Z';
+            }
+
             showAlert('quizAlert', 'info', '🧠 Generating quiz...');
 
             try {
@@ -803,7 +810,7 @@
                         topic: topic,
                         num_questions: parseInt(document.getElementById('numQuestions').value),
                         difficulty: document.getElementById('difficulty').value,
-                        due_date: document.getElementById('dueDate').value || null
+                        due_date: dueDate
                     })
                 });
 
@@ -865,6 +872,15 @@
             const description = document.getElementById('assignmentDescription').value;
             if (!title || !description) { alert('Enter title and description'); return; }
 
+            // Convert datetime-local to ISO 8601 format for Canvas
+            const dueDateInput = document.getElementById('assignmentDueDate').value;
+            let dueDate = null;
+            if (dueDateInput) {
+                // datetime-local gives: "2026-02-16T18:27"
+                // Canvas needs: "2026-02-16T18:27:00Z" (ISO 8601)
+                dueDate = dueDateInput + ':00Z';
+            }
+
             showAlert('assignmentAlert', 'info', '📋 Creating assignment...');
 
             try {
@@ -879,7 +895,7 @@
                         title: title,
                         description: description,
                         points: parseInt(document.getElementById('assignmentPoints').value),
-                        due_date: document.getElementById('assignmentDueDate').value || null
+                        due_date: dueDate
                     })
                 });
 
