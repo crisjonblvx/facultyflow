@@ -1,0 +1,15 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="30" cy="30" r="28" fill="#667eea"/>
+  
+  <!-- Icon: Flowing lines in white -->
+  <g id="icon" transform="translate(12, 10)">
+    <!-- Three flowing waves/streams -->
+    <path d="M 2 10 Q 9 5, 16 10 T 30 10" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M 2 20 Q 9 15, 16 20 T 30 20" stroke="#FF6B35" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M 2 30 Q 9 25, 16 30 T 30 30" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Arrow at the end -->
+    <path d="M 30 20 L 36 20 L 33 16 M 36 20 L 33 24" stroke="#FF6B35" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

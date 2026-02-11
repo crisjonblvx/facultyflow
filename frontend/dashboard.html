@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FacultyFlow</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --purple: #667eea;
+            --coral: #FF6B35;
+            --dark: #1a1a1a;
+            --gray: #666666;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --success: #10b981;
+            --error: #ef4444;
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            padding: 2rem 0;
+        }
+        
+        .logo {
+            padding: 0 2rem 2rem;
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .logo span {
+            color: var(--purple);
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            padding: 0.75rem 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--gray);
+        }
+        
+        .nav-item:hover {
+            background: var(--light-gray);
+            color: var(--purple);
+        }
+        
+        .nav-item.active {
+            background: var(--light-gray);
+            color: var(--purple);
+            border-right: 3px solid var(--purple);
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+        
+        /* Course Builder */
+        .course-builder {
+            max-width: 900px;
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .builder-header {
+            margin-bottom: 2.5rem;
+        }
+        
+        .builder-header h2 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .builder-header p {
+            color: var(--gray);
+            font-size: 1.05rem;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        label .required {
+            color: var(--error);
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-top: 0.375rem;
+        }
+        
+        /* Canvas Connection */
+        .canvas-connection {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .canvas-connection h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.connected {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Cost Estimate */
+        .cost-estimate {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(255, 107, 53, 0.1));
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--purple);
+            margin-bottom: 2rem;
+        }
+        
+        .cost-estimate h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--purple);
+        }
+        
+        .cost-value {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--coral);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--purple);
+            border: 2px solid var(--purple);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--purple);
+            color: white;
+        }
+        
+        /* Progress/Status */
+        .build-status {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .build-status.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--light-gray);
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-message {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-detail {
+            font-size: 0.95rem;
+            color: var(--gray);
+            opacity: 0.8;
+        }
+        
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .success-message.active {
+            display: block;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success-message h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .success-message a {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            background: white;
+            color: var(--success);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .success-message a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Faculty<span>Flow</span></div>
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <span>📝</span> Build Course
+                </li>
+                <li class="nav-item">
+                    <span>📚</span> My Courses
+                </li>
+                <li class="nav-item">
+                    <span>⚙️</span> Settings
+                </li>
+                <li class="nav-item">
+                    <span>💳</span> Billing
+                </li>
+                <li class="nav-item">
+                    <span>❓</span> Help
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Build a New Course</h1>
+                <div class="user-info">
+                    <div class="user-avatar">CJ</div>
+                    <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f1c15110a0d0c1a3f090a0a511a1b0a">[email&#160;protected]</a></span>
+                </div>
+            </div>
+
+            <!-- Course Builder Form -->
+            <div class="course-builder">
+                <div class="builder-header">
+                    <h2>Course Details</h2>
+                    <p>Fill out the information below and we'll build your complete Canvas course in 5 minutes</p>
+                </div>
+
+                <!-- Canvas Connection Status -->
+                <div class="canvas-connection">
+                    <h3>
+                        Canvas Connection
+                        <span class="status-badge connected">✓ Connected</span>
+                    </h3>
+                    <p style="color: var(--gray); font-size: 0.95rem;">
+                        Connected to: <strong>Virginia Union University</strong><br>
+                        <a href="#" style="color: var(--purple); text-decoration: none; font-size: 0.9rem;">Change Canvas account →</a>
+                    </p>
+                </div>
+
+                <form id="courseForm">
+                    <!-- Course Name -->
+                    <div class="form-group">
+                        <label for="courseName">
+                            Course Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="courseName" 
+                            name="courseName"
+                            placeholder="e.g., Media Ethics"
+                            required
+                        >
+                    </div>
+
+                    <!-- Course Code -->
+                    <div class="form-group">
+                        <label for="courseCode">
+                            Course Code <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="courseCode" 
+                            name="courseCode"
+                            placeholder="e.g., MCM 307"
+                            required
+                        >
+                    </div>
+
+                    <!-- Credits -->
+                    <div class="form-group">
+                        <label for="credits">
+                            Credits <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="credits" 
+                            name="credits"
+                            min="1" 
+                            max="6"
+                            value="3"
+                            required
+                        >
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description">
+                            Course Description <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description"
+                            placeholder="Brief description of what students will learn..."
+                            required
+                        ></textarea>
+                        <div class="help-text">2-3 sentences about the course</div>
+                    </div>
+
+                    <!-- Learning Objectives -->
+                    <div class="form-group">
+                        <label for="objectives">
+                            Learning Objectives <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="objectives" 
+                            name="objectives"
+                            placeholder="Students will be able to:&#10;- Objective 1&#10;- Objective 2&#10;- Objective 3"
+                            required
+                        ></textarea>
+                        <div class="help-text">One objective per line (3-5 recommended)</div>
+                    </div>
+
+                    <!-- Semester Length -->
+                    <div class="form-group">
+                        <label for="weeks">
+                            Semester Length <span class="required">*</span>
+                        </label>
+                        <select id="weeks" name="weeks" required>
+                            <option value="8">8 weeks (Summer/Accelerated)</option>
+                            <option value="15" selected>15 weeks (Standard Semester)</option>
+                            <option value="16">16 weeks (Standard Semester)</option>
+                        </select>
+                    </div>
+
+                    <!-- Meeting Schedule -->
+                    <div class="form-group">
+                        <label for="schedule">
+                            Meeting Schedule <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="schedule" 
+                            name="schedule"
+                            placeholder="e.g., Tuesday & Thursday 1:00-2:25 PM"
+                            required
+                        >
+                    </div>
+
+                    <!-- Canvas Course ID -->
+                    <div class="form-group">
+                        <label for="canvasCourseId">
+                            Canvas Course ID <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="canvasCourseId" 
+                            name="canvasCourseId"
+                            placeholder="e.g., 6358"
+                            required
+                        >
+                        <div class="help-text">
+                            Find this in your Canvas course URL: canvas.vuu.edu/courses/<strong>6358</strong>
+                        </div>
+                    </div>
+
+                    <!-- Cost Estimate -->
+                    <div class="cost-estimate">
+                        <h3>💰 This Course Build</h3>
+                        <div class="cost-value">Included in your plan</div>
+                        <p style="font-size: 0.95rem; color: var(--gray);">
+                            Unlimited courses on Pro plan • Actual cost: ~$0.50
+                        </p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        🚀 Build My Course
+                    </button>
+                </form>
+
+                <!-- Build Status -->
+                <div id="buildStatus" class="build-status">
+                    <div class="spinner"></div>
+                    <div class="status-message">Building your course...</div>
+                    <div class="status-detail">This usually takes 3-5 minutes</div>
+                </div>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message">
+                    <h3>✅ Course Built Successfully!</h3>
+                    <p>Your course has been created in Canvas and is ready to review.</p>
+                    <a href="#" target="_blank" id="canvasLink">View Course in Canvas →</a>
+                    <div style="margin-top: 1.5rem; opacity: 0.9;">
+                        <small>Total cost: $0.52 • Time saved: ~25 hours</small>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        const form = document.getElementById('courseForm');
+        const buildStatus = document.getElementById('buildStatus');
+        const successMessage = document.getElementById('successMessage');
+        const canvasLink = document.getElementById('canvasLink');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data
+            const formData = new FormData(form);
+            const data = {
+                course_name: formData.get('courseName'),
+                course_code: formData.get('courseCode'),
+                credits: parseInt(formData.get('credits')),
+                description: formData.get('description'),
+                objectives: formData.get('objectives').split('\n')
+                    .map(line => line.trim().replace(/^-\s*/, ''))
+                    .filter(line => line.length > 0),
+                weeks: parseInt(formData.get('weeks')),
+                schedule: formData.get('schedule'),
+                canvas_course_id: formData.get('canvasCourseId')
+            };
+
+            // Hide form, show building status
+            form.style.display = 'none';
+            buildStatus.classList.add('active');
+
+            try {
+                // Call FacultyFlow API
+                const response = await fetch('/api/build-course', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success!
+                    buildStatus.classList.remove('active');
+                    successMessage.classList.add('active');
+                    
+                    // Update Canvas link
+                    canvasLink.href = `https://vuu.instructure.com/courses/${data.canvas_course_id}`;
+                } else {
+                    throw new Error(result.error || 'Failed to build course');
+                }
+            } catch (error) {
+                // Error handling
+                buildS

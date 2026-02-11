@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "name": "facultyflow",
+  "builds": [
+    {
+      "src": "frontend/*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/frontend/landing-page.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/frontend/dashboard.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ],
+  "env": {
+    "API_URL": "https://your-railway-backend.railway.app"
+  }
+}
