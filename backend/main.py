@@ -47,13 +47,14 @@ async def startup_event():
     """Initialize database tables on startup"""
     init_db()
 
-# CORS middleware
+# CORS middleware - Allow all origins (broadest compatibility)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production: specify your frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Security
