@@ -261,6 +261,18 @@
 
         .hidden { display: none; }
 
+        /* Drag & Drop Styles */
+        #dropZone:hover {
+            border-color: var(--purple) !important;
+            background: #f5f7ff !important;
+        }
+
+        #dropZone.drag-over {
+            border-color: var(--purple) !important;
+            background: #f0f4ff !important;
+            border-width: 3px !important;
+        }
+
         .alert {
             padding: 1rem;
             border-radius: 8px;
@@ -822,18 +834,19 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                 <p style="color: #666; margin-bottom: 2rem;">Upload your existing syllabi and documents to help AI match your teaching style</p>
                 <div id="referenceAlert"></div>
 
-                <!-- Upload Section -->
-                <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; border: 2px dashed var(--purple); text-align: center; margin-bottom: 2rem;">
-                    <h3 style="margin-top: 0;">Upload Reference Documents</h3>
-                    <p style="color: #666;">Upload your existing syllabi to help AI match your style</p>
+                <!-- Upload Section with Drag & Drop -->
+                <div id="dropZone" style="background: #fafafa; padding: 3rem; border-radius: 12px; border: 2px dashed #d0d0d0; text-align: center; margin-bottom: 2rem; cursor: pointer; transition: all 0.2s;">
+                    <input type="file" id="referenceFileInput" accept=".pdf,.docx,.txt" style="display: none;" multiple>
 
-                    <input type="file" id="referenceFileInput" accept=".pdf,.docx,.txt" style="display: none;" onchange="handleFileSelect(event)">
+                    <div style="font-size: 48px; color: var(--purple); margin-bottom: 1rem;">📄</div>
+                    <h3 style="margin-top: 0; margin-bottom: 0.5rem;">Drag & Drop Files Here</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">or click to browse</p>
 
-                    <button class="btn btn-primary" onclick="document.getElementById('referenceFileInput').click()" style="margin-bottom: 1rem;">
-                        📁 Choose File
+                    <button class="btn btn-primary" id="browseFilesBtn" style="margin-bottom: 1rem;">
+                        📁 Choose Files
                     </button>
 
-                    <p style="font-size: 0.875rem; color: #999;">Accepted: PDF, DOCX, TXT</p>
+                    <p style="font-size: 0.875rem; color: #999; margin-top: 1rem;">Accepted: PDF, DOCX, TXT • Multiple files supported</p>
 
                     <!-- Optional Course Name -->
                     <div class="form-group" style="max-width: 400px; margin: 1.5rem auto 0;">
@@ -1836,57 +1849,136 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         // REFERENCE MATERIALS FUNCTIONS
         // ============================================================================
 
-        let selectedFile = null;
+        // Drag & Drop Setup
+        const dropZone = document.getElementById('dropZone');
+        const referenceFileInput = document.getElementById('referenceFileInput');
+        const browseFilesBtn = document.getElementById('browseFilesBtn');
 
-        function handleFileSelect(event) {
-            selectedFile = event.target.files[0];
-            if (selectedFile) {
-                // Show upload confirmation
-                showAlert('referenceAlert', 'info', `📁 Selected: ${selectedFile.name}`);
-                // Auto-upload
-                uploadReferenceMaterial();
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            if (dropZone) {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
             }
+        });
+
+        // Highlight drop zone when dragging over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            if (dropZone) {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('drag-over');
+                }, false);
+            }
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            if (dropZone) {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            }
+        });
+
+        // Handle dropped files
+        if (dropZone) {
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            }, false);
         }
 
-        async function uploadReferenceMaterial() {
-            if (!selectedFile) {
-                showAlert('referenceAlert', 'error', '❌ Please select a file first');
+        // Click to browse
+        if (browseFilesBtn) {
+            browseFilesBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                referenceFileInput.click();
+            });
+        }
+
+        if (dropZone) {
+            dropZone.addEventListener('click', (e) => {
+                if (e.target.id === 'dropZone' || e.target.closest('#dropZone')) {
+                    // Don't trigger if clicking the button or course name input
+                    if (!e.target.classList.contains('btn') && e.target.id !== 'referenceCourseName' && e.target.id !== 'browseFilesBtn') {
+                        referenceFileInput.click();
+                    }
+                }
+            });
+        }
+
+        if (referenceFileInput) {
+            referenceFileInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                handleFiles(files);
+            });
+        }
+
+        async function handleFiles(files) {
+            if (!files || files.length === 0) return;
+
+            console.log('Files selected:', files);
+
+            // Validate file types
+            const allowedTypes = ['.pdf', '.docx', '.txt'];
+            const validFiles = Array.from(files).filter(file => {
+                const extension = '.' + file.name.split('.').pop().toLowerCase();
+                return allowedTypes.includes(extension);
+            });
+
+            if (validFiles.length === 0) {
+                showAlert('referenceAlert', 'error', '❌ Please upload PDF, DOCX, or TXT files only');
                 return;
             }
 
             const courseName = document.getElementById('referenceCourseName').value.trim();
 
-            showAlert('referenceAlert', 'info', '📤 Uploading and processing file...');
+            showAlert('referenceAlert', 'info', `📤 Uploading ${validFiles.length} file(s)...`);
 
-            try {
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-                if (courseName) {
-                    formData.append('course_name', courseName);
+            // Upload files one by one
+            let successCount = 0;
+            let totalChars = 0;
+
+            for (const file of validFiles) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    if (courseName) {
+                        formData.append('course_name', courseName);
+                    }
+
+                    const response = await fetch(`${API_URL}/api/v2/reference-materials/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        successCount++;
+                        totalChars += result.extracted_length || 0;
+                    } else {
+                        console.error(`Failed to upload ${file.name}:`, result.detail);
+                    }
+                } catch (error) {
+                    console.error(`Error uploading ${file.name}:`, error);
                 }
+            }
 
-                const response = await fetch(`${API_URL}/api/v2/reference-materials/upload`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('referenceAlert', 'success', `✅ ${result.message} (${result.extracted_length} characters extracted)`);
-                    document.getElementById('referenceCourseName').value = '';
-                    document.getElementById('referenceFileInput').value = '';
-                    selectedFile = null;
-                    // Reload materials list
-                    loadReferenceMaterials();
-                } else {
-                    showAlert('referenceAlert', 'error', '❌ ' + result.detail);
-                }
-            } catch (error) {
-                showAlert('referenceAlert', 'error', '❌ Error: ' + error.message);
+            // Show success message
+            if (successCount > 0) {
+                showAlert('referenceAlert', 'success', `✅ Uploaded ${successCount} file(s) successfully! (${totalChars.toLocaleString()} characters extracted)`);
+                document.getElementById('referenceCourseName').value = '';
+                document.getElementById('referenceFileInput').value = '';
+                // Reload materials list
+                loadReferenceMaterials();
+            } else {
+                showAlert('referenceAlert', 'error', '❌ Failed to upload files');
             }
         }
 
