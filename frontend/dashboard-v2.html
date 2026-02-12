@@ -1021,9 +1021,40 @@ Participation: 10%" style="min-height: 80px;"></textarea>
     <!-- /dashboard -->
 
     <script>
+        // ============================================================================
+        // AUTH PROTECTION - Require login
+        // ============================================================================
+        (function() {
+            const token = localStorage.getItem('auth_token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            if (!token) {
+                // No token - redirect to login
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Check demo expiry
+            if (user.is_demo && user.demo_expires_at) {
+                const expiresAt = new Date(user.demo_expires_at);
+                if (new Date() > expiresAt) {
+                    alert('Your demo access has expired. Please contact support.');
+                    localStorage.clear();
+                    window.location.href = '/login.html';
+                    return;
+                }
+            }
+
+            // Set auth token for API calls
+            window.authToken = token;
+        })();
+
+        // ============================================================================
+        // APP INITIALIZATION
+        // ============================================================================
         const API_URL = 'https://readysetclass-production.up.railway.app';
         let selectedCourse = null;
-        let authToken = 'dummy-token';
+        let authToken = window.authToken;
 
         // School Name Mapping for Better UX
         function getSchoolName(canvasUrl) {

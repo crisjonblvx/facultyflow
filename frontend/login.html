@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ReadySetClass</title>
+    <link rel="icon" href="/assets/ReadySetClass_alpha_badge.png" type="image/png">
+
+    <meta name="description" content="AI-powered Canvas course setup. Less time setting up. More time teaching.">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F2E8;  /* Cream background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(27, 58, 82, 0.1);
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #1B3A52;  /* Navy */
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .tagline {
+            color: #666;
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2C3E50;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1B3A52;  /* Navy */
+            box-shadow: 0 0 0 3px rgba(27, 58, 82, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #1B3A52;  /* Navy */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: #152E40;  /* Darker navy */
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(27, 58, 82, 0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            background: #FFE5E5;
+            color: #D32F2F;
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #D32F2F;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .footer strong {
+            color: #1B3A52;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="/assets/ReadySetClass_alpha_full.png" alt="ReadySetClass">
+        </div>
+
+        <h1>Welcome Back</h1>
+        <p class="tagline">Less time setting up.<br>More time teaching.</p>
+
+        <div id="error" class="error"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required autofocus placeholder="your.email@university.edu">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="btn" id="login-btn">
+                Log In
+            </button>
+        </form>
+
+        <div class="footer">
+            <strong>Not hype. Just help.</strong>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://readysetclass-production.up.railway.app';
+        const form = document.getElementById('login-form');
+        const errorDiv = document.getElementById('error');
+        const btn = document.getElementById('login-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Hide error
+            errorDiv.classList.remove('show');
+
+            // Disable button
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Login failed');
+                }
+
+                const data = await response.json();
+
+                // Save token
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Redirect to dashboard
+                window.location.href = '/dashboard-v2.html';
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+            }
+        });
+    </script>
+</body>
+</html>

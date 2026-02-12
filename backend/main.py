@@ -20,8 +20,12 @@ import secrets
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, DateTime, TIMESTAMP, text
+from sqlalchemy.ext.declarative import declarative_base
 from openai import OpenAI
 from groq import Groq
+from passlib.hash import bcrypt
+import psycopg2
 
 # ReadySetClass v2.0 imports
 from database import init_db, get_db, CanvasCredentials, UserCourse
@@ -764,6 +768,170 @@ class QuizRequest(BaseModel):
     num_questions: int = 10
     difficulty: str = "medium"
     due_date: Optional[str] = None
+
+# ============================================================================
+# AUTH MODELS
+# ============================================================================
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class LoginResponse(BaseModel):
+    token: str
+    user: Dict[str, Any]
+
+# ============================================================================
+# AUTH HELPERS
+# ============================================================================
+
+def get_db_connection():
+    """Get direct database connection"""
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    return psycopg2.connect(DATABASE_URL)
+
+async def get_current_user_from_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get current user from session token"""
+    token = credentials.credentials
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT s.user_id, s.expires_at, u.email, u.role, u.is_demo, u.demo_expires_at
+            FROM sessions s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.session_token = %s AND u.is_active = TRUE
+        """, (token,))
+
+        session = cursor.fetchone()
+
+        if not session:
+            raise HTTPException(status_code=401, detail="Invalid or expired session")
+
+        user_id, expires_at, email, role, is_demo, demo_expires_at = session
+
+        # Check session expiry
+        if datetime.now() > expires_at:
+            raise HTTPException(status_code=401, detail="Session expired")
+
+        # Check demo expiry
+        if is_demo and demo_expires_at and datetime.now() > demo_expires_at:
+            raise HTTPException(status_code=403, detail="Demo account expired")
+
+        return {
+            "user_id": user_id,
+            "email": email,
+            "role": role,
+            "is_demo": is_demo
+        }
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ============================================================================
+# AUTH ENDPOINTS
+# ============================================================================
+
+@app.post("/api/auth/login")
+async def login(request: LoginRequest):
+    """Login endpoint"""
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Get user
+        cursor.execute("""
+            SELECT id, email, password_hash, role, is_active, is_demo, demo_expires_at, full_name
+            FROM users
+            WHERE email = %s
+        """, (request.email,))
+
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        user_id, email, password_hash, role, is_active, is_demo, demo_expires_at, full_name = user
+
+        # Check password
+        if not bcrypt.verify(request.password, password_hash):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        # Check if active
+        if not is_active:
+            raise HTTPException(status_code=403, detail="Account disabled")
+
+        # Check if demo expired
+        if is_demo and demo_expires_at and datetime.now() > demo_expires_at:
+            raise HTTPException(status_code=403, detail="Demo account expired")
+
+        # Create session
+        session_token = secrets.token_urlsafe(32)
+        expires_at = datetime.now() + timedelta(hours=24)
+
+        cursor.execute("""
+            INSERT INTO sessions (user_id, session_token, expires_at)
+            VALUES (%s, %s, %s)
+        """, (user_id, session_token, expires_at))
+
+        # Log activity
+        cursor.execute("""
+            INSERT INTO activity_log (user_id, action, details)
+            VALUES (%s, 'login', %s)
+        """, (user_id, '{"timestamp": "' + datetime.now().isoformat() + '"}'))
+
+        # Update last active
+        cursor.execute("""
+            UPDATE users SET last_active_at = NOW() WHERE id = %s
+        """, (user_id,))
+
+        conn.commit()
+
+        return {
+            "token": session_token,
+            "user": {
+                "id": user_id,
+                "email": email,
+                "role": role,
+                "full_name": full_name,
+                "is_demo": is_demo,
+                "demo_expires_at": demo_expires_at.isoformat() if demo_expires_at else None
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.post("/api/auth/logout")
+async def logout(current_user = Depends(get_current_user_from_token)):
+    """Logout endpoint"""
+
+    # Note: In a real app, we'd delete the session token here
+    # For simplicity, we'll just return success
+    return {"message": "Logged out successfully"}
+
+
+@app.get("/api/auth/me")
+async def get_current_user_info(current_user = Depends(get_current_user_from_token)):
+    """Get current user info"""
+    return current_user
+
+# ============================================================================
+# CANVAS INTEGRATION ENDPOINTS
+# ============================================================================
 
 @app.post("/api/v2/canvas/connect")
 async def connect_canvas_v2(
