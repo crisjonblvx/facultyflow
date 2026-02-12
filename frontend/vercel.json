@@ -4,11 +4,23 @@
   "routes": [
     {
       "src": "/",
-      "dest": "/landing-page.html"
+      "dest": "/dashboard-v2.html"
     },
     {
       "src": "/dashboard",
-      "dest": "/dashboard.html"
+      "dest": "/dashboard-v2.html"
+    },
+    {
+      "src": "/v2",
+      "dest": "/dashboard-v2.html"
+    },
+    {
+      "src": "/dashboard-v2.html",
+      "dest": "/dashboard-v2.html"
+    },
+    {
+      "src": "/landing",
+      "dest": "/landing-page.html"
     },
     {
       "src": "/landing-page.html",
