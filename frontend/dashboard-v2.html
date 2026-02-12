@@ -429,27 +429,107 @@
                 <div class="selected-course-info" id="assignmentCourseInfo"></div>
                 <div id="assignmentAlert"></div>
 
-                <div class="form-group">
-                    <label>Assignment Title</label>
-                    <input type="text" id="assignmentTitle" placeholder="e.g., Social Media Campaign Analysis">
+                <!-- Mode Selection -->
+                <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="font-weight: 600; margin-bottom: 1rem; color: var(--dark);">Choose Mode:</div>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="assignmentMode" value="quick" checked onchange="toggleAssignmentMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>Quick Input</strong> — Use your content as-is
+                            </span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="assignmentMode" value="ai" onchange="toggleAssignmentMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>✨ AI-Enhanced</strong> — AI generates professional content
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Description/Instructions</label>
-                    <textarea id="assignmentDescription" placeholder="Brief description or key requirements..."></textarea>
+                <!-- Quick Input Mode Form -->
+                <div id="quickAssignmentForm">
+                    <div class="form-group">
+                        <label>Assignment Title</label>
+                        <input type="text" id="assignmentTitle" placeholder="e.g., Social Media Campaign Analysis">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description/Instructions</label>
+                        <textarea id="assignmentDescription" placeholder="Paste your complete assignment instructions here..." style="min-height: 150px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Points</label>
+                        <input type="number" id="assignmentPoints" value="100" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Due Date (Optional)</label>
+                        <input type="datetime-local" id="assignmentDueDate">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="createAssignment()">📤 Upload to Canvas</button>
                 </div>
 
-                <div class="form-group">
-                    <label>Points</label>
-                    <input type="number" id="assignmentPoints" value="100" min="0">
+                <!-- AI-Enhanced Mode Form -->
+                <div id="aiAssignmentForm" style="display: none;">
+                    <div class="form-group">
+                        <label>Assignment Topic/Title</label>
+                        <input type="text" id="aiAssignmentTopic" placeholder="e.g., Social Media Marketing Campaign">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assignment Type</label>
+                        <select id="aiAssignmentType" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                            <option value="essay">Essay/Paper</option>
+                            <option value="discussion">Discussion Post</option>
+                            <option value="project">Project/Presentation</option>
+                            <option value="research">Research Assignment</option>
+                            <option value="case_study">Case Study Analysis</option>
+                            <option value="lab">Lab/Practical Work</option>
+                            <option value="reflection">Reflection Assignment</option>
+                            <option value="group">Group Assignment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What should students do? (Brief description)</label>
+                        <textarea id="aiAssignmentRequirements" placeholder="Example: 'Students will analyze a social media campaign, identify strategies used, and propose improvements. Should include research from at least 3 sources.'" style="min-height: 120px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Points</label>
+                        <input type="number" id="aiAssignmentPoints" value="100" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Due Date (Optional)</label>
+                        <input type="datetime-local" id="aiAssignmentDueDate">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="generateAIAssignment()">✨ Generate with AI</button>
                 </div>
 
-                <div class="form-group">
-                    <label>Due Date (Optional)</label>
-                    <input type="datetime-local" id="assignmentDueDate">
-                </div>
+                <!-- AI Preview Area -->
+                <div id="aiAssignmentPreview" style="display: none; margin-top: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 2px solid var(--purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; color: var(--dark);">AI-Generated Assignment Preview</h3>
+                        <button onclick="regenerateAIAssignment()" class="btn" style="background: var(--coral); color: white; padding: 0.5rem 1rem;">🔄 Regenerate</button>
+                    </div>
 
-                <button class="btn btn-primary" onclick="createAssignment()">Generate & Create Assignment</button>
+                    <div class="form-group">
+                        <label>Edit Assignment Content (if needed)</label>
+                        <textarea id="aiGeneratedContent" style="min-height: 300px; font-family: 'DM Sans', sans-serif; line-height: 1.6;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="uploadAIAssignment()">📤 Upload to Canvas</button>
+                        <button class="btn" onclick="cancelAIAssignment()" style="background: #666; color: white;">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Page Creator -->
@@ -865,6 +945,131 @@
         }
 
         // Create Assignment
+        // Toggle between Quick Input and AI-Enhanced modes
+        function toggleAssignmentMode() {
+            const mode = document.querySelector('input[name="assignmentMode"]:checked').value;
+
+            if (mode === 'quick') {
+                document.getElementById('quickAssignmentForm').style.display = 'block';
+                document.getElementById('aiAssignmentForm').style.display = 'none';
+                document.getElementById('aiAssignmentPreview').style.display = 'none';
+            } else {
+                document.getElementById('quickAssignmentForm').style.display = 'none';
+                document.getElementById('aiAssignmentForm').style.display = 'block';
+                document.getElementById('aiAssignmentPreview').style.display = 'none';
+            }
+        }
+
+        // Generate AI-Enhanced Assignment
+        async function generateAIAssignment() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const topic = document.getElementById('aiAssignmentTopic').value;
+            const type = document.getElementById('aiAssignmentType').value;
+            const requirements = document.getElementById('aiAssignmentRequirements').value;
+
+            if (!topic || !requirements) {
+                alert('Please enter topic and requirements');
+                return;
+            }
+
+            showAlert('assignmentAlert', 'info', '✨ AI is generating your assignment...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/generate-assignment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        assignment_type: type,
+                        requirements: requirements,
+                        points: parseInt(document.getElementById('aiAssignmentPoints').value)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show preview with AI-generated content
+                    document.getElementById('aiGeneratedContent').value = result.generated_content;
+                    document.getElementById('aiAssignmentPreview').style.display = 'block';
+                    document.getElementById('aiAssignmentForm').style.display = 'none';
+                    showAlert('assignmentAlert', 'success', '✅ AI-generated content ready! Review and edit if needed, then upload.');
+                } else {
+                    showAlert('assignmentAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('assignmentAlert', 'error', '❌ Error generating assignment: ' + error.message);
+            }
+        }
+
+        // Regenerate AI Assignment
+        async function regenerateAIAssignment() {
+            showAlert('assignmentAlert', 'info', '🔄 Regenerating...');
+            await generateAIAssignment();
+        }
+
+        // Upload AI-Generated Assignment to Canvas
+        async function uploadAIAssignment() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const topic = document.getElementById('aiAssignmentTopic').value;
+            const generatedContent = document.getElementById('aiGeneratedContent').value;
+            const points = parseInt(document.getElementById('aiAssignmentPoints').value);
+
+            // Convert datetime-local to ISO 8601
+            const dueDateInput = document.getElementById('aiAssignmentDueDate').value;
+            let dueDate = null;
+            if (dueDateInput) {
+                dueDate = dueDateInput + ':00Z';
+            }
+
+            showAlert('assignmentAlert', 'info', '📤 Uploading to Canvas...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/assignment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        title: topic,
+                        description: generatedContent,
+                        points: points,
+                        due_date: dueDate
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('assignmentAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+
+                    // Reset form
+                    document.getElementById('aiAssignmentTopic').value = '';
+                    document.getElementById('aiAssignmentRequirements').value = '';
+                    document.getElementById('aiAssignmentPreview').style.display = 'none';
+                    document.getElementById('aiAssignmentForm').style.display = 'block';
+                } else {
+                    showAlert('assignmentAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('assignmentAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Cancel AI Assignment
+        function cancelAIAssignment() {
+            document.getElementById('aiAssignmentPreview').style.display = 'none';
+            document.getElementById('aiAssignmentForm').style.display = 'block';
+            showAlert('assignmentAlert', 'info', 'Cancelled. You can regenerate or modify your inputs.');
+        }
+
         async function createAssignment() {
             if (!selectedCourse) { alert('Select a course first'); return; }
 

@@ -776,6 +776,13 @@ async def create_quiz_v2(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class AIAssignmentRequest(BaseModel):
+    topic: str
+    assignment_type: str
+    requirements: str
+    points: int = 100
+
+
 class AnnouncementRequest(BaseModel):
     course_id: int
     topic: str
@@ -939,6 +946,85 @@ Format in clean HTML for Canvas. Use headers, lists, and formatting for clarity.
     except HTTPException:
         raise
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/generate-assignment")
+async def generate_ai_assignment(
+    request: AIAssignmentRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Generate AI-enhanced assignment content using Bonita
+    Returns professional assignment description with instructions, objectives, rubric
+    """
+    try:
+        print(f"🤖 Generating AI assignment: {request.topic}")
+
+        # Map assignment types to better descriptions
+        type_descriptions = {
+            "essay": "essay or written paper",
+            "discussion": "discussion post or forum response",
+            "project": "project or presentation",
+            "research": "research assignment",
+            "case_study": "case study analysis",
+            "lab": "lab or practical work",
+            "reflection": "reflection assignment",
+            "group": "group collaborative assignment",
+            "other": "assignment"
+        }
+
+        assignment_type_desc = type_descriptions.get(request.assignment_type, "assignment")
+
+        system = """You are Bonita, an AI assistant helping college professors create high-quality assignments.
+Your output should be professional, clear, and properly formatted for Canvas LMS.
+Use HTML formatting with headers, lists, and proper structure."""
+
+        prompt = f"""Create a professional college assignment on: {request.topic}
+
+Assignment Type: {assignment_type_desc}
+Points: {request.points}
+Professor's Requirements:
+{request.requirements}
+
+Generate a complete assignment description with the following sections:
+
+1. **Assignment Overview** (2-3 paragraphs explaining what students will do and why it's important)
+
+2. **Learning Objectives** (3-5 specific, measurable objectives students will achieve)
+
+3. **Instructions** (Step-by-step directions for completing the assignment)
+
+4. **Deliverables** (Specific list of what students must submit)
+
+5. **Grading Rubric** (Clear criteria for how the assignment will be evaluated)
+
+6. **Resources** (Suggested materials, readings, or tools students can use)
+
+Format the output in clean HTML suitable for Canvas LMS. Use:
+- <h3> for section headings
+- <p> for paragraphs
+- <ul> and <li> for lists
+- <strong> for emphasis
+- <table> for rubric (if applicable)
+
+Keep it professional but engaging. Make instructions clear and actionable.
+Do NOT include the assignment title as a heading (it will be added separately).
+Focus on creating content that helps students succeed."""
+
+        # Generate with Bonita AI
+        generated_content, cost = bonita.call_claude(prompt, system)
+
+        print(f"✅ Assignment generated (cost: ${cost:.4f})")
+
+        return {
+            "status": "success",
+            "generated_content": generated_content,
+            "cost": cost
+        }
+
+    except Exception as e:
+        print(f"❌ Error generating assignment: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
