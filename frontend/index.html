@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadySetClass - AI Course Builder for Canvas</title>
+    <meta name="description" content="Less time setting up. More time teaching. Build complete Canvas courses in minutes. Syllabi, quizzes, assignments - all automated. $29/month for educators.">
+    
+    <!-- Fonts: Distinctive choices that elevate the aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Brand Colors */
+            --purple: #667eea;
+            --coral: #FF6B35;
+            --dark: #1a1a1a;
+            --gray: #666666;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            
+            /* Semantic */
+            --success: #10b981;
+            --error: #ef4444;
+            
+            /* Typography */
+            --font-display: 'Sora', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            color: var(--dark);
+            background: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background gradient mesh */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 90%, rgba(102, 126, 234, 0.08) 0%, transparent 50%);
+            animation: meshMove 20s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes meshMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(5%, -5%) rotate(1deg); }
+            66% { transform: translate(-3%, 3%) rotate(-1deg); }
+        }
+        
+        /* Header/Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo span {
+            color: var(--purple);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--purple);
+        }
+        
+        .cta-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--purple);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+        
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .hero-text {
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hero-text h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .hero-text h1 span {
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-text .tagline {
+            font-size: 1.5rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        
+        .hero-text .subtext {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 3rem;
+            line-height: 1.7;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .primary-cta {
+            padding: 1.25rem 2.5rem;
+            background: var(--coral);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+            font-family: var(--font-body);
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 107, 53, 0.4);
+        }
+        
+        .secondary-cta {
+            padding: 1.25rem 2.5rem;
+            background: transparent;
+            color: var(--purple);
+            border: 2px solid var(--purple);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-body);
+        }
+        
+        .secondary-cta:hover {
+            background: var(--purple);
+            color: white;
+        }
+        
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+        
+        .visual-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 20px 60px rgba(102, 126, 234, 0.15),
+                0 0 0 1px rgba(102, 126, 234, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visual-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--purple), var(--coral));
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .stat:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 600;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--light-gray);
+        }
+        
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+        
+        .section-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+        
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+        
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .feature-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .feature-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 2rem;
+            background: white;
+        }
+        
+        .pricing-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .pricing-card {
+            background: white;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+        
+        .pricing-card:nth-child(1) { animation-delay: 0.1s; }
+        .pricing-card:nth-child(2) { 
+            animation-delay: 0.2s;
+            border-color: var(--purple);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+            transform: scale(1.05);
+        }
+        .pricing-card:nth-child(3) { animation-delay: 0.3s; }
+        .pricing-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 16px 50px rgba(102, 126, 234, 0.2);
+        }
+        
+        .recommended {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--coral);
+            color: white;
+            padding: 0.4rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        
+        .tier-name {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tier-target {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        
+        .price {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        .price span {
+            font-size: 1.2rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .features-list li {
+            padding: 0.75rem 0;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .features-list li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .pricing-cta {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-body);
+        }
+        
+        .pricing-cta:hover {
+            background: var(--coral);
+            transform: translateY(-2px);
+        }
+        
+        /* CTA Section */
+        .final-cta {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--purple), var(--coral));
+            color: white;
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .final-cta p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+        }
+        
+        .final-cta button {
+            padding: 1.5rem 3rem;
+            background: white;
+            color: var(--purple);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-body);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .final-cta button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            background: var(--dark);
+            color: white;
+            text-align: center;
+        }
+        
+        footer p {
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+        
+        footer a {
+            color: var(--purple);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-visual {
+                order: -1;
+            }
+            
+            .hero-actions {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .pricing-card:nth-child(2) {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <img src="/assets/ReadySetClass_alpha_full.png" alt="ReadySetClass" style="height: 40px; width: auto;">
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="login.html" style="margin-right: 1rem; color: var(--dark); text-decoration: none; font-weight: 600;">Login</a>
+                <a href="pricing.html" class="cta-button">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Reclaim your time.</h1>
+                <p class="tagline">Less time setting up. More time teaching.</p>
+                <p class="subtext">
+                    Teachers spend 15 hours/week on Canvas busywork. Get that time back. Your weekends. Your evenings. Your life. Build complete courses in minutes with AI.
+                </p>
+                <div class="hero-actions">
+                    <button class="primary-cta" onclick="window.location.href='pricing.html'">Start Free Trial - Reclaim Your Time</button>
+                    <button class="secondary-cta" onclick="window.location.href='login.html'">Login</button>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="visual-card">
+                    <h3 style="font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 1.5rem; text-align: center;">
+                        Built for Educators
+                    </h3>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Minutes to Build</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">$19</div>
+                            <div class="stat-label">Starting Price</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">15</div>
+                            <div class="stat-label">Weekly Modules</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Canvas Ready</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>Everything you need, nothing you don't</h2>
+            <p>FacultyFlow automates the tedious parts so you can focus on what matters</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Complete Syllabi</h3>
+                <p>Professional syllabi with course overview, objectives, schedule, grading breakdown, and policies.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>15 Lesson Plans</h3>
+                <p>Weekly lesson plans with objectives, key concepts, activities, and discussion prompts.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🧪</div>
+                <h3>Auto-Generated Quizzes</h3>
+                <p>10-question quizzes for each week, complete with multiple choice questions and answer keys.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Study Packs with Links</h3>
+                <p>Curated study materials with real YouTube videos, articles, and resources - not fake links.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Canvas Upload</h3>
+                <p>Everything automatically uploaded to your Canvas course. Modules, assignments, quizzes - all done.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Private</h3>
+                <p>Your Canvas token is encrypted. Your course content is yours. We never share or train on your data.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="section-header">
+            <h2>Simple, affordable pricing</h2>
+            <p>Choose the plan that works for you. No hidden fees, cancel anytime.</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3 class="tier-name">Educator</h3>
+                <p class="tier-target">K-12 teachers, adjuncts</p>
+                <div class="price">$19<span>/mo</span></div>
+                <ul class="features-list">
+                    <li>Unlimited courses</li>
+                    <li>AI-generated content</li>
+                    <li>Canvas upload</li>
+                    <li>Email support</li>
+                </ul>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Start Free Trial</button>
+            </div>
+
+            <div class="pricing-card">
+                <span class="recommended">Recommended</span>
+                <h3 class="tier-name">Pro</h3>
+                <p class="tier-target">College faculty</p>
+                <div class="price">$29<span>/mo</span></div>
+                <ul class="features-list">
+                    <li>Everything in Educator</li>
+                    <li>Custom templates</li>
+                    <li>Priority support</li>
+                    <li>Advanced analytics</li>
+                </ul>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Start Free Trial</button>
+            </div>
+            
+            <div class="pricing-card">
+                <h3 class="tier-name">Department</h3>
+                <p class="tier-target">Small departments</p>
+                <div class="price">$99<span>/mo</span></div>
+                <ul class="features-list">
+                    <li>Everything in Pro</li>
+                    <li>5 faculty seats</li>
+                    <li>Shared templates</li>
+                    <li>Team collaboration</li>
+                </ul>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Contact Sales</button>
+            </div>
+
+            <div class="pricing-card">
+                <h3 class="tier-name">Institution</h3>
+                <p class="tier-target">Schools & districts</p>
+                <div class="price">$499<span>/mo</span></div>
+                <ul class="features-list">
+                    <li>Unlimited seats</li>
+                    <li>White-label option</li>
+                    <li>Dedicated support</li>
+                    <li>Custom integrations</li>
+                </ul>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>Ready to reclaim your time?</h2>
+        <p>Join educators who've saved 20+ hours per course with FacultyFlow</p>
+        <button onclick="window.location.href='dashboard.html'">Start Your Free Trial</button>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 FacultyFlow. Built with 🦋 by <a href="https://contentcreators.life" target="_blank">ContentCreators.life</a></p>
+        <p>Powered by Bonita AI</p>
+    </footer>
+
+    <script>
+        function scrollToPricing() {
+            document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
