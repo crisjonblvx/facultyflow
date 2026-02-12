@@ -4,7 +4,7 @@
   "routes": [
     {
       "src": "/",
-      "dest": "/dashboard-v2.html"
+      "dest": "/index.html"
     },
     {
       "src": "/dashboard",
