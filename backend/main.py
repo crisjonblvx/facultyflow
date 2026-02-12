@@ -2733,7 +2733,7 @@ async def create_demo_account(db: Session = Depends(get_db)):
         password_hash = bcrypt.hash(password)
 
         # Calculate expiration (24 hours from now)
-        expires_at = datetime.now() + timedelta(hours=24)
+        expires_at = datetime.utcnow() + timedelta(hours=24)
 
         # Get database connection
         conn = get_db_connection()
@@ -2777,7 +2777,10 @@ async def create_demo_account(db: Session = Depends(get_db)):
         }
 
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
         print(f"❌ Error creating demo: {e}")
+        print(f"Full traceback:\n{error_trace}")
         raise HTTPException(status_code=500, detail=f"Failed to create demo: {str(e)}")
 
 
