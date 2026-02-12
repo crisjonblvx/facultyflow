@@ -316,18 +316,43 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
             "content": lesson
         }
     
-    def generate_quiz(self, week: int, topic: str) -> Dict:
-        """Generate quiz questions (Groq - FREE!)"""
-        system = "You are Bonita, an AI assistant helping professors create quiz questions."
+    def generate_quiz(
+        self,
+        week: int,
+        topic: str,
+        description: str = "",
+        num_questions: int = 10,
+        difficulty: str = "medium"
+    ) -> Dict:
+        """Generate quiz questions with detailed context (Groq - FREE!)"""
+        system = "You are Bonita, an AI assistant helping professors create quiz questions that assess student understanding."
 
-        prompt = f"""Create a 10-question multiple choice quiz on: {topic}
+        # Build difficulty distribution based on difficulty level
+        if difficulty == "easy":
+            diff_mix = f"{num_questions} easy questions"
+        elif difficulty == "hard":
+            diff_mix = f"{num_questions} challenging questions"
+        else:  # medium (default)
+            easy_count = max(1, num_questions // 3)
+            hard_count = max(1, num_questions // 5)
+            medium_count = num_questions - easy_count - hard_count
+            diff_mix = f"{easy_count} easy, {medium_count} medium, {hard_count} hard questions"
+
+        prompt = f"""Create a {num_questions}-question multiple choice quiz.
+
+TOPIC: {topic}
+
+DETAILED CONTEXT:
+{description}
 
 Requirements:
-- 10 questions total
+- {num_questions} questions total
 - 4 answer options each (A, B, C, D)
-- Mix of difficulty (3 easy, 5 medium, 2 hard)
+- Difficulty distribution: {diff_mix}
+- Questions should test understanding of the concepts described above
 - Clear, unambiguous questions
 - One correct answer per question
+- Use the detailed context to create relevant, targeted questions
 
 Format as JSON:
 {{
@@ -626,6 +651,7 @@ class CanvasConnectionRequest(BaseModel):
 class QuizRequest(BaseModel):
     course_id: int
     topic: str
+    description: str  # NEW - detailed description of what quiz should cover
     num_questions: int = 10
     difficulty: str = "medium"
     due_date: Optional[str] = None
@@ -826,7 +852,13 @@ async def create_quiz_v2(
 
         # Step 1: Generate quiz with Bonita AI
         print(f"🧠 Generating quiz on: {request.topic}")
-        quiz_data = bonita.generate_quiz(1, request.topic)
+        quiz_data = bonita.generate_quiz(
+            week=1,
+            topic=request.topic,
+            description=request.description,
+            num_questions=request.num_questions,
+            difficulty=request.difficulty
+        )
 
         # Step 2: Upload to Canvas
         decrypted_token = decrypt_token(credentials.access_token_encrypted)

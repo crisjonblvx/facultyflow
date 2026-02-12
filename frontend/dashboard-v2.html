@@ -462,8 +462,23 @@ Use (CORRECT) to mark the right answer" style="min-height: 300px;"></textarea>
                 <!-- AI-Enhanced Mode -->
                 <div id="aiQuizForm" style="display: none;">
                     <div class="form-group">
-                        <label>Quiz Topic</label>
-                        <input type="text" id="aiQuizTopic" placeholder="e.g., Content Creation Strategies">
+                        <label>Quiz Topic / Title</label>
+                        <input type="text" id="aiQuizTopic" placeholder="e.g., Week 3: The Illusion (Truth in the Age of AI)" maxlength="255">
+                        <small style="color: #666; font-style: italic;">Short title that will appear in Canvas</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Quiz Description & Instructions</label>
+                        <textarea id="aiQuizDescription" rows="6" placeholder="Describe what this quiz should cover. Be specific!
+
+Example:
+This quiz covers Week 3 material on media literacy and AI-generated content. Focus on:
+- How AI manipulates images and videos
+- The concept of 'seeing is believing' in the digital age
+- Critical thinking skills for evaluating media
+- Real-world examples of deepfakes and misinformation
+
+Students should demonstrate understanding of how technology challenges traditional notions of truth and visual evidence." style="min-height: 140px; line-height: 1.6;"></textarea>
+                        <small style="color: #666; font-style: italic;">The more detail you provide, the better the AI-generated questions will be</small>
                     </div>
                     <div class="form-group">
                         <label>Number of Questions</label>
@@ -1383,13 +1398,20 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             if (!selectedCourse) { alert('Select a course first'); return; }
 
             const topic = document.getElementById('aiQuizTopic').value.trim();
+            const description = document.getElementById('aiQuizDescription').value.trim();
+
             if (!topic) {
                 showAlert('quizAlert', 'error', '❌ Please enter a quiz topic');
                 return;
             }
 
+            if (!description) {
+                showAlert('quizAlert', 'error', '❌ Please provide a description of what the quiz should cover');
+                return;
+            }
+
             const numQuestions = parseInt(document.getElementById('aiNumQuestions').value);
-            const difficulty = document.getElementById('aiDifficulty').value;
+            const difficulty = document.getElementById('aiDifficulty').value);
 
             showAlert('quizAlert', 'info', '✨ AI is generating quiz questions...');
 
@@ -1403,6 +1425,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     body: JSON.stringify({
                         course_id: selectedCourse.id,
                         topic: topic,
+                        description: description,  // NEW - pass detailed description to AI
                         num_questions: numQuestions,
                         difficulty: difficulty,
                         due_date: null  // Will add in upload step
