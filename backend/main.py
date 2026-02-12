@@ -884,10 +884,17 @@ class AnnouncementRequest(BaseModel):
     details: Optional[str] = None
 
 
+class AIPageRequest(BaseModel):
+    title: str
+    page_type: str
+    description: str
+    objectives: Optional[str] = None
+
+
 class PageRequest(BaseModel):
     course_id: int
     title: str
-    topic: str
+    content: str
 
 
 class AssignmentRequest(BaseModel):
@@ -977,6 +984,85 @@ Return just the HTML content, no markdown code blocks."""
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/v2/canvas/generate-page")
+async def generate_ai_page(
+    request: AIPageRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Generate AI-enhanced course page content using Groq/OpenAI
+    Returns professional page content with proper structure
+    """
+    try:
+        print(f"🤖 Generating AI page: {request.title}")
+
+        # Map page types to better descriptions
+        type_descriptions = {
+            "overview": "course or unit overview",
+            "resource_list": "resource list with links and descriptions",
+            "study_guide": "study guide with key concepts",
+            "tutorial": "tutorial or how-to guide",
+            "reading": "reading material or article",
+            "reference": "reference material",
+            "other": "informational page"
+        }
+
+        page_type_desc = type_descriptions.get(request.page_type, "course page")
+
+        system = """You are Bonita, an AI assistant helping college professors create course pages.
+Your output should be well-formatted HTML suitable for Canvas LMS.
+Use clear structure, headers, lists, and proper formatting."""
+
+        prompt = f"""Create a professional course page titled: {request.title}
+
+Page Type: {page_type_desc}
+Description: {request.description}
+{f'Learning Objectives: {request.objectives}' if request.objectives else ''}
+
+Generate comprehensive page content with:
+
+1. **Introduction** (2-3 paragraphs explaining the topic and its importance)
+
+2. **Main Content Sections** (organized with clear headings)
+   - Break down the content logically
+   - Use bullet points and numbered lists where appropriate
+   - Include examples or explanations
+
+3. **Key Takeaways** (3-5 bullet points summarizing main points)
+
+4. **Resources** (optional but recommended)
+   - Suggested readings
+   - Helpful links
+   - Additional materials
+
+Format the output in clean HTML suitable for Canvas LMS. Use:
+- <h3> for section headings
+- <h4> for subsection headings
+- <p> for paragraphs
+- <ul> and <li> for bullet lists
+- <ol> and <li> for numbered lists
+- <strong> for emphasis
+- <a href="..."> for links (if suggesting real resources)
+
+Do NOT include the page title as an <h1> or <h2> (Canvas will add that).
+Make it educational, engaging, and well-organized."""
+
+        # Generate with AI
+        generated_content, cost = bonita.call_ai(prompt, system)
+
+        print(f"✅ Page generated (cost: ${cost:.4f})")
+
+        return {
+            "status": "success",
+            "generated_content": generated_content,
+            "cost": cost
+        }
+
+    except Exception as e:
+        print(f"❌ Error generating page: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/v2/canvas/page")
 async def create_page_v2(
     request: PageRequest,
@@ -995,25 +1081,9 @@ async def create_page_v2(
         if not credentials:
             raise HTTPException(status_code=404, detail="Canvas not connected")
 
-        # Generate page content with AI
-        print(f"📄 Generating page: {request.title}")
+        # Upload page to Canvas (content already provided)
+        print(f"📄 Creating page: {request.title}")
 
-        system = "You are Bonita, creating educational course pages."
-        prompt = f"""Create a course page titled: {request.title}
-
-Topic: {request.topic}
-
-Create comprehensive page content including:
-- Overview section
-- Key concepts (3-5 bullet points)
-- Learning objectives
-- Resources or examples if relevant
-
-Format in clean HTML for Canvas. Use headers, lists, and formatting for clarity."""
-
-        page_html, _ = bonita.call_claude(prompt, system)
-
-        # Upload to Canvas
         decrypted_token = decrypt_token(credentials.access_token_encrypted)
         canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
 
@@ -1021,7 +1091,7 @@ Format in clean HTML for Canvas. Use headers, lists, and formatting for clarity.
             course_id=request.course_id,
             page_data={
                 "title": request.title,
-                "content": page_html
+                "content": request.content
             }
         )
 

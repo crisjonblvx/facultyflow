@@ -538,17 +538,90 @@
                 <div class="selected-course-info" id="pageCourseInfo"></div>
                 <div id="pageAlert"></div>
 
-                <div class="form-group">
-                    <label>Page Title</label>
-                    <input type="text" id="pageTitle" placeholder="e.g., Week 1 Overview">
+                <!-- Mode Selection -->
+                <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="font-weight: 600; margin-bottom: 1rem; color: var(--dark);">Choose Mode:</div>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="pageMode" value="quick" checked onchange="togglePageMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>Quick Input</strong> — Use your content as-is
+                            </span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="pageMode" value="ai" onchange="togglePageMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>✨ AI-Enhanced</strong> — AI generates professional content
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Topic/Content</label>
-                    <textarea id="pageTopic" placeholder="What should this page cover?"></textarea>
+                <!-- Quick Input Mode Form -->
+                <div id="quickPageForm">
+                    <div class="form-group">
+                        <label>Page Title</label>
+                        <input type="text" id="pageTitle" placeholder="e.g., Week 1 Overview">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Page Content (HTML accepted)</label>
+                        <textarea id="pageContent" placeholder="Paste your page content here..." style="min-height: 200px;"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="createPage()">📤 Upload to Canvas</button>
                 </div>
 
-                <button class="btn btn-primary" onclick="createPage()">Generate & Create Page</button>
+                <!-- AI-Enhanced Mode Form -->
+                <div id="aiPageForm" style="display: none;">
+                    <div class="form-group">
+                        <label>Page Title/Topic</label>
+                        <input type="text" id="aiPageTitle" placeholder="e.g., Introduction to Social Media Marketing">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Page Type</label>
+                        <select id="aiPageType" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                            <option value="overview">Course/Unit Overview</option>
+                            <option value="resource_list">Resource List</option>
+                            <option value="study_guide">Study Guide</option>
+                            <option value="tutorial">Tutorial/How-To</option>
+                            <option value="reading">Reading Material</option>
+                            <option value="reference">Reference Material</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What should this page cover? (Brief description)</label>
+                        <textarea id="aiPageDescription" placeholder="Example: 'Overview of social media marketing strategies, platforms, and best practices. Include examples of successful campaigns.'" style="min-height: 100px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Learning Objectives (Optional)</label>
+                        <textarea id="aiPageObjectives" placeholder="What should students learn from this page?" style="min-height: 80px;"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="generateAIPage()">✨ Generate with AI</button>
+                </div>
+
+                <!-- AI Preview Area -->
+                <div id="aiPagePreview" style="display: none; margin-top: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 2px solid var(--purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; color: var(--dark);">AI-Generated Page Preview</h3>
+                        <button onclick="regenerateAIPage()" class="btn" style="background: var(--coral); color: white; padding: 0.5rem 1rem;">🔄 Regenerate</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Edit Page Content (if needed)</label>
+                        <textarea id="aiGeneratedPageContent" style="min-height: 300px; font-family: 'DM Sans', sans-serif; line-height: 1.6;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="uploadAIPage()">📤 Upload to Canvas</button>
+                        <button class="btn" onclick="cancelAIPage()" style="background: #666; color: white;">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Discussion Creator -->
@@ -1119,12 +1192,129 @@
         }
 
         // Create Page
+        // Toggle between Quick Input and AI-Enhanced modes for Pages
+        function togglePageMode() {
+            const mode = document.querySelector('input[name="pageMode"]:checked').value;
+
+            if (mode === 'quick') {
+                document.getElementById('quickPageForm').style.display = 'block';
+                document.getElementById('aiPageForm').style.display = 'none';
+                document.getElementById('aiPagePreview').style.display = 'none';
+            } else {
+                document.getElementById('quickPageForm').style.display = 'none';
+                document.getElementById('aiPageForm').style.display = 'block';
+                document.getElementById('aiPagePreview').style.display = 'none';
+            }
+        }
+
+        // Generate AI-Enhanced Page
+        async function generateAIPage() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const title = document.getElementById('aiPageTitle').value;
+            const pageType = document.getElementById('aiPageType').value;
+            const description = document.getElementById('aiPageDescription').value;
+            const objectives = document.getElementById('aiPageObjectives').value;
+
+            if (!title || !description) {
+                alert('Please enter title and description');
+                return;
+            }
+
+            showAlert('pageAlert', 'info', '✨ AI is generating your page...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/generate-page`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        page_type: pageType,
+                        description: description,
+                        objectives: objectives
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show preview with AI-generated content
+                    document.getElementById('aiGeneratedPageContent').value = result.generated_content;
+                    document.getElementById('aiPagePreview').style.display = 'block';
+                    document.getElementById('aiPageForm').style.display = 'none';
+                    showAlert('pageAlert', 'success', '✅ AI-generated page ready! Review and edit if needed, then upload.');
+                } else {
+                    showAlert('pageAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('pageAlert', 'error', '❌ Error generating page: ' + error.message);
+            }
+        }
+
+        // Regenerate AI Page
+        async function regenerateAIPage() {
+            showAlert('pageAlert', 'info', '🔄 Regenerating...');
+            await generateAIPage();
+        }
+
+        // Upload AI-Generated Page to Canvas
+        async function uploadAIPage() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+
+            const title = document.getElementById('aiPageTitle').value;
+            const generatedContent = document.getElementById('aiGeneratedPageContent').value;
+
+            showAlert('pageAlert', 'info', '📤 Uploading to Canvas...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/page`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        title: title,
+                        content: generatedContent
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('pageAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
+
+                    // Reset form
+                    document.getElementById('aiPageTitle').value = '';
+                    document.getElementById('aiPageDescription').value = '';
+                    document.getElementById('aiPageObjectives').value = '';
+                    document.getElementById('aiPagePreview').style.display = 'none';
+                    document.getElementById('aiPageForm').style.display = 'block';
+                } else {
+                    showAlert('pageAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('pageAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        // Cancel AI Page
+        function cancelAIPage() {
+            document.getElementById('aiPagePreview').style.display = 'none';
+            document.getElementById('aiPageForm').style.display = 'block';
+            showAlert('pageAlert', 'info', 'Cancelled. You can regenerate or modify your inputs.');
+        }
+
         async function createPage() {
             if (!selectedCourse) { alert('Select a course first'); return; }
 
             const title = document.getElementById('pageTitle').value;
-            const topic = document.getElementById('pageTopic').value;
-            if (!title || !topic) { alert('Enter title and topic'); return; }
+            const content = document.getElementById('pageContent').value;
+            if (!title || !content) { alert('Enter title and content'); return; }
 
             showAlert('pageAlert', 'info', '📄 Creating page...');
 
@@ -1138,7 +1328,7 @@
                     body: JSON.stringify({
                         course_id: selectedCourse.id,
                         title: title,
-                        topic: topic
+                        content: content
                     })
                 });
 
@@ -1147,7 +1337,7 @@
                 if (response.ok) {
                     showAlert('pageAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank" style="color: var(--purple);">View in Canvas →</a>`);
                     document.getElementById('pageTitle').value = '';
-                    document.getElementById('pageTopic').value = '';
+                    document.getElementById('pageContent').value = '';
                 } else {
                     showAlert('pageAlert', 'error', '❌ ' + result.detail);
                 }
