@@ -1,0 +1,35 @@
+{
+  "name": "ReadySetClass",
+  "short_name": "RSC",
+  "description": "Less time setting up. More time teaching.",
+  "start_url": "/dashboard-v2.html",
+  "display": "standalone",
+  "background_color": "#1B3A52",
+  "theme_color": "#1B3A52",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/assets/ReadySetClass_alpha_badge.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/ReadySetClass_alpha_badge.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Create Quiz",
+      "short_name": "Quiz",
+      "description": "Create a new quiz with AI",
+      "url": "/dashboard-v2.html?action=quiz",
+      "icons": [{ "src": "/assets/ReadySetClass_alpha_badge.png", "sizes": "192x192" }]
+    }
+  ]
+}

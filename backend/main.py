@@ -26,6 +26,7 @@ from openai import OpenAI
 from groq import Groq
 from passlib.hash import bcrypt
 import psycopg2
+import stripe
 
 # ReadySetClass v2.0 imports
 from database import init_db, get_db, CanvasCredentials, UserCourse
@@ -928,6 +929,208 @@ async def logout(current_user = Depends(get_current_user_from_token)):
 async def get_current_user_info(current_user = Depends(get_current_user_from_token)):
     """Get current user info"""
     return current_user
+
+# ============================================================================
+# STRIPE SUBSCRIPTION ENDPOINTS
+# ============================================================================
+
+# Initialize Stripe
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+class CheckoutRequest(BaseModel):
+    price_id: str
+    success_url: str
+    cancel_url: str
+
+@app.post("/api/stripe/create-checkout")
+async def create_checkout_session(
+    request: CheckoutRequest,
+    current_user = Depends(get_current_user_from_token)
+):
+    """Create Stripe checkout session"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Get or create Stripe customer
+        cursor.execute("SELECT stripe_customer_id, email FROM users WHERE id = %s", (current_user['user_id'],))
+        result = cursor.fetchone()
+        stripe_customer_id, email = result
+
+        if not stripe_customer_id:
+            # Create Stripe customer
+            customer = stripe.Customer.create(
+                email=email,
+                metadata={"user_id": current_user['user_id']}
+            )
+            stripe_customer_id = customer.id
+
+            # Save customer ID
+            cursor.execute(
+                "UPDATE users SET stripe_customer_id = %s WHERE id = %s",
+                (stripe_customer_id, current_user['user_id'])
+            )
+            conn.commit()
+
+        # Create checkout session
+        checkout_session = stripe.checkout.Session.create(
+            customer=stripe_customer_id,
+            payment_method_types=['card'],
+            line_items=[{
+                'price': request.price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=request.success_url,
+            cancel_url=request.cancel_url,
+            metadata={
+                'user_id': current_user['user_id']
+            }
+        )
+
+        cursor.close()
+        conn.close()
+
+        return {"checkout_url": checkout_session.url}
+
+    except Exception as e:
+        print(f"Checkout error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: HTTPException):
+    """Handle Stripe webhook events"""
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Handle different event types
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            user_id = session['metadata']['user_id']
+
+            # Update user subscription
+            cursor.execute("""
+                UPDATE users
+                SET subscription_status = 'active',
+                    subscription_tier = 'pro',
+                    stripe_subscription_id = %s,
+                    trial_ends_at = NULL
+                WHERE id = %s
+            """, (session['subscription'], user_id))
+
+        elif event['type'] == 'customer.subscription.updated':
+            subscription = event['data']['object']
+            stripe_customer_id = subscription['customer']
+
+            cursor.execute("""
+                UPDATE users
+                SET subscription_status = %s
+                WHERE stripe_customer_id = %s
+            """, (subscription['status'], stripe_customer_id))
+
+        elif event['type'] == 'customer.subscription.deleted':
+            subscription = event['data']['object']
+            stripe_customer_id = subscription['customer']
+
+            cursor.execute("""
+                UPDATE users
+                SET subscription_status = 'canceled',
+                    subscription_tier = 'trial'
+                WHERE stripe_customer_id = %s
+            """, (stripe_customer_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {"status": "success"}
+
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/subscription/status")
+async def get_subscription_status(current_user = Depends(get_current_user_from_token)):
+    """Get current subscription status"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT subscription_tier, subscription_status, trial_ends_at,
+               subscription_ends_at, ai_generations_this_month, stripe_subscription_id
+        FROM users
+        WHERE id = %s
+    """, (current_user['user_id'],))
+
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    tier, status, trial_ends, sub_ends, ai_gens, stripe_sub_id = result
+
+    return {
+        "tier": tier,
+        "status": status,
+        "trial_ends_at": trial_ends.isoformat() if trial_ends else None,
+        "subscription_ends_at": sub_ends.isoformat() if sub_ends else None,
+        "ai_generations_used": ai_gens,
+        "has_active_subscription": status == 'active' and tier != 'trial',
+        "stripe_subscription_id": stripe_sub_id
+    }
+
+
+@app.post("/api/subscription/cancel")
+async def cancel_subscription(current_user = Depends(get_current_user_from_token)):
+    """Cancel subscription"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT stripe_subscription_id FROM users WHERE id = %s",
+        (current_user['user_id'],)
+    )
+    result = cursor.fetchone()
+
+    if not result or not result[0]:
+        raise HTTPException(status_code=404, detail="No active subscription")
+
+    stripe_subscription_id = result[0]
+
+    try:
+        # Cancel in Stripe
+        stripe.Subscription.delete(stripe_subscription_id)
+
+        # Update in database
+        cursor.execute("""
+            UPDATE users
+            SET subscription_status = 'canceled'
+            WHERE id = %s
+        """, (current_user['user_id'],))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {"status": "canceled"}
+
+    except Exception as e:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
 # CANVAS INTEGRATION ENDPOINTS
