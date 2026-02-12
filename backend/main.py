@@ -1420,3 +1420,40 @@ Keep it concise but meaningful."""
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+class AIDiscussionRequest(BaseModel):
+    topic: str
+    discussion_type: str
+    goals: str
+
+
+@app.post("/api/v2/canvas/generate-discussion")
+async def generate_ai_discussion(request: AIDiscussionRequest):
+    """Generate AI-enhanced discussion topic"""
+    try:
+        print(f"🤖 Generating AI discussion: {request.topic}")
+        
+        system = "You are Bonita, helping professors create engaging class discussions."
+        prompt = f"""Create a discussion topic on: {request.topic}
+
+Discussion Type: {request.discussion_type}
+Learning Goals: {request.goals}
+
+Generate an engaging discussion post that includes:
+
+1. **Opening Prompt** (2-3 paragraphs that provide context and spark interest)
+
+2. **Discussion Questions** (3-5 thought-provoking questions that encourage critical thinking)
+
+3. **Participation Guidelines** (How students should engage - length, citations, peer responses)
+
+4. **Expected Outcomes** (What students should gain from this discussion)
+
+Format in HTML for Canvas. Make it engaging and encourage meaningful dialogue."""
+
+        content, cost = bonita.call_ai(prompt, system)
+        print(f"✅ Discussion generated (cost: ${cost:.4f})")
+        return {"status": "success", "generated_content": content, "cost": cost}
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

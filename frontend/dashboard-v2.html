@@ -630,17 +630,85 @@
                 <div class="selected-course-info" id="discussionCourseInfo"></div>
                 <div id="discussionAlert"></div>
 
-                <div class="form-group">
-                    <label>Discussion Topic</label>
-                    <input type="text" id="discussionTopic" placeholder="e.g., Ethics in Social Media">
+                <!-- Mode Selection -->
+                <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="font-weight: 600; margin-bottom: 1rem; color: var(--dark);">Choose Mode:</div>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="discussionMode" value="quick" checked onchange="toggleDiscussionMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>Quick Input</strong> — Use your content as-is
+                            </span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.95rem;">
+                            <input type="radio" name="discussionMode" value="ai" onchange="toggleDiscussionMode()">
+                            <span style="margin-left: 0.5rem;">
+                                <strong>✨ AI-Enhanced</strong> — AI generates engaging prompts
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Discussion Prompt</label>
-                    <textarea id="discussionPrompt" placeholder="What should students discuss?"></textarea>
+                <!-- Quick Input Mode Form -->
+                <div id="quickDiscussionForm">
+                    <div class="form-group">
+                        <label>Discussion Topic</label>
+                        <input type="text" id="discussionTopic" placeholder="e.g., Ethics in Social Media">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Discussion Message/Prompt</label>
+                        <textarea id="discussionMessage" placeholder="Paste your discussion prompt here..." style="min-height: 150px;"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="createDiscussion()">📤 Upload to Canvas</button>
                 </div>
 
-                <button class="btn btn-primary" onclick="createDiscussion()">Generate & Create Discussion</button>
+                <!-- AI-Enhanced Mode Form -->
+                <div id="aiDiscussionForm" style="display: none;">
+                    <div class="form-group">
+                        <label>Discussion Topic</label>
+                        <input type="text" id="aiDiscussionTopic" placeholder="e.g., Ethics in Social Media Marketing">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Discussion Type</label>
+                        <select id="aiDiscussionType" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                            <option value="debate">Debate/Argument</option>
+                            <option value="reflection">Reflection</option>
+                            <option value="case_study">Case Study Analysis</option>
+                            <option value="current_events">Current Events</option>
+                            <option value="peer_review">Peer Review</option>
+                            <option value="brainstorm">Brainstorming</option>
+                            <option value="qanda">Q&A/Problem Solving</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What should students discuss? (Brief description)</label>
+                        <textarea id="aiDiscussionGoals" placeholder="Example: 'Students will debate the ethical implications of targeted advertising, considering privacy, manipulation, and consumer protection.'" style="min-height: 100px;"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="generateAIDiscussion()">✨ Generate with AI</button>
+                </div>
+
+                <!-- AI Preview Area -->
+                <div id="aiDiscussionPreview" style="display: none; margin-top: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border: 2px solid var(--purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; color: var(--dark);">AI-Generated Discussion Preview</h3>
+                        <button onclick="regenerateAIDiscussion()" class="btn" style="background: var(--coral); color: white; padding: 0.5rem 1rem;">🔄 Regenerate</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Edit Discussion Content (if needed)</label>
+                        <textarea id="aiGeneratedDiscussionContent" style="min-height: 300px; font-family: 'DM Sans', sans-serif; line-height: 1.6;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="uploadAIDiscussion()">📤 Upload to Canvas</button>
+                        <button class="btn" onclick="cancelAIDiscussion()" style="background: #666; color: white;">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Module Creator -->
@@ -1347,12 +1415,79 @@
         }
 
         // Create Discussion
+
+        // ===== DISCUSSION FUNCTIONS =====
+        function toggleDiscussionMode() {
+            const mode = document.querySelector('input[name="discussionMode"]:checked').value;
+            if (mode === 'quick') {
+                document.getElementById('quickDiscussionForm').style.display = 'block';
+                document.getElementById('aiDiscussionForm').style.display = 'none';
+                document.getElementById('aiDiscussionPreview').style.display = 'none';
+            } else {
+                document.getElementById('quickDiscussionForm').style.display = 'none';
+                document.getElementById('aiDiscussionForm').style.display = 'block';
+                document.getElementById('aiDiscussionPreview').style.display = 'none';
+            }
+        }
+
+        async function generateAIDiscussion() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+            const topic = document.getElementById('aiDiscussionTopic').value;
+            const type = document.getElementById('aiDiscussionType').value;
+            const goals = document.getElementById('aiDiscussionGoals').value;
+            if (!topic || !goals) { alert('Please enter topic and goals'); return; }
+            showAlert('discussionAlert', 'info', '✨ AI is generating discussion...');
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/generate-discussion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ topic, discussion_type: type, goals })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    document.getElementById('aiGeneratedDiscussionContent').value = result.generated_content;
+                    document.getElementById('aiDiscussionPreview').style.display = 'block';
+                    document.getElementById('aiDiscussionForm').style.display = 'none';
+                    showAlert('discussionAlert', 'success', '✅ AI discussion ready!');
+                } else { showAlert('discussionAlert', 'error', '❌ ' + result.detail); }
+            } catch (error) { showAlert('discussionAlert', 'error', '❌ Error: ' + error.message); }
+        }
+
+        async function regenerateAIDiscussion() { showAlert('discussionAlert', 'info', '🔄 Regenerating...'); await generateAIDiscussion(); }
+
+        async function uploadAIDiscussion() {
+            if (!selectedCourse) { alert('Select a course first'); return; }
+            const topic = document.getElementById('aiDiscussionTopic').value;
+            const content = document.getElementById('aiGeneratedDiscussionContent').value;
+            showAlert('discussionAlert', 'info', '📤 Uploading...');
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/discussion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ course_id: selectedCourse.id, topic, message: content })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert('discussionAlert', 'success', `✅ ${result.message}<br><a href="${result.preview_url}" target="_blank">View →</a>`);
+                    document.getElementById('aiDiscussionTopic').value = '';
+                    document.getElementById('aiDiscussionGoals').value = '';
+                    document.getElementById('aiDiscussionPreview').style.display = 'none';
+                    document.getElementById('aiDiscussionForm').style.display = 'block';
+                } else { showAlert('discussionAlert', 'error', '❌ ' + result.detail); }
+            } catch (error) { showAlert('discussionAlert', 'error', '❌ Error: ' + error.message); }
+        }
+
+        function cancelAIDiscussion() {
+            document.getElementById('aiDiscussionPreview').style.display = 'none';
+            document.getElementById('aiDiscussionForm').style.display = 'block';
+        }
+
         async function createDiscussion() {
             if (!selectedCourse) { alert('Select a course first'); return; }
 
             const topic = document.getElementById('discussionTopic').value;
-            const prompt = document.getElementById('discussionPrompt').value;
-            if (!topic || !prompt) { alert('Enter topic and prompt'); return; }
+            const message = document.getElementById('discussionMessage').value;
+            if (!topic || !message) { alert('Enter topic and prompt'); return; }
 
             showAlert('discussionAlert', 'info', '💬 Creating discussion...');
 
@@ -1366,7 +1501,7 @@
                     body: JSON.stringify({
                         course_id: selectedCourse.id,
                         topic: topic,
-                        prompt: prompt
+                        message: message
                     })
                 });
 
