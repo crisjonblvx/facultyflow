@@ -2742,8 +2742,8 @@ async def create_demo_account(db: Session = Depends(get_db)):
         # Create user
         cursor.execute("""
             INSERT INTO users
-            (email, password_hash, full_name, role, institution, notes, is_active, is_demo, subscription_tier, trial_ends_at)
-            VALUES (%s, %s, %s, 'user', %s, %s, TRUE, TRUE, 'trial', %s)
+            (email, password_hash, full_name, role, institution, notes, is_active, is_demo, demo_expires_at)
+            VALUES (%s, %s, %s, 'user', %s, %s, TRUE, TRUE, %s)
             RETURNING id
         """, (
             email,
@@ -2798,7 +2798,7 @@ async def cleanup_expired_demos(current_user=Depends(get_current_user_from_token
         cursor.execute("""
             DELETE FROM users
             WHERE is_demo = TRUE
-            AND trial_ends_at < NOW()
+            AND demo_expires_at < NOW()
             RETURNING id, email
         """)
 
