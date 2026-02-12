@@ -1597,6 +1597,13 @@ Participation: 10%" style="min-height: 80px;"></textarea>
 
     <script>
         // ============================================================================
+        // GLOBAL CONFIGURATION - Must be first!
+        // ============================================================================
+        const API_URL = 'https://facultyflow-production.up.railway.app';
+        let authToken = localStorage.getItem('auth_token');
+        let selectedCourse = null;
+
+        // ============================================================================
         // AUTH PROTECTION - Require login
         // ============================================================================
         (function() {
@@ -1627,9 +1634,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         // ============================================================================
         // APP INITIALIZATION
         // ============================================================================
-        const API_URL = 'https://facultyflow-production.up.railway.app';
-        let selectedCourse = null;
-        let authToken = window.authToken;
+        // (API_URL, authToken, selectedCourse declared at top of script)
 
         // School Name Mapping for Better UX
         function getSchoolName(canvasUrl) {
