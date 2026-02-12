@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy.orm import Session
 from openai import OpenAI
+from groq import Groq
 
 # FacultyFlow v2.0 imports
 from database import init_db, get_db, CanvasCredentials, UserCourse
@@ -53,22 +54,29 @@ security = HTTPBearer()
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
 JWT_ALGORITHM = "HS256"
 
-# AI Clients - Support both OpenAI and Anthropic
+# AI Clients - Support OpenAI, Groq (FREE!), and Anthropic
 openai_client = None
+groq_client = None
 anthropic_client = None
 
-# Initialize OpenAI (preferred - cheaper)
+# Initialize OpenAI (preferred - cheap and high quality)
 if os.getenv("OPENAI_API_KEY"):
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    print("✅ OpenAI client initialized (GPT-4o-mini)")
+    print("✅ OpenAI client initialized (GPT-4o-mini - $0.002/assignment)")
 
-# Initialize Anthropic (fallback)
+# Initialize Groq (second choice - FREE!)
+if os.getenv("GROQ_API_KEY"):
+    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    print("✅ Groq client initialized (Llama 3.3 70B - FREE!)")
+
+# Initialize Anthropic (fallback - expensive but highest quality)
 if os.getenv("ANTHROPIC_API_KEY"):
     anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    print("✅ Anthropic client initialized (Claude)")
+    print("✅ Anthropic client initialized (Claude Sonnet - $0.05/assignment)")
 
-if not openai_client and not anthropic_client:
+if not openai_client and not groq_client and not anthropic_client:
     print("⚠️  No AI API keys found. AI features will not work.")
+    print("   Set one of: OPENAI_API_KEY, GROQ_API_KEY, or ANTHROPIC_API_KEY")
 
 # ============================================================================
 # DATA MODELS
@@ -132,12 +140,13 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 class BonitaEngine:
     """
     Smart AI routing for FacultyFlow
-    Supports OpenAI (GPT-4o-mini) and Anthropic (Claude)
-    Prefers OpenAI for cost efficiency
+    Supports: OpenAI (cheap), Groq (FREE!), Anthropic (premium)
+    Provider priority: OpenAI > Groq > Anthropic
     """
 
     def __init__(self):
         self.openai_client = openai_client
+        self.groq_client = groq_client
         self.anthropic_client = anthropic_client
         self.cost_tracker = {
             "syllabus": 0,
@@ -149,10 +158,11 @@ class BonitaEngine:
 
     def call_ai(self, prompt: str, system: str = "") -> tuple[str, float]:
         """
-        Call AI provider (OpenAI preferred, Claude fallback)
+        Call AI provider with automatic fallback
+        Priority: OpenAI > Groq (FREE!) > Anthropic
         Returns: (response_text, cost)
         """
-        # Try OpenAI first (25x cheaper)
+        # Try OpenAI first (cheapest paid option - $0.002/assignment)
         if self.openai_client:
             try:
                 response = self.openai_client.chat.completions.create(
@@ -170,11 +180,33 @@ class BonitaEngine:
                 output_tokens = response.usage.completion_tokens
                 cost = (input_tokens / 1_000_000 * 0.15) + (output_tokens / 1_000_000 * 0.60)
 
+                print(f"✅ OpenAI response (cost: ${cost:.4f})")
                 return response.choices[0].message.content, cost
             except Exception as e:
-                print(f"⚠️  OpenAI failed: {e}, falling back to Claude")
+                print(f"⚠️  OpenAI failed: {e}, trying Groq...")
 
-        # Fallback to Claude
+        # Try Groq second (FREE! 🎉)
+        if self.groq_client:
+            try:
+                response = self.groq_client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",  # Fast, high quality, FREE!
+                    messages=[
+                        {"role": "system", "content": system} if system else {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=2048,
+                    temperature=0.7
+                )
+
+                # Groq is FREE!
+                cost = 0.0
+
+                print(f"✅ Groq response (cost: FREE!)")
+                return response.choices[0].message.content, cost
+            except Exception as e:
+                print(f"⚠️  Groq failed: {e}, falling back to Claude...")
+
+        # Fallback to Claude (most expensive but highest quality)
         if self.anthropic_client:
             response = self.anthropic_client.messages.create(
                 model="claude-sonnet-4-20250514",
@@ -188,9 +220,10 @@ class BonitaEngine:
             output_tokens = response.usage.output_tokens
             cost = (input_tokens / 1_000_000 * 3) + (output_tokens / 1_000_000 * 15)
 
+            print(f"✅ Claude response (cost: ${cost:.4f})")
             return response.content[0].text, cost
 
-        raise Exception("No AI provider available. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY")
+        raise Exception("No AI provider available. Please set OPENAI_API_KEY, GROQ_API_KEY, or ANTHROPIC_API_KEY")
 
     # Keep old method name for backward compatibility
     def call_claude(self, prompt: str, system: str = "") -> tuple[str, float]:
