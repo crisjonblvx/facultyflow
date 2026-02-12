@@ -30,23 +30,26 @@
             font-family: var(--font-body);
             background: var(--light-gray);
             color: var(--dark);
+            height: 100vh;
+            overflow: hidden;
         }
 
         .dashboard {
             display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: auto;
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* Sidebar */
+        /* Sidebar - Fixed width, scrollable */
         .sidebar {
             background: white;
             border-right: 1px solid rgba(0,0,0,0.05);
-            padding: 2rem 0;
+            overflow-y: auto;
+            height: 100vh;
             position: sticky;
             top: 0;
-            height: 100vh;
-            overflow-y: auto;
         }
 
         .logo {
@@ -84,14 +87,21 @@
             border-right: 3px solid var(--purple);
         }
 
-        /* Main Content */
+        /* Main Content - Scrollable, fills remaining space */
         .main-content {
-            padding: 2rem;
-            max-width: 1200px;
+            overflow-y: auto;
+            height: 100vh;
+            background: var(--light-gray);
         }
 
         .header {
-            margin-bottom: 2rem;
+            background: white;
+            padding: 32px 40px;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin-bottom: 0;
         }
 
         .header h1 {
@@ -101,6 +111,12 @@
         }
 
         .header p { color: var(--gray); }
+
+        /* Content Container - Proper padding, no layout issues */
+        .content-wrapper {
+            padding: 40px;
+            max-width: 1200px;
+        }
 
         /* Connection Card */
         .connection-card {
@@ -327,8 +343,9 @@
                 <p>Your daily Canvas tasks, simplified with AI</p>
             </div>
 
-            <!-- Canvas Connection -->
-            <div id="canvasConnection" class="connection-card">
+            <div class="content-wrapper">
+                <!-- Canvas Connection -->
+                <div id="canvasConnection" class="connection-card">
                 <h2>Canvas Connection <span id="connectionStatus" class="status-badge disconnected">Not Connected</span></h2>
 
                 <div id="connectionForm">
@@ -748,8 +765,6 @@
 
                 <div id="modulesList"></div>
             </div>
-        </main>
-    </div>
 
             <!-- Syllabus Creator -->
             <div id="syllabusCreator" class="content-creator">
@@ -875,7 +890,11 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     </ul>
                 </div>
             </div>
-
+            </div>
+            <!-- /content-wrapper -->
+        </main>
+    </div>
+    <!-- /dashboard -->
 
     <script>
         const API_URL = 'https://facultyflow-production.up.railway.app';
