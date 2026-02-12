@@ -1075,7 +1075,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
 
         function updateCourseInfo(section) {
             if (!selectedCourse) return;
-            
+
             const info = `📚 <strong>${selectedCourse.name}</strong> (${selectedCourse.course_code || 'No code'})`;
             const infoIds = {
                 quiz: 'quizCourseInfo',
@@ -1083,7 +1083,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                 assignment: 'assignmentCourseInfo',
                 page: 'pageCourseInfo',
                 discussion: 'discussionCourseInfo',
-                module: 'moduleCourseInfo'
+                module: 'moduleCourseInfo',
+                syllabus: 'syllabusCourseInfo'
             };
             
             if (infoIds[section]) {
