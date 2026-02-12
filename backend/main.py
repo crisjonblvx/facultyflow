@@ -2730,8 +2730,7 @@ async def create_demo_account(db: Session = Depends(get_db)):
         password = "demo2026"  # Simple password for all demos
 
         # Hash password
-        password_bytes = password.encode('utf-8')
-        password_hash = bcrypt.hash(password_bytes)
+        password_hash = bcrypt.hash(password)
 
         # Calculate expiration (24 hours from now)
         expires_at = datetime.now() + timedelta(hours=24)
