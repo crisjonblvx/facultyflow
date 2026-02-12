@@ -172,11 +172,11 @@
 
         <div style="text-align: center; margin: 20px 0;">
             <div style="color: #999; font-size: 13px; margin-bottom: 10px;">OR</div>
-            <button type="button" onclick="tryDemo()" style="width: 100%; padding: 14px; background: #B8945F; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                🚀 Try Demo (No signup required)
+            <button type="button" id="demo-btn" onclick="startDemo()" style="width: 100%; padding: 14px; background: #B8945F; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                🚀 Start Free Demo
             </button>
             <div style="color: #666; font-size: 12px; margin-top: 8px; font-style: italic;">
-                Test drive all features with sample data
+                Instant access • No signup • Your own isolated account • Expires in 24h
             </div>
         </div>
 
@@ -191,12 +191,47 @@
         const errorDiv = document.getElementById('error');
         const btn = document.getElementById('login-btn');
 
-        // Try Demo - Auto-fill demo credentials and login
-        function tryDemo() {
-            document.getElementById('email').value = 'demo@readysetclass.com';
-            document.getElementById('password').value = 'TryReadySetClass2026';
-            // Auto-submit the form
-            form.dispatchEvent(new Event('submit'));
+        // Start Demo - Create isolated demo account and auto-login
+        async function startDemo() {
+            const demoBtn = document.getElementById('demo-btn');
+            demoBtn.disabled = true;
+            demoBtn.textContent = '⏳ Creating your demo account...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/demo/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create demo account');
+                }
+
+                const data = await response.json();
+
+                // Store credentials
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('user', JSON.stringify({
+                    email: data.email,
+                    is_demo: true,
+                    expires_in_hours: data.expires_in_hours
+                }));
+
+                // Show success and redirect
+                demoBtn.textContent = '✓ Demo Ready! Redirecting...';
+                setTimeout(() => {
+                    window.location.href = '/dashboard-v2.html';
+                }, 500);
+
+            } catch (error) {
+                console.error('Demo creation error:', error);
+                demoBtn.disabled = false;
+                demoBtn.textContent = '🚀 Start Free Demo';
+                errorDiv.textContent = 'Failed to create demo account. Please try again.';
+                errorDiv.classList.add('show');
+            }
         }
 
         form.addEventListener('submit', async (e) => {
