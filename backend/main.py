@@ -19,6 +19,7 @@ import secrets
 from datetime import datetime, timedelta
 from jose import jwt
 from sqlalchemy.orm import Session
+from openai import OpenAI
 
 # FacultyFlow v2.0 imports
 from database import init_db, get_db, CanvasCredentials, UserCourse
@@ -52,8 +53,22 @@ security = HTTPBearer()
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
 JWT_ALGORITHM = "HS256"
 
-# AI Clients
-anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+# AI Clients - Support both OpenAI and Anthropic
+openai_client = None
+anthropic_client = None
+
+# Initialize OpenAI (preferred - cheaper)
+if os.getenv("OPENAI_API_KEY"):
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    print("✅ OpenAI client initialized (GPT-4o-mini)")
+
+# Initialize Anthropic (fallback)
+if os.getenv("ANTHROPIC_API_KEY"):
+    anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    print("✅ Anthropic client initialized (Claude)")
+
+if not openai_client and not anthropic_client:
+    print("⚠️  No AI API keys found. AI features will not work.")
 
 # ============================================================================
 # DATA MODELS
@@ -117,10 +132,12 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 class BonitaEngine:
     """
     Smart AI routing for FacultyFlow
-    Uses Claude for quality, Qwen for structure, optimizes costs
+    Supports OpenAI (GPT-4o-mini) and Anthropic (Claude)
+    Prefers OpenAI for cost efficiency
     """
-    
+
     def __init__(self):
+        self.openai_client = openai_client
         self.anthropic_client = anthropic_client
         self.cost_tracker = {
             "syllabus": 0,
@@ -129,22 +146,56 @@ class BonitaEngine:
             "study_packs": 0,
             "total": 0
         }
-    
+
+    def call_ai(self, prompt: str, system: str = "") -> tuple[str, float]:
+        """
+        Call AI provider (OpenAI preferred, Claude fallback)
+        Returns: (response_text, cost)
+        """
+        # Try OpenAI first (25x cheaper)
+        if self.openai_client:
+            try:
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": system} if system else {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=2048,
+                    temperature=0.7
+                )
+
+                # Calculate cost for GPT-4o-mini
+                input_tokens = response.usage.prompt_tokens
+                output_tokens = response.usage.completion_tokens
+                cost = (input_tokens / 1_000_000 * 0.15) + (output_tokens / 1_000_000 * 0.60)
+
+                return response.choices[0].message.content, cost
+            except Exception as e:
+                print(f"⚠️  OpenAI failed: {e}, falling back to Claude")
+
+        # Fallback to Claude
+        if self.anthropic_client:
+            response = self.anthropic_client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=2048,
+                system=system,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            # Calculate cost for Claude
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            cost = (input_tokens / 1_000_000 * 3) + (output_tokens / 1_000_000 * 15)
+
+            return response.content[0].text, cost
+
+        raise Exception("No AI provider available. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY")
+
+    # Keep old method name for backward compatibility
     def call_claude(self, prompt: str, system: str = "") -> tuple[str, float]:
-        """Use Claude Sonnet for high-quality content"""
-        response = self.anthropic_client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2048,
-            system=system,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        # Calculate cost
-        input_tokens = response.usage.input_tokens
-        output_tokens = response.usage.output_tokens
-        cost = (input_tokens / 1_000_000 * 3) + (output_tokens / 1_000_000 * 15)
-        
-        return response.content[0].text, cost
+        """Alias for call_ai() for backward compatibility"""
+        return self.call_ai(prompt, system)
     
     def call_qwen_local(self, prompt: str) -> tuple[str, float]:
         """Use Qwen local for structured content (FREE!)"""
