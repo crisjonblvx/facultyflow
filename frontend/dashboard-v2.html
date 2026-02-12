@@ -586,6 +586,152 @@
                 padding: 2rem;
             }
         }
+
+        /* ========================================
+           GRADING WIZARD STYLES
+           ======================================== */
+
+        .wizard-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .wizard-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+
+        .wizard-step.active {
+            opacity: 1;
+        }
+
+        .wizard-step .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .wizard-step.active .step-number {
+            background: var(--primary-navy);
+            color: white;
+        }
+
+        .wizard-step .step-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .wizard-step.active .step-label {
+            color: var(--primary-navy);
+        }
+
+        .wizard-step-connector {
+            width: 60px;
+            height: 2px;
+            background: #e0e0e0;
+            margin: 0 -0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .wizard-step-content {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grading-method-card {
+            transition: all 0.2s;
+        }
+
+        .grading-method-card:hover {
+            border-color: var(--primary-navy) !important;
+            background: #f8f9ff;
+        }
+
+        .grading-method-card input[type="radio"]:checked ~ div {
+            color: var(--primary-navy);
+        }
+
+        .category-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .category-row input,
+        .category-row select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .category-row .remove-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .category-row .remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .rule-section {
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+        }
+
+        .rule-section h4 {
+            margin-bottom: 1rem;
+            color: var(--primary-navy);
+        }
+
+        @media (max-width: 768px) {
+            .wizard-step .step-label {
+                font-size: 0.75rem;
+            }
+
+            .wizard-step-connector {
+                width: 30px;
+            }
+
+            .category-row {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -597,6 +743,7 @@
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active" onclick="showSection('courses')">📚 My Courses</li>
+                <li class="nav-item" onclick="showSection('grading')">📊 Setup Grading</li>
                 <li class="nav-item" onclick="showSection('quiz')">📝 Create Quiz</li>
                 <li class="nav-item" onclick="showSection('announcement')">📢 Announcement</li>
                 <li class="nav-item" onclick="showSection('assignment')">📋 Assignment</li>
@@ -672,6 +819,156 @@
                 <h2>Your Courses</h2>
                 <p style="color: var(--gray); margin-bottom: 1rem;">Select a course to get started</p>
                 <div id="coursesGrid" class="courses-grid"></div>
+            </div>
+
+            <!-- Grading Setup Wizard -->
+            <div id="gradingCreator" class="content-creator">
+                <h2>📊 Grading Setup Wizard</h2>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">
+                    Set up your course grading in 2 minutes. We'll handle all the Canvas complexity.
+                </p>
+
+                <div class="selected-course-info" id="gradingCourseInfo"></div>
+                <div id="gradingAlert"></div>
+
+                <!-- Wizard Progress -->
+                <div class="wizard-progress" style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center;">
+                    <div class="wizard-step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Method</div>
+                    </div>
+                    <div class="wizard-step-connector"></div>
+                    <div class="wizard-step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Categories</div>
+                    </div>
+                    <div class="wizard-step-connector"></div>
+                    <div class="wizard-step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Rules</div>
+                    </div>
+                    <div class="wizard-step-connector"></div>
+                    <div class="wizard-step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Preview</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Choose Method -->
+                <div id="gradingStep1" class="wizard-step-content" style="display: block;">
+                    <h3 style="margin-bottom: 1.5rem;">How do you want to calculate final grades?</h3>
+
+                    <div style="display: grid; gap: 1.5rem; max-width: 600px;">
+                        <label class="grading-method-card" style="display: block; padding: 1.5rem; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="gradingMethod" value="total_points" style="margin-right: 1rem;">
+                            <div style="display: inline-block; vertical-align: top;">
+                                <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">📊 Total Points (Simple)</div>
+                                <div style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                    All assignments add up to a total
+                                </div>
+                                <div style="color: var(--text-light); font-size: 0.9rem;">
+                                    <strong>Example:</strong> 500 points total = 100%<br>
+                                    <strong>Best for:</strong> Straightforward courses
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="grading-method-card" style="display: block; padding: 1.5rem; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="gradingMethod" value="weighted" checked style="margin-right: 1rem;">
+                            <div style="display: inline-block; vertical-align: top;">
+                                <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">⚖️ Weighted Categories (Common)</div>
+                                <div style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                    Different types worth different percentages
+                                </div>
+                                <div style="color: var(--text-light); font-size: 0.9rem;">
+                                    <strong>Example:</strong> Quizzes 30%, Assignments 40%, Exams 30%<br>
+                                    <strong>Best for:</strong> Most college courses
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 2: Setup Categories -->
+                <div id="gradingStep2" class="wizard-step-content" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem;">What categories do you use?</h3>
+
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Quick Start - Choose Your Subject:</label>
+                        <select id="subjectSelector" style="width: 100%; max-width: 400px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                            <option value="Mass Communications">Mass Communications</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="English">English</option>
+                            <option value="Science">Science</option>
+                            <option value="History">History</option>
+                            <option value="Business">Business</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Custom">Custom (Create Your Own)</option>
+                        </select>
+                    </div>
+
+                    <div id="categoriesList" style="margin-bottom: 1.5rem;"></div>
+
+                    <button type="button" onclick="addCategory()" style="background: var(--accent-gold); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        + Add Category
+                    </button>
+
+                    <div id="weightTotal" style="margin-top: 1.5rem; padding: 1rem; background: #f0f4ff; border-radius: 8px; font-weight: 600;">
+                        Total: <span id="totalWeightDisplay">0</span>%
+                    </div>
+                </div>
+
+                <!-- Step 3: Special Rules -->
+                <div id="gradingStep3" class="wizard-step-content" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem;">Any special grading rules?</h3>
+
+                    <div id="rulesContainer" style="display: grid; gap: 1.5rem;"></div>
+
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin-bottom: 1rem;">Advanced Options:</h4>
+                        <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer;">
+                            <input type="checkbox" id="latePenaltyEnabled" style="margin-right: 0.75rem;">
+                            <span>Late penalty (deduct <input type="number" id="latePenaltyPercent" value="10" min="0" max="100" style="width: 60px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;"> % per day late)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="missingPolicyEnabled" style="margin-right: 0.75rem;">
+                            <span>Automatically assign 0 for missing submissions</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 4: Preview -->
+                <div id="gradingStep4" class="wizard-step-content" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem;">Preview: How Your Grades Will Calculate</h3>
+
+                    <div style="background: white; padding: 1.5rem; border: 2px solid #e0e0e0; border-radius: 12px; margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Your grading setup:</h4>
+                        <div id="gradingPreviewSummary"></div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                        <h4 style="margin-bottom: 1rem;">Example calculation:</h4>
+                        <div id="gradingPreviewExample"></div>
+                    </div>
+
+                    <label style="display: flex; align-items: center; margin-top: 1.5rem; cursor: pointer;">
+                        <input type="checkbox" id="confirmGrading" style="margin-right: 0.75rem;">
+                        <span style="font-weight: 600;">✓ This makes sense</span>
+                    </label>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+                    <button id="gradingBackBtn" onclick="gradingPrevStep()" style="padding: 12px 24px; background: white; color: var(--primary-navy); border: 2px solid var(--primary-navy); border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">
+                        ← Back
+                    </button>
+                    <button id="gradingNextBtn" onclick="gradingNextStep()" style="padding: 12px 24px; background: var(--primary-navy); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: auto;">
+                        Continue →
+                    </button>
+                    <button id="gradingSetupBtn" onclick="submitGradingSetup()" style="padding: 12px 24px; background: var(--accent-gold); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: auto; display: none;">
+                        🚀 Set Up in Canvas
+                    </button>
+                </div>
             </div>
 
             <!-- Quiz Creator -->
@@ -1515,6 +1812,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                 document.getElementById('canvasConnection').classList.add('hidden');
 
                 const creatorMap = {
+                    grading: 'gradingCreator',
                     quiz: 'quizCreator',
                     announcement: 'announcementCreator',
                     assignment: 'assignmentCreator',
@@ -1535,6 +1833,9 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     document.getElementById(creatorMap[section]).classList.add('active');
                     if (section === 'reference') {
                         loadReferenceMaterials(); // Load uploaded materials
+                    } else if (section === 'grading') {
+                        loadGradingTemplates(); // Load grading templates
+                        updateCourseInfo(section);
                     } else {
                         updateCourseInfo(section);
                     }
@@ -2670,6 +2971,360 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                 showAlert('referenceAlert', 'error', '❌ Error: ' + error.message);
             }
         }
+
+        // ============================================================================
+        // GRADING SETUP WIZARD
+        // ============================================================================
+        // Strategy by: Sunni | Implementation by: Q-Tip
+
+        let currentGradingStep = 1;
+        let gradingCategories = [];
+        let gradingTemplates = {};
+
+        // Load grading templates from backend
+        async function loadGradingTemplates() {
+            try {
+                const response = await fetch(`${API_URL}/api/grading/templates`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const data = await response.json();
+                gradingTemplates = data.templates;
+
+                // Load default template (Mass Communications)
+                loadSubjectTemplate('Mass Communications');
+            } catch (error) {
+                console.error('Failed to load templates:', error);
+            }
+        }
+
+        // Load template for a subject
+        function loadSubjectTemplate(subject) {
+            const template = gradingTemplates[subject] || [];
+            gradingCategories = template.map(cat => ({...cat})); // Deep copy
+            renderCategories();
+            calculateTotalWeight();
+        }
+
+        // Add new category
+        function addCategory() {
+            gradingCategories.push({
+                name: '',
+                weight: 0,
+                rules: {}
+            });
+            renderCategories();
+        }
+
+        // Remove category
+        function removeCategory(index) {
+            gradingCategories.splice(index, 1);
+            renderCategories();
+            calculateTotalWeight();
+        }
+
+        // Update category
+        function updateCategory(index, field, value) {
+            gradingCategories[index][field] = field === 'weight' ? parseFloat(value) || 0 : value;
+            if (field === 'weight') {
+                calculateTotalWeight();
+            }
+        }
+
+        // Render categories list
+        function renderCategories() {
+            const container = document.getElementById('categoriesList');
+            if (!container) return;
+
+            container.innerHTML = gradingCategories.map((cat, index) => `
+                <div class="category-row">
+                    <input
+                        type="text"
+                        placeholder="Category name (e.g., Quizzes)"
+                        value="${cat.name}"
+                        onchange="updateCategory(${index}, 'name', this.value)"
+                    >
+                    <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        placeholder="Weight %"
+                        value="${cat.weight}"
+                        onchange="updateCategory(${index}, 'weight', this.value)"
+                    >
+                    <button class="remove-btn" onclick="removeCategory(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Calculate total weight
+        function calculateTotalWeight() {
+            const total = gradingCategories.reduce((sum, cat) => sum + (cat.weight || 0), 0);
+            const display = document.getElementById('totalWeightDisplay');
+            if (display) {
+                display.textContent = total.toFixed(1);
+                display.style.color = Math.abs(total - 100) < 0.1 ? 'var(--success)' : 'var(--error)';
+            }
+            return total;
+        }
+
+        // Grading wizard navigation
+        function gradingNextStep() {
+            // Validation for current step
+            if (currentGradingStep === 2) {
+                const total = calculateTotalWeight();
+                if (Math.abs(total - 100) > 0.1) {
+                    alert('Category weights must total 100%');
+                    return;
+                }
+
+                if (gradingCategories.length === 0) {
+                    alert('Please add at least one category');
+                    return;
+                }
+
+                if (gradingCategories.some(cat => !cat.name)) {
+                    alert('All categories must have a name');
+                    return;
+                }
+            }
+
+            // Move to next step
+            if (currentGradingStep < 4) {
+                currentGradingStep++;
+                updateGradingWizardUI();
+
+                // Render rules on step 3
+                if (currentGradingStep === 3) {
+                    renderRules();
+                }
+
+                // Render preview on step 4
+                if (currentGradingStep === 4) {
+                    renderPreview();
+                }
+            }
+        }
+
+        function gradingPrevStep() {
+            if (currentGradingStep > 1) {
+                currentGradingStep--;
+                updateGradingWizardUI();
+            }
+        }
+
+        function updateGradingWizardUI() {
+            // Update progress indicators
+            document.querySelectorAll('.wizard-step').forEach((step, index) => {
+                if (index + 1 <= currentGradingStep) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+
+            // Show/hide step content
+            for (let i = 1; i <= 4; i++) {
+                const stepContent = document.getElementById(`gradingStep${i}`);
+                if (stepContent) {
+                    stepContent.style.display = i === currentGradingStep ? 'block' : 'none';
+                }
+            }
+
+            // Update navigation buttons
+            const backBtn = document.getElementById('gradingBackBtn');
+            const nextBtn = document.getElementById('gradingNextBtn');
+            const setupBtn = document.getElementById('gradingSetupBtn');
+
+            if (backBtn) backBtn.style.display = currentGradingStep > 1 ? 'block' : 'none';
+            if (nextBtn) nextBtn.style.display = currentGradingStep < 4 ? 'block' : 'none';
+            if (setupBtn) setupBtn.style.display = currentGradingStep === 4 ? 'block' : 'none';
+        }
+
+        // Render special rules
+        function renderRules() {
+            const container = document.getElementById('rulesContainer');
+            if (!container) return;
+
+            container.innerHTML = gradingCategories.map((cat, index) => `
+                <div class="rule-section">
+                    <h4>${cat.name} (${cat.weight}%)</h4>
+                    <label style="display: flex; align-items: center; margin-bottom: 0.75rem; cursor: pointer;">
+                        <input
+                            type="checkbox"
+                            id="dropLowest_${index}"
+                            onchange="updateCategoryRule(${index}, 'drop_lowest', this.checked)"
+                            style="margin-right: 0.75rem;"
+                        >
+                        <span>Drop
+                            <select id="dropCount_${index}" style="width: 60px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                            lowest score(s)
+                        </span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input
+                            type="checkbox"
+                            id="extraCredit_${index}"
+                            onchange="updateCategoryRule(${index}, 'extra_credit', this.checked)"
+                            style="margin-right: 0.75rem;"
+                        >
+                        <span>Allow extra credit</span>
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        // Update category rule
+        function updateCategoryRule(index, ruleType, enabled) {
+            if (!gradingCategories[index].rules) {
+                gradingCategories[index].rules = {};
+            }
+
+            if (ruleType === 'drop_lowest') {
+                const count = document.getElementById(`dropCount_${index}`)?.value || 1;
+                gradingCategories[index].rules.drop_lowest = {
+                    enabled: enabled,
+                    count: parseInt(count)
+                };
+            } else if (ruleType === 'extra_credit') {
+                gradingCategories[index].rules.extra_credit = {
+                    enabled: enabled
+                };
+            }
+        }
+
+        // Render preview
+        function renderPreview() {
+            const summaryContainer = document.getElementById('gradingPreviewSummary');
+            const exampleContainer = document.getElementById('gradingPreviewExample');
+
+            if (summaryContainer) {
+                summaryContainer.innerHTML = gradingCategories.map(cat => {
+                    const rules = [];
+                    if (cat.rules?.drop_lowest?.enabled) {
+                        rules.push(`Drop ${cat.rules.drop_lowest.count} lowest`);
+                    }
+                    if (cat.rules?.extra_credit?.enabled) {
+                        rules.push('Extra credit allowed');
+                    }
+                    const rulesText = rules.length > 0 ? ` - ${rules.join(', ')}` : '';
+                    return `<div style="margin-bottom: 0.5rem;">✓ ${cat.name} (${cat.weight}%)${rulesText}</div>`;
+                }).join('');
+            }
+
+            if (exampleContainer) {
+                // Generate example calculation
+                exampleContainer.innerHTML = gradingCategories.map(cat => {
+                    const exampleScore = 85 + Math.random() * 10;
+                    const contribution = (exampleScore * cat.weight / 100).toFixed(1);
+                    return `
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px;">
+                            <strong>${cat.name} (${cat.weight}%):</strong><br>
+                            <span style="color: var(--text-light); font-size: 0.95rem;">
+                                Average: ${exampleScore.toFixed(1)}% × ${cat.weight}% = ${contribution} points
+                            </span>
+                        </div>
+                    `;
+                }).join('') + `
+                    <div style="margin-top: 1rem; padding: 1rem; background: var(--primary-navy); color: white; border-radius: 8px; font-weight: 700; font-size: 1.1rem; text-align: center;">
+                        Final Grade: ${gradingCategories.reduce((sum, cat) => {
+                            const score = 85 + Math.random() * 10;
+                            return sum + (score * cat.weight / 100);
+                        }, 0).toFixed(1)}%
+                    </div>
+                `;
+            }
+        }
+
+        // Submit grading setup
+        async function submitGradingSetup() {
+            const confirmCheckbox = document.getElementById('confirmGrading');
+            if (!confirmCheckbox?.checked) {
+                alert('Please confirm that the grading setup makes sense');
+                return;
+            }
+
+            const currentCourse = getCurrentCourse();
+            if (!currentCourse) {
+                alert('Please select a course first');
+                return;
+            }
+
+            const gradingMethod = document.querySelector('input[name="gradingMethod"]:checked')?.value || 'weighted';
+
+            // Collect global rules
+            const globalRules = {};
+            if (document.getElementById('latePenaltyEnabled')?.checked) {
+                globalRules.late_penalty = {
+                    enabled: true,
+                    percent_per_day: parseInt(document.getElementById('latePenaltyPercent')?.value || 10)
+                };
+            }
+            if (document.getElementById('missingPolicyEnabled')?.checked) {
+                globalRules.missing_policy = {
+                    enabled: true,
+                    auto_zero: true
+                };
+            }
+
+            const setupBtn = document.getElementById('gradingSetupBtn');
+            setupBtn.disabled = true;
+            setupBtn.textContent = '⏳ Setting up...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/grading/setup`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        course_id: currentCourse,
+                        grading_method: gradingMethod,
+                        categories: gradingCategories,
+                        global_rules: Object.keys(globalRules).length > 0 ? globalRules : null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    showAlert('gradingAlert', 'success', `✅ Success! ${data.groups_created} assignment groups created and grading configured in Canvas.`);
+
+                    // Reset wizard
+                    setTimeout(() => {
+                        currentGradingStep = 1;
+                        gradingCategories = [];
+                        updateGradingWizardUI();
+                        document.getElementById('confirmGrading').checked = false;
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Failed to set up grading');
+                }
+            } catch (error) {
+                console.error('Grading setup error:', error);
+                showAlert('gradingAlert', 'error', '❌ Error: ' + error.message);
+            } finally {
+                setupBtn.disabled = false;
+                setupBtn.innerHTML = '🚀 Set Up in Canvas';
+            }
+        }
+
+        // Subject selector handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const subjectSelector = document.getElementById('subjectSelector');
+            if (subjectSelector) {
+                subjectSelector.addEventListener('change', function() {
+                    loadSubjectTemplate(this.value);
+                });
+            }
+        });
 
         // ============================================================================
         // MOBILE FEATURES

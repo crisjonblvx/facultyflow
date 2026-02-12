@@ -32,6 +32,7 @@ import stripe
 from database import init_db, get_db, CanvasCredentials, UserCourse
 from canvas_client import CanvasClient
 from canvas_auth import CanvasAuth, encrypt_token, decrypt_token
+from grading_setup import GradingSetupService, GRADING_TEMPLATES, get_template
 
 # Initialize FastAPI
 app = FastAPI(
@@ -1559,6 +1560,31 @@ class DiscussionRequest(BaseModel):
     prompt: str
 
 
+# Grading Setup Models
+class GradingCategoryRules(BaseModel):
+    drop_lowest: Optional[Dict[str, Any]] = None
+    drop_highest: Optional[Dict[str, Any]] = None
+    extra_credit: Optional[Dict[str, Any]] = None
+
+
+class GradingCategory(BaseModel):
+    name: str
+    weight: float
+    rules: Optional[Dict[str, Any]] = {}
+
+
+class GradingSetupRequest(BaseModel):
+    course_id: int
+    grading_method: str  # "total_points" or "weighted"
+    categories: List[GradingCategory]
+    global_rules: Optional[Dict[str, Any]] = None
+
+
+class GradingFixRequest(BaseModel):
+    course_id: int
+    fix_type: str = "auto"  # "auto" or "reset"
+
+
 @app.post("/api/v2/canvas/announcement")
 async def create_announcement_v2(
     request: AnnouncementRequest,
@@ -2401,4 +2427,270 @@ async def upload_syllabus(
         raise
     except Exception as e:
         print(f"❌ Error uploading syllabus: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# GRADING SETUP WIZARD
+# ============================================================================
+# Strategy by: Sunni
+# Implementation by: Q-Tip
+# Purpose: Reduce Canvas grading setup from 45 minutes to 2 minutes
+
+
+@app.get("/api/grading/templates")
+async def get_grading_templates():
+    """
+    Get available grading templates by subject
+
+    Returns:
+        {
+            "Mass Communications": [{name, weight, rules}, ...],
+            "Mathematics": [...],
+            ...
+        }
+    """
+    return {"templates": GRADING_TEMPLATES}
+
+
+@app.get("/api/grading/template/{subject}")
+async def get_subject_template(subject: str):
+    """
+    Get grading template for a specific subject
+
+    Args:
+        subject: Subject name (e.g., "Mass Communications", "Mathematics")
+
+    Returns:
+        List of categories with weights and rules
+    """
+    template = get_template(subject)
+
+    if not template and subject != "Custom":
+        raise HTTPException(status_code=404, detail=f"Template not found for subject: {subject}")
+
+    return {
+        "subject": subject,
+        "categories": template
+    }
+
+
+@app.post("/api/grading/setup")
+async def setup_grading(
+    request: GradingSetupRequest,
+    current_user=Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Complete grading setup for a Canvas course
+
+    Creates assignment groups, enables weighted grading, applies rules.
+    Reduces manual 45-minute process to 2-minute wizard.
+
+    Request:
+        {
+            "course_id": 6355,
+            "grading_method": "weighted",
+            "categories": [
+                {"name": "Quizzes", "weight": 30, "rules": {"drop_lowest": {"enabled": true, "count": 1}}},
+                {"name": "Assignments", "weight": 40, "rules": {}},
+                {"name": "Exams", "weight": 30, "rules": {}}
+            ],
+            "global_rules": {"late_penalty": {"enabled": true, "percent_per_day": 10}}
+        }
+
+    Returns:
+        {
+            "status": "success",
+            "groups_created": 3,
+            "weighted_grading_enabled": true,
+            "assignment_groups": [...]
+        }
+    """
+    try:
+        user_id = current_user['user_id']
+
+        # Get Canvas credentials
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected. Please connect Canvas first.")
+
+        print(f"📊 Setting up grading for course {request.course_id}")
+        print(f"   Method: {request.grading_method}")
+        print(f"   Categories: {len(request.categories)}")
+
+        # Initialize grading service
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        grading_service = GradingSetupService(
+            canvas_url=credentials.canvas_url,
+            canvas_token=decrypted_token
+        )
+
+        # Validate grading method
+        if request.grading_method == "total_points":
+            # Total points doesn't need categories
+            return {
+                "status": "success",
+                "message": "Total points grading enabled. No categories needed.",
+                "grading_method": "total_points"
+            }
+
+        elif request.grading_method == "weighted":
+            # Convert Pydantic models to dicts
+            categories = [
+                {
+                    "name": cat.name,
+                    "weight": cat.weight,
+                    "rules": cat.rules or {}
+                }
+                for cat in request.categories
+            ]
+
+            # Setup weighted grading
+            result = await grading_service.setup_weighted_grading(
+                course_id=request.course_id,
+                categories=categories,
+                rules=request.global_rules
+            )
+
+            if result.get("status") == "error":
+                raise HTTPException(status_code=400, detail=result.get("message"))
+
+            print(f"✅ Grading setup complete!")
+            print(f"   Groups created: {result.get('groups_created')}")
+
+            return result
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid grading method: {request.grading_method}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error setting up grading: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/grading/analyze/{course_id}")
+async def analyze_grading_setup(
+    course_id: int,
+    current_user=Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Analyze existing Canvas grading setup
+
+    Detects issues like:
+    - Weights don't add to 100%
+    - Assignments not in any category
+    - Weighted grading not enabled
+    - Empty categories
+
+    Returns:
+        {
+            "has_groups": true,
+            "groups": [...],
+            "weighted_grading_enabled": true,
+            "total_weight": 97,
+            "orphan_assignments": 3,
+            "issues": ["Weights don't add to 100%", ...],
+            "suggestions": ["Adjust weights to total 100%", ...],
+            "health": "needs_attention"
+        }
+    """
+    try:
+        user_id = current_user['user_id']
+
+        # Get Canvas credentials
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        print(f"🔍 Analyzing grading setup for course {course_id}")
+
+        # Initialize grading service
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        grading_service = GradingSetupService(
+            canvas_url=credentials.canvas_url,
+            canvas_token=decrypted_token
+        )
+
+        # Analyze setup
+        analysis = await grading_service.analyze_existing_setup(course_id)
+
+        if analysis.get("status") == "error":
+            raise HTTPException(status_code=500, detail=analysis.get("message"))
+
+        print(f"   Health: {analysis.get('health')}")
+        print(f"   Issues found: {len(analysis.get('issues', []))}")
+
+        return analysis
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error analyzing grading: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/grading/fix")
+async def fix_grading_setup(
+    request: GradingFixRequest,
+    current_user=Depends(get_current_user_from_token),
+    db: Session = Depends(get_db)
+):
+    """
+    Automatically fix common grading setup issues
+
+    Fix types:
+    - "auto": Fix issues while preserving structure (adjust weights, enable weighted grading)
+    - "reset": Delete all groups and start fresh
+
+    Request:
+        {
+            "course_id": 6355,
+            "fix_type": "auto"
+        }
+
+    Returns:
+        {
+            "status": "success",
+            "message": "Grading setup fixed automatically",
+            "groups_adjusted": 3
+        }
+    """
+    try:
+        user_id = current_user['user_id']
+
+        # Get Canvas credentials
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        print(f"🔧 Fixing grading setup for course {request.course_id} (mode: {request.fix_type})")
+
+        # Initialize grading service
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        grading_service = GradingSetupService(
+            canvas_url=credentials.canvas_url,
+            canvas_token=decrypted_token
+        )
+
+        # Fix setup
+        result = await grading_service.fix_existing_setup(
+            course_id=request.course_id,
+            fix_type=request.fix_type
+        )
+
+        if result.get("status") == "error":
+            raise HTTPException(status_code=500, detail=result.get("message"))
+
+        print(f"✅ Grading fixed: {result.get('message')}")
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error fixing grading: {e}")
         raise HTTPException(status_code=500, detail=str(e))
