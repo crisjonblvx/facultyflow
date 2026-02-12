@@ -1043,8 +1043,12 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             // Show selected section
             if (section === 'courses') {
                 document.getElementById('coursesSection').classList.remove('hidden');
+                document.getElementById('canvasConnection').classList.remove('hidden');
             } else {
                 document.getElementById('coursesSection').classList.add('hidden');
+                // Hide Canvas Connection card when viewing content creators
+                document.getElementById('canvasConnection').classList.add('hidden');
+
                 const creatorMap = {
                     quiz: 'quizCreator',
                     announcement: 'announcementCreator',
