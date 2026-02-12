@@ -61,18 +61,29 @@ anthropic_client = None
 
 # Initialize OpenAI (preferred - cheap and high quality)
 if os.getenv("OPENAI_API_KEY"):
-    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    print("✅ OpenAI client initialized (GPT-4o-mini - $0.002/assignment)")
+    try:
+        openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        print("✅ OpenAI client initialized (GPT-4o-mini - $0.002/assignment)")
+    except Exception as e:
+        print(f"⚠️  OpenAI initialization failed: {e}")
 
 # Initialize Groq (second choice - FREE!)
 if os.getenv("GROQ_API_KEY"):
-    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    print("✅ Groq client initialized (Llama 3.3 70B - FREE!)")
+    try:
+        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        print("✅ Groq client initialized (Llama 3.3 70B - FREE!)")
+    except Exception as e:
+        print(f"⚠️  Groq initialization failed: {e}")
+        print("   This is a known compatibility issue with Python 3.13")
+        print("   Using OpenAI or Anthropic instead")
 
 # Initialize Anthropic (fallback - expensive but highest quality)
 if os.getenv("ANTHROPIC_API_KEY"):
-    anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    print("✅ Anthropic client initialized (Claude Sonnet - $0.05/assignment)")
+    try:
+        anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        print("✅ Anthropic client initialized (Claude Sonnet - $0.05/assignment)")
+    except Exception as e:
+        print(f"⚠️  Anthropic initialization failed: {e}")
 
 if not openai_client and not groq_client and not anthropic_client:
     print("⚠️  No AI API keys found. AI features will not work.")
