@@ -1427,12 +1427,24 @@ class AIDiscussionRequest(BaseModel):
     goals: str
 
 
+class AISyllabusRequest(BaseModel):
+    course_name: str
+    description: str
+    objectives: str
+    grading: str
+
+
+class SyllabusRequest(BaseModel):
+    course_id: int
+    syllabus_body: str
+
+
 @app.post("/api/v2/canvas/generate-discussion")
 async def generate_ai_discussion(request: AIDiscussionRequest):
     """Generate AI-enhanced discussion topic"""
     try:
         print(f"🤖 Generating AI discussion: {request.topic}")
-        
+
         system = "You are Bonita, helping professors create engaging class discussions."
         prompt = f"""Create a discussion topic on: {request.topic}
 
@@ -1456,4 +1468,101 @@ Format in HTML for Canvas. Make it engaging and encourage meaningful dialogue.""
         return {"status": "success", "generated_content": content, "cost": cost}
     except Exception as e:
         print(f"❌ Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/generate-syllabus")
+async def generate_ai_syllabus(request: AISyllabusRequest):
+    """Generate AI-enhanced course syllabus"""
+    try:
+        print(f"🤖 Generating AI syllabus: {request.course_name}")
+
+        system = "You are Bonita, helping professors create comprehensive course syllabi."
+        prompt = f"""Create a professional course syllabus for: {request.course_name}
+
+Course Description: {request.description}
+Learning Objectives: {request.objectives}
+Grading Policy: {request.grading}
+
+Generate a complete syllabus with:
+
+1. **Course Overview** (2-3 engaging paragraphs about the course and its value)
+
+2. **Learning Objectives** (Clear, measurable objectives formatted as a list)
+
+3. **Course Structure** (How the course is organized - weeks, units, topics)
+
+4. **Grading Breakdown** (Based on the professor's grading policy, formatted as a table)
+
+5. **Attendance & Participation Policy** (Professional but fair expectations)
+
+6. **Academic Integrity Statement** (Clear guidelines on plagiarism and cheating)
+
+7. **Course Materials** (Required textbooks, software, or resources if applicable)
+
+8. **Important Policies** (Late work, extensions, communication expectations)
+
+9. **Weekly Schedule Overview** (High-level breakdown of topics by week)
+
+Format in clean HTML suitable for Canvas. Use:
+- <h3> for major sections
+- <h4> for subsections
+- <ul> and <li> for lists
+- <table> for grading breakdown
+- <p> for paragraphs
+- <strong> for emphasis
+
+Make it comprehensive, professional, and student-friendly."""
+
+        content, cost = bonita.call_ai(prompt, system)
+        print(f"✅ Syllabus generated (cost: ${cost:.4f})")
+        return {"status": "success", "generated_content": content, "cost": cost}
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/v2/canvas/syllabus")
+async def upload_syllabus(
+    request: SyllabusRequest,
+    db: Session = Depends(get_db)
+):
+    """Upload syllabus to Canvas course"""
+    try:
+        user_id = 1  # TODO: Use real user ID from authentication
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+        if not credentials:
+            raise HTTPException(status_code=404, detail="Canvas not connected")
+
+        print(f"📋 Uploading syllabus to course {request.course_id}")
+
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        result = canvas_client.update_syllabus(
+            course_id=request.course_id,
+            syllabus_body=request.syllabus_body
+        )
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to upload syllabus")
+
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/assignments/syllabus"
+
+        return {
+            "status": "success",
+            "course_id": request.course_id,
+            "preview_url": preview_url,
+            "message": "Syllabus uploaded successfully!"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error uploading syllabus: {e}")
         raise HTTPException(status_code=500, detail=str(e))

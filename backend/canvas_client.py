@@ -411,3 +411,28 @@ class CanvasClient:
                 "published": False  # Draft first
             }
         )
+
+    # ==========================================================================
+    # SYLLABUS
+    # ==========================================================================
+
+    def update_syllabus(self, course_id: int, syllabus_body: str) -> Optional[Dict]:
+        """
+        Update the course syllabus
+
+        Args:
+            course_id: Canvas course ID
+            syllabus_body: Syllabus content (HTML allowed)
+
+        Returns:
+            dict: Course object if successful, None if failed
+        """
+        return self._make_request(
+            method="PUT",
+            endpoint=f"/api/v1/courses/{course_id}",
+            data={
+                "course": {
+                    "syllabus_body": syllabus_body
+                }
+            }
+        )
