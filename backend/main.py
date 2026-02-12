@@ -7,7 +7,7 @@ Purpose: Power ReadySetClass SaaS with smart AI routing
 Less time setting up. More time teaching.
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -1002,7 +1002,7 @@ async def create_checkout_session(
 
 
 @app.post("/api/stripe/webhook")
-async def stripe_webhook(request: HTTPException):
+async def stripe_webhook(request: Request):
     """Handle Stripe webhook events"""
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
