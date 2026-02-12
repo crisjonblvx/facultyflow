@@ -170,6 +170,16 @@
             </button>
         </form>
 
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="color: #999; font-size: 13px; margin-bottom: 10px;">OR</div>
+            <button type="button" onclick="tryDemo()" style="width: 100%; padding: 14px; background: #B8945F; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                🚀 Try Demo (No signup required)
+            </button>
+            <div style="color: #666; font-size: 12px; margin-top: 8px; font-style: italic;">
+                Test drive all features with sample data
+            </div>
+        </div>
+
         <div class="footer">
             <strong>Not hype. Just help.</strong>
         </div>
@@ -180,6 +190,14 @@
         const form = document.getElementById('login-form');
         const errorDiv = document.getElementById('error');
         const btn = document.getElementById('login-btn');
+
+        // Try Demo - Auto-fill demo credentials and login
+        function tryDemo() {
+            document.getElementById('email').value = 'demo@readysetclass.com';
+            document.getElementById('password').value = 'TryReadySetClass2026';
+            // Auto-submit the form
+            form.dispatchEvent(new Event('submit'));
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
