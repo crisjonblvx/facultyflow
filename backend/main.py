@@ -317,8 +317,10 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
         }
     
     def generate_quiz(self, week: int, topic: str) -> Dict:
-        """Generate quiz questions (Qwen - structured, FREE!)"""
-        prompt = f"""Create a 10-question multiple choice quiz for Week {week}: {topic}
+        """Generate quiz questions (Groq - FREE!)"""
+        system = "You are Bonita, an AI assistant helping professors create quiz questions."
+
+        prompt = f"""Create a 10-question multiple choice quiz on: {topic}
 
 Requirements:
 - 10 questions total
@@ -340,17 +342,30 @@ Format as JSON:
       ]
     }}
   ]
-}}"""
-        
-        quiz_json, cost = self.call_qwen_local(prompt)
+}}
+
+Return ONLY valid JSON, no markdown code blocks."""
+
+        quiz_json, cost = self.call_ai(prompt, system)
         self.cost_tracker["quizzes"] += cost
-        
+
         try:
             import json
-            quiz_data = json.loads(quiz_json.strip().replace("```json", "").replace("```", ""))
+            # Clean up any markdown formatting
+            cleaned_json = quiz_json.strip()
+            if cleaned_json.startswith("```"):
+                # Remove markdown code blocks
+                cleaned_json = cleaned_json.split("```")[1]
+                if cleaned_json.startswith("json"):
+                    cleaned_json = cleaned_json[4:]
+                cleaned_json = cleaned_json.strip()
+
+            quiz_data = json.loads(cleaned_json)
             return quiz_data
-        except:
-            return {"questions": [], "error": "Failed to parse quiz"}
+        except Exception as e:
+            print(f"Error parsing quiz JSON: {e}")
+            print(f"Raw response: {quiz_json}")
+            return {"questions": [], "error": f"Failed to parse quiz: {str(e)}"}
     
     def generate_study_pack(self, week: int, topic: str) -> str:
         """Generate study pack with real resources (Claude + search intent)"""
