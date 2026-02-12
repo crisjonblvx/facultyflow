@@ -501,6 +501,17 @@ Students should demonstrate understanding of how technology challenges tradition
                         <small style="color: #666; font-style: italic;">The more detail you provide, the better the AI-generated questions will be</small>
                     </div>
                     <div class="form-group">
+                        <label>Grade Level</label>
+                        <select id="aiQuizGradeLevel">
+                            <option value="elementary-k2">K-2nd Grade (Ages 5-7)</option>
+                            <option value="elementary-35">3rd-5th Grade (Ages 8-10)</option>
+                            <option value="middle-68">6th-8th Grade (Ages 11-13)</option>
+                            <option value="high-912">9th-12th Grade (Ages 14-18)</option>
+                            <option value="college" selected>College/University</option>
+                        </select>
+                        <small style="color: #666; font-style: italic;">AI will adjust vocabulary and complexity for this grade level</small>
+                    </div>
+                    <div class="form-group">
                         <label>Number of Questions</label>
                         <input type="number" id="aiNumQuestions" value="10" min="5" max="20">
                     </div>
@@ -1432,6 +1443,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
 
             const numQuestions = parseInt(document.getElementById('aiNumQuestions').value);
             const difficulty = document.getElementById('aiDifficulty').value;
+            const gradeLevel = document.getElementById('aiQuizGradeLevel').value;
 
             showAlert('quizAlert', 'info', '✨ AI is generating quiz questions...');
 
@@ -1445,7 +1457,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                         topic: topic,
                         description: description,
                         num_questions: numQuestions,
-                        difficulty: difficulty
+                        difficulty: difficulty,
+                        grade_level: gradeLevel
                     })
                 });
 

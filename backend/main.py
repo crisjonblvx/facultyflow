@@ -146,6 +146,83 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 # ============================================================================
+# GRADE LEVEL HELPER
+# ============================================================================
+
+def get_reading_level_instructions(grade_level: str) -> Dict[str, str]:
+    """Return detailed instructions for AI based on grade level"""
+
+    levels = {
+        'elementary-k2': {
+            'lexile': 'Lexile 0-300 (Beginning Reader)',
+            'instructions': """
+- Use VERY simple words (one or two syllables)
+- Write SHORT sentences (5-8 words max)
+- Use concrete, relatable examples (toys, pets, family, school)
+- Avoid abstract concepts
+- Include visual descriptions
+- Use encouraging, friendly language
+- No complex vocabulary
+- Reading level: Ages 5-7""",
+            'example_words': 'Use words like: see, run, play, big, small, happy, sad'
+        },
+
+        'elementary-35': {
+            'lexile': 'Lexile 300-700 (Elementary)',
+            'instructions': """
+- Use clear, simple language
+- Short to medium sentences (8-12 words)
+- Examples relevant to elementary students (playground, classrooms, cartoons)
+- Limited complex vocabulary (define new words)
+- Step-by-step instructions
+- Positive, encouraging tone
+- Reading level: Ages 8-10""",
+            'example_words': 'Use words like: understand, explain, compare, describe, identify'
+        },
+
+        'middle-68': {
+            'lexile': 'Lexile 700-1000 (Middle School)',
+            'instructions': """
+- Age-appropriate vocabulary for pre-teens
+- Medium sentences (10-15 words)
+- Examples relevant to middle schoolers (social media, sports, music, friends)
+- Can introduce some academic vocabulary
+- Clear but less simplified
+- Respectful, not condescending
+- Reading level: Ages 11-13""",
+            'example_words': 'Use words like: analyze, evaluate, interpret, demonstrate, illustrate'
+        },
+
+        'high-912': {
+            'lexile': 'Lexile 1000-1300 (High School)',
+            'instructions': """
+- High school appropriate vocabulary
+- College-prep level content
+- Examples relevant to teens (college, careers, current events)
+- Academic language acceptable
+- Can assume background knowledge
+- Professional but not overly formal
+- Reading level: Ages 14-18""",
+            'example_words': 'Use words like: synthesize, critique, justify, formulate, assess'
+        },
+
+        'college': {
+            'lexile': 'Lexile 1300+ (College/University)',
+            'instructions': """
+- Academic/professional vocabulary
+- Complex sentence structures acceptable
+- University-level examples and concepts
+- Discipline-specific terminology
+- Assumes advanced background knowledge
+- Formal academic tone
+- Reading level: University students""",
+            'example_words': 'Use words like: paradigm, methodology, theoretical framework, empirical'
+        }
+    }
+
+    return levels.get(grade_level, levels['college'])
+
+# ============================================================================
 # BONITA AI ENGINE
 # ============================================================================
 
@@ -323,10 +400,15 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
         topic: str,
         description: str = "",
         num_questions: int = 10,
-        difficulty: str = "medium"
+        difficulty: str = "medium",
+        grade_level: str = "college"
     ) -> Dict:
-        """Generate quiz questions with detailed context (Groq - FREE!)"""
-        system = "You are Bonita, an AI assistant helping professors create quiz questions that assess student understanding."
+        """Generate quiz questions with detailed context and grade-appropriate language (Groq - FREE!)"""
+
+        # Get reading level instructions
+        level_info = get_reading_level_instructions(grade_level)
+
+        system = f"You are Bonita, an AI assistant helping educators create {grade_level} quiz questions that assess student understanding at the appropriate reading level."
 
         # Build difficulty distribution based on difficulty level
         if difficulty == "easy":
@@ -339,21 +421,30 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
             medium_count = num_questions - easy_count - hard_count
             diff_mix = f"{easy_count} easy, {medium_count} medium, {hard_count} hard questions"
 
-        prompt = f"""Create a {num_questions}-question multiple choice quiz.
+        prompt = f"""Create a {num_questions}-question multiple choice quiz for {grade_level} students.
 
 TOPIC: {topic}
 
 DETAILED CONTEXT:
 {description}
 
+GRADE LEVEL: {grade_level}
+{level_info['lexile']}
+
+CRITICAL READING LEVEL REQUIREMENTS:
+{level_info['instructions']}
+
+{level_info['example_words']}
+
 Requirements:
 - {num_questions} questions total
 - 4 answer options each (A, B, C, D)
 - Difficulty distribution: {diff_mix}
 - Questions should test understanding of the concepts described above
-- Clear, unambiguous questions
+- Clear, unambiguous questions at {grade_level} reading level
 - One correct answer per question
 - Use the detailed context to create relevant, targeted questions
+- IMPORTANT: Match vocabulary and complexity to the grade level above
 
 Format as JSON:
 {{
@@ -656,6 +747,7 @@ class QuizGenerateRequest(BaseModel):
     description: str
     num_questions: int = 10
     difficulty: str = "medium"
+    grade_level: str = "college"  # NEW: elementary-k2, elementary-35, middle-68, high-912, college
 
 class QuizUploadRequest(BaseModel):
     """Request to upload generated quiz to Canvas"""
@@ -848,14 +940,15 @@ async def generate_quiz_questions(request: QuizGenerateRequest):
     Returns questions for user to review before uploading
     """
     try:
-        print(f"🧠 Generating quiz questions: {request.topic}")
+        print(f"🧠 Generating {request.grade_level} quiz questions: {request.topic}")
 
         quiz_data = bonita.generate_quiz(
             week=1,
             topic=request.topic,
             description=request.description,
             num_questions=request.num_questions,
-            difficulty=request.difficulty
+            difficulty=request.difficulty,
+            grade_level=request.grade_level
         )
 
         return {
