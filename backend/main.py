@@ -648,6 +648,21 @@ class CanvasConnectionRequest(BaseModel):
     canvas_url: str
     access_token: str
 
+class QuizGenerateRequest(BaseModel):
+    """Request to generate quiz questions (preview only, no upload)"""
+    topic: str
+    description: str
+    num_questions: int = 10
+    difficulty: str = "medium"
+
+class QuizUploadRequest(BaseModel):
+    """Request to upload generated quiz to Canvas"""
+    course_id: int
+    topic: str
+    questions: list  # The generated questions from preview
+    num_questions: int
+    due_date: Optional[str] = None
+
 class QuizRequest(BaseModel):
     course_id: int
     topic: str
@@ -824,12 +839,126 @@ async def get_courses_v2(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/v2/canvas/quiz/generate")
+async def generate_quiz_questions(request: QuizGenerateRequest):
+    """
+    Generate quiz questions with AI (preview only, no Canvas upload)
+    Returns questions for user to review before uploading
+    """
+    try:
+        print(f"🧠 Generating quiz questions: {request.topic}")
+
+        quiz_data = bonita.generate_quiz(
+            week=1,
+            topic=request.topic,
+            description=request.description,
+            num_questions=request.num_questions,
+            difficulty=request.difficulty
+        )
+
+        return {
+            "status": "success",
+            "topic": request.topic,
+            "questions": quiz_data.get("questions", []),
+            "num_questions": len(quiz_data.get("questions", [])),
+            "message": "Quiz questions generated! Review and upload to Canvas."
+        }
+
+    except Exception as e:
+        print(f"❌ Error generating quiz: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v2/canvas/quiz/upload")
+async def upload_quiz_to_canvas(
+    request: QuizUploadRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Upload generated quiz questions to Canvas
+    Takes questions from preview and creates quiz in Canvas
+    """
+    try:
+        user_id = 1  # TODO: Use real user ID from authentication
+
+        # Get Canvas credentials
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        credentials = db.query(CanvasCredentials).filter_by(user_id=user_id).first()
+
+        if not credentials:
+            raise HTTPException(
+                status_code=404,
+                detail="Canvas not connected"
+            )
+
+        # Upload to Canvas
+        decrypted_token = decrypt_token(credentials.access_token_encrypted)
+        canvas_client = CanvasClient(credentials.canvas_url, decrypted_token)
+
+        quiz_title = f"Quiz: {request.topic}"
+        quiz_id = canvas_client.create_quiz(
+            course_id=request.course_id,
+            quiz_data={
+                "title": quiz_title,
+                "quiz_type": "assignment",
+                "time_limit": 20,
+                "allowed_attempts": 1,
+                "points_possible": request.num_questions * 10,
+                "due_at": request.due_date
+            }
+        )
+
+        if not quiz_id:
+            raise HTTPException(status_code=500, detail="Failed to create quiz in Canvas")
+
+        # Add questions to Canvas quiz
+        for i, question in enumerate(request.questions, 1):
+            canvas_client.add_quiz_question(
+                course_id=request.course_id,
+                quiz_id=quiz_id,
+                question_data={
+                    "name": f"Question {i}",
+                    "text": question["question_text"],
+                    "type": "multiple_choice_question",
+                    "points": 10,
+                    "answers": [
+                        {
+                            "answer_text": ans["text"],
+                            "answer_weight": 100 if ans.get("correct") else 0
+                        }
+                        for ans in question["answers"]
+                    ]
+                }
+            )
+
+        # Return success with Canvas preview URL
+        preview_url = f"{credentials.canvas_url}/courses/{request.course_id}/quizzes/{quiz_id}"
+
+        return {
+            "status": "success",
+            "quiz_id": quiz_id,
+            "quiz_title": quiz_title,
+            "questions_added": len(request.questions),
+            "preview_url": preview_url,
+            "message": "Quiz uploaded to Canvas successfully!"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error uploading quiz: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/v2/canvas/quiz")
 async def create_quiz_v2(
     request: QuizRequest,
     db: Session = Depends(get_db)
 ):
     """
+    LEGACY: Create quiz in Canvas course (one-step: generate + upload)
     Phase 2: Create quiz in Canvas course
     1. Generate quiz with Bonita AI
     2. Upload to Canvas

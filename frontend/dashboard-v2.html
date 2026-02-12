@@ -1411,24 +1411,21 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             }
 
             const numQuestions = parseInt(document.getElementById('aiNumQuestions').value);
-            const difficulty = document.getElementById('aiDifficulty').value);
+            const difficulty = document.getElementById('aiDifficulty').value;
 
             showAlert('quizAlert', 'info', '✨ AI is generating quiz questions...');
 
             try {
-                const response = await fetch(`${API_URL}/api/v2/canvas/quiz`, {
+                const response = await fetch(`${API_URL}/api/v2/canvas/quiz/generate`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        course_id: selectedCourse.id,
                         topic: topic,
-                        description: description,  // NEW - pass detailed description to AI
+                        description: description,
                         num_questions: numQuestions,
-                        difficulty: difficulty,
-                        due_date: null  // Will add in upload step
+                        difficulty: difficulty
                     })
                 });
 
@@ -1438,11 +1435,11 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     // Store the generated quiz data
                     generatedQuizData = result;
 
-                    // Show preview
-                    displayQuizPreview(topic, numQuestions);
+                    // Show preview with actual questions
+                    displayQuizPreview();
                     document.getElementById('aiQuizForm').style.display = 'none';
                     document.getElementById('aiQuizPreview').style.display = 'block';
-                    showAlert('quizAlert', 'success', '✅ Quiz generated! Review and upload below.');
+                    showAlert('quizAlert', 'success', '✅ Quiz generated! Review questions below and upload to Canvas.');
                 } else {
                     showAlert('quizAlert', 'error', '❌ ' + result.detail);
                 }
@@ -1451,44 +1448,111 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             }
         }
 
-        function displayQuizPreview(topic, numQuestions) {
+        function displayQuizPreview() {
+            if (!generatedQuizData || !generatedQuizData.questions) {
+                return;
+            }
+
+            const { topic, questions, num_questions } = generatedQuizData;
             const previewContent = document.getElementById('aiQuizPreviewContent');
+
+            let questionsHTML = '';
+            questions.forEach((q, index) => {
+                questionsHTML += `
+                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--purple);">
+                        <div style="font-weight: 600; margin-bottom: 0.75rem; color: var(--dark);">
+                            ${index + 1}. ${q.question_text}
+                        </div>
+                        <div style="margin-left: 1rem;">
+                            ${q.answers.map((ans, i) => {
+                                const isCorrect = ans.correct;
+                                const letter = String.fromCharCode(65 + i); // A, B, C, D
+                                return `
+                                    <div style="padding: 0.5rem; margin: 0.25rem 0; background: ${isCorrect ? '#e8f5e9' : '#f5f5f5'}; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="font-weight: 600; color: ${isCorrect ? 'var(--success)' : '#666'};">${letter}.</span>
+                                        <span>${ans.text.replace(/^[A-D]\.\s*/, '')}</span>
+                                        ${isCorrect ? '<span style="margin-left: auto; color: var(--success);">✓ Correct</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
             previewContent.innerHTML = `
-                <div style="margin-bottom: 1rem;">
-                    <h4 style="margin-bottom: 0.5rem;">Quiz: ${topic}</h4>
-                    <p style="color: #666; font-size: 0.9rem;">${numQuestions} questions • Generated with AI</p>
+                <div style="margin-bottom: 1.5rem; padding: 1rem; background: linear-gradient(135deg, var(--purple) 0%, var(--coral) 100%); border-radius: 8px; color: white;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: white;">Quiz: ${topic}</h4>
+                    <p style="margin: 0; opacity: 0.9;">${num_questions} questions • Generated with AI</p>
                 </div>
-                <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success);">
-                    <p style="margin: 0; color: #555;">
-                        <strong>✅ Quiz created successfully!</strong><br>
-                        Questions: ${numQuestions}<br>
-                        Status: Ready to upload to Canvas
-                    </p>
-                </div>
-                <div style="margin-top: 1rem; font-size: 0.875rem; color: #666;">
-                    <p><strong>Note:</strong> The quiz has been created in Canvas as a draft. Click the preview link after upload to review and publish it.</p>
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+                    ${questionsHTML}
                 </div>
             `;
         }
 
         async function uploadAIQuiz() {
-            if (!generatedQuizData) {
+            if (!selectedCourse) {
+                showAlert('quizAlert', 'error', '❌ Please select a course first');
+                return;
+            }
+
+            if (!generatedQuizData || !generatedQuizData.questions) {
                 showAlert('quizAlert', 'error', '❌ No quiz data to upload');
                 return;
             }
 
-            showAlert('quizAlert', 'success', `✅ ${generatedQuizData.message}<br><a href="${generatedQuizData.preview_url}" target="_blank" style="color: var(--purple);">Preview & Publish in Canvas →</a>`);
+            showAlert('quizAlert', 'info', '📤 Uploading quiz to Canvas...');
 
-            // Reset form
-            document.getElementById('aiQuizTopic').value = '';
-            document.getElementById('aiQuizPreview').style.display = 'none';
-            document.getElementById('aiQuizForm').style.display = 'block';
-            generatedQuizData = null;
+            try {
+                const response = await fetch(`${API_URL}/api/v2/canvas/quiz/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        course_id: selectedCourse.id,
+                        topic: generatedQuizData.topic,
+                        questions: generatedQuizData.questions,
+                        num_questions: generatedQuizData.num_questions,
+                        due_date: document.getElementById('aiQuizDueDate')?.value || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show success with Canvas link
+                    showAlert('quizAlert', 'success', `
+                        ✅ ${result.message}<br>
+                        <strong>${result.questions_added} questions</strong> uploaded to Canvas<br>
+                        <a href="${result.preview_url}" target="_blank" style="color: var(--purple); text-decoration: underline; font-weight: 600; margin-top: 0.5rem; display: inline-block;">
+                            🔗 Open Quiz in Canvas →
+                        </a>
+                    `);
+
+                    // Reset form
+                    document.getElementById('aiQuizTopic').value = '';
+                    document.getElementById('aiQuizDescription').value = '';
+                    document.getElementById('aiQuizPreview').style.display = 'none';
+                    document.getElementById('aiQuizForm').style.display = 'block';
+                    generatedQuizData = null;
+                } else {
+                    showAlert('quizAlert', 'error', '❌ Upload failed: ' + result.detail);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('quizAlert', 'error', '❌ Error uploading quiz: ' + error.message);
+            }
         }
 
         async function regenerateAIQuiz() {
+            // Show the form again to regenerate
+            document.getElementById('aiQuizPreview').style.display = 'none';
+            document.getElementById('aiQuizForm').style.display = 'block';
             showAlert('quizAlert', 'info', '🔄 Regenerating quiz...');
-            await generateAIQuiz();
+            setTimeout(() => generateAIQuiz(), 100);
         }
 
         function cancelAIQuiz() {
