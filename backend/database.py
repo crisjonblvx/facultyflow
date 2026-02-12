@@ -57,6 +57,22 @@ class UserCourse(Base):
     canvas_account = relationship("CanvasCredentials", back_populates="courses")
 
 
+class ReferenceMaterial(Base):
+    """
+    Stores uploaded reference materials (syllabi, documents)
+    Used to train AI to match professor's style
+    """
+    __tablename__ = "reference_materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)  # Will link to users table later
+    file_name = Column(String(255), nullable=False)
+    file_type = Column(String(10), nullable=False)  # pdf, docx, txt
+    extracted_text = Column(Text, nullable=False)
+    course_name = Column(String(255))  # Optional: which course this is for
+    upload_date = Column(DateTime, default=datetime.utcnow)
+
+
 def init_db():
     """
     Initialize database tables

@@ -304,6 +304,7 @@
                 <li class="nav-item" onclick="showSection('discussion')">💬 Discussion</li>
                 <li class="nav-item" onclick="showSection('module')">📦 Modules</li>
                 <li class="nav-item" onclick="showSection('syllabus')">📋 Syllabus</li>
+                <li class="nav-item" onclick="showSection('reference')">📚 Reference Materials</li>
             </ul>
         </aside>
 
@@ -815,6 +816,53 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                 </div>
             </div>
 
+            <!-- Reference Materials Section -->
+            <div id="referenceCreator" class="content-creator" style="display: none;">
+                <h2>📚 Reference Materials</h2>
+                <p style="color: #666; margin-bottom: 2rem;">Upload your existing syllabi and documents to help AI match your teaching style</p>
+                <div id="referenceAlert"></div>
+
+                <!-- Upload Section -->
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; border: 2px dashed var(--purple); text-align: center; margin-bottom: 2rem;">
+                    <h3 style="margin-top: 0;">Upload Reference Documents</h3>
+                    <p style="color: #666;">Upload your existing syllabi to help AI match your style</p>
+
+                    <input type="file" id="referenceFileInput" accept=".pdf,.docx,.txt" style="display: none;" onchange="handleFileSelect(event)">
+
+                    <button class="btn btn-primary" onclick="document.getElementById('referenceFileInput').click()" style="margin-bottom: 1rem;">
+                        📁 Choose File
+                    </button>
+
+                    <p style="font-size: 0.875rem; color: #999;">Accepted: PDF, DOCX, TXT</p>
+
+                    <!-- Optional Course Name -->
+                    <div class="form-group" style="max-width: 400px; margin: 1.5rem auto 0;">
+                        <label>Course Name (Optional)</label>
+                        <input type="text" id="referenceCourseName" placeholder="e.g., MCM 490 Fall 2025">
+                        <small style="color: #666;">Help AI know which course this syllabus is for</small>
+                    </div>
+                </div>
+
+                <!-- Uploaded Materials List -->
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    <h3>Your Uploaded Materials</h3>
+                    <div id="referenceList">
+                        <p style="color: #999; text-align: center; padding: 2rem;">No materials uploaded yet. Upload your first syllabus above!</p>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 8px; margin-top: 2rem; border-left: 4px solid var(--purple);">
+                    <h4 style="margin-top: 0;">💡 How This Works</h4>
+                    <ul style="color: #555; line-height: 1.8;">
+                        <li><strong>Upload your syllabi:</strong> Add PDF, DOCX, or TXT files of your existing course materials</li>
+                        <li><strong>AI learns your style:</strong> When generating new content, AI will reference your materials</li>
+                        <li><strong>Better matches:</strong> AI-generated content will match YOUR writing style, tone, and format</li>
+                        <li><strong>Privacy first:</strong> Your materials are stored securely and never shared</li>
+                    </ul>
+                </div>
+            </div>
+
 
     <script>
         const API_URL = 'https://facultyflow-production.up.railway.app';
@@ -1003,17 +1051,24 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     assignment: 'assignmentCreator',
                     page: 'pageCreator',
                     discussion: 'discussionCreator',
-                    module: 'moduleCreator'
+                    module: 'moduleCreator',
+                    syllabus: 'syllabusCreator',
+                    reference: 'referenceCreator'
                 };
-                
+
                 if (creatorMap[section]) {
-                    if (!selectedCourse) {
+                    // Reference materials don't require a selected course
+                    if (section !== 'reference' && !selectedCourse) {
                         alert('Please select a course first');
                         showSection('courses');
                         return;
                     }
                     document.getElementById(creatorMap[section]).classList.add('active');
-                    updateCourseInfo(section);
+                    if (section === 'reference') {
+                        loadReferenceMaterials(); // Load uploaded materials
+                    } else {
+                        updateCourseInfo(section);
+                    }
                 }
             }
         }
@@ -1770,6 +1825,138 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             document.getElementById('connectedInfo').classList.add('hidden');
             document.getElementById('coursesSection').classList.add('hidden');
             selectedCourse = null;
+        }
+
+        // ============================================================================
+        // REFERENCE MATERIALS FUNCTIONS
+        // ============================================================================
+
+        let selectedFile = null;
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            if (selectedFile) {
+                // Show upload confirmation
+                showAlert('referenceAlert', 'info', `📁 Selected: ${selectedFile.name}`);
+                // Auto-upload
+                uploadReferenceMaterial();
+            }
+        }
+
+        async function uploadReferenceMaterial() {
+            if (!selectedFile) {
+                showAlert('referenceAlert', 'error', '❌ Please select a file first');
+                return;
+            }
+
+            const courseName = document.getElementById('referenceCourseName').value.trim();
+
+            showAlert('referenceAlert', 'info', '📤 Uploading and processing file...');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                if (courseName) {
+                    formData.append('course_name', courseName);
+                }
+
+                const response = await fetch(`${API_URL}/api/v2/reference-materials/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('referenceAlert', 'success', `✅ ${result.message} (${result.extracted_length} characters extracted)`);
+                    document.getElementById('referenceCourseName').value = '';
+                    document.getElementById('referenceFileInput').value = '';
+                    selectedFile = null;
+                    // Reload materials list
+                    loadReferenceMaterials();
+                } else {
+                    showAlert('referenceAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('referenceAlert', 'error', '❌ Error: ' + error.message);
+            }
+        }
+
+        async function loadReferenceMaterials() {
+            try {
+                const response = await fetch(`${API_URL}/api/v2/reference-materials`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const listContainer = document.getElementById('referenceList');
+
+                    if (result.materials.length === 0) {
+                        listContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No materials uploaded yet. Upload your first syllabus above!</p>';
+                    } else {
+                        listContainer.innerHTML = result.materials.map(material => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #e0e0e0;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--purple); margin-bottom: 0.25rem;">
+                                        📄 ${material.file_name}
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #666;">
+                                        ${material.course_name || 'No course specified'} •
+                                        ${material.file_type.toUpperCase()} •
+                                        ${Math.round(material.text_length / 1000)}K chars •
+                                        ${new Date(material.upload_date).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <button class="btn" onclick="deleteReferenceMaterial(${material.id})" style="background: #f44336; color: white; padding: 0.5rem 1rem;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    console.error('Failed to load reference materials:', result.detail);
+                }
+            } catch (error) {
+                console.error('Error loading reference materials:', error);
+            }
+        }
+
+        async function deleteReferenceMaterial(materialId) {
+            if (!confirm('Are you sure you want to delete this reference material?')) {
+                return;
+            }
+
+            showAlert('referenceAlert', 'info', '🗑️ Deleting...');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v2/reference-materials/${materialId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('referenceAlert', 'success', `✅ ${result.message}`);
+                    loadReferenceMaterials(); // Reload list
+                } else {
+                    showAlert('referenceAlert', 'error', '❌ ' + result.detail);
+                }
+            } catch (error) {
+                showAlert('referenceAlert', 'error', '❌ Error: ' + error.message);
+            }
         }
     </script>
 </body>

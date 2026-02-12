@@ -1413,6 +1413,200 @@ Keep it concise but meaningful."""
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# ============================================================================
+# REFERENCE MATERIALS (SYLLABUS UPLOAD & AI STYLE MATCHING)
+# ============================================================================
+
+from fastapi import UploadFile, File
+from database import ReferenceMaterial
+import PyPDF2
+from docx import Document
+import io
+
+
+@app.post("/api/v2/reference-materials/upload")
+async def upload_reference_material(
+    file: UploadFile = File(...),
+    course_name: str = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Upload reference material (syllabus, document) for AI style matching
+    Accepts: PDF, DOCX, TXT
+    """
+    try:
+        user_id = 1  # TODO: Use real user ID from authentication
+
+        # Validate file type
+        file_ext = file.filename.split('.')[-1].lower()
+        if file_ext not in ['pdf', 'docx', 'txt']:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid file type. Accepted: PDF, DOCX, TXT"
+            )
+
+        # Read file content
+        file_content = await file.read()
+
+        # Extract text based on file type
+        extracted_text = ""
+
+        if file_ext == 'pdf':
+            # Extract text from PDF
+            try:
+                pdf_file = io.BytesIO(file_content)
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                for page in pdf_reader.pages:
+                    extracted_text += page.extract_text() + "\n"
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to extract text from PDF: {str(e)}"
+                )
+
+        elif file_ext == 'docx':
+            # Extract text from DOCX
+            try:
+                docx_file = io.BytesIO(file_content)
+                doc = Document(docx_file)
+                for paragraph in doc.paragraphs:
+                    extracted_text += paragraph.text + "\n"
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to extract text from DOCX: {str(e)}"
+                )
+
+        elif file_ext == 'txt':
+            # Extract text from TXT
+            try:
+                extracted_text = file_content.decode('utf-8')
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to read TXT file: {str(e)}"
+                )
+
+        # Validate extracted text
+        if not extracted_text or len(extracted_text.strip()) < 100:
+            raise HTTPException(
+                status_code=400,
+                detail="File appears to be empty or too short. Please upload a valid syllabus."
+            )
+
+        # Save to database
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        reference_material = ReferenceMaterial(
+            user_id=user_id,
+            file_name=file.filename,
+            file_type=file_ext,
+            extracted_text=extracted_text,
+            course_name=course_name
+        )
+
+        db.add(reference_material)
+        db.commit()
+        db.refresh(reference_material)
+
+        print(f"✅ Reference material uploaded: {file.filename} ({len(extracted_text)} chars)")
+
+        return {
+            "status": "success",
+            "message": "Reference material uploaded successfully",
+            "material_id": reference_material.id,
+            "file_name": file.filename,
+            "extracted_length": len(extracted_text),
+            "course_name": course_name
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error uploading reference material: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v2/reference-materials")
+async def get_reference_materials(db: Session = Depends(get_db)):
+    """
+    Get all reference materials for the current user
+    """
+    try:
+        user_id = 1  # TODO: Use real user ID from authentication
+
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        materials = db.query(ReferenceMaterial).filter_by(user_id=user_id).order_by(
+            ReferenceMaterial.upload_date.desc()
+        ).all()
+
+        return {
+            "status": "success",
+            "materials": [
+                {
+                    "id": m.id,
+                    "file_name": m.file_name,
+                    "file_type": m.file_type,
+                    "course_name": m.course_name,
+                    "upload_date": m.upload_date.isoformat(),
+                    "text_length": len(m.extracted_text)
+                }
+                for m in materials
+            ],
+            "total": len(materials)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error fetching reference materials: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/v2/reference-materials/{material_id}")
+async def delete_reference_material(material_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a reference material
+    """
+    try:
+        user_id = 1  # TODO: Use real user ID from authentication
+
+        if not db:
+            raise HTTPException(status_code=500, detail="Database not available")
+
+        material = db.query(ReferenceMaterial).filter_by(
+            id=material_id,
+            user_id=user_id
+        ).first()
+
+        if not material:
+            raise HTTPException(
+                status_code=404,
+                detail="Reference material not found"
+            )
+
+        file_name = material.file_name
+        db.delete(material)
+        db.commit()
+
+        print(f"✅ Reference material deleted: {file_name}")
+
+        return {
+            "status": "success",
+            "message": f"Deleted {file_name}"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error deleting reference material: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============================================================================
 # RUN SERVER
 # ============================================================================
