@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - FacultyFlow v2.0</title>
+    <title>Dashboard - ReadySetClass</title>
+    <link rel="icon" href="/assets/ReadySetClass_alpha_badge.png" type="image/png">
+
+    <meta name="description" content="AI-powered Canvas course setup. Your LMS organized and ready in days. Not hype. Just help.">
+    <meta property="og:title" content="ReadySetClass">
+    <meta property="og:description" content="Less time setting up. More time teaching.">
+    <meta property="og:image" content="/assets/ReadySetClass_alpha_full.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ReadySetClass">
+    <meta name="twitter:description" content="Not hype. Just help.">
+    <meta name="twitter:image" content="/assets/ReadySetClass_alpha_full.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,11 +21,19 @@
 
     <style>
         :root {
-            --purple: #667eea;
-            --coral: #FF6B35;
-            --dark: #1a1a1a;
+            /* ReadySetClass Brand Colors */
+            --primary-navy: #1B3A52;
+            --accent-gold: #B8945F;
+            --background-cream: #F5F2E8;
+            --text-dark: #2C3E50;
+            --text-light: #666666;
+
+            /* Legacy color mappings for compatibility */
+            --purple: #1B3A52;  /* Navy as primary */
+            --coral: #B8945F;   /* Gold as accent */
+            --dark: #2C3E50;
             --gray: #666666;
-            --light-gray: #f5f5f5;
+            --light-gray: #F5F2E8;  /* Cream background */
             --white: #ffffff;
             --success: #10b981;
             --error: #ef4444;
@@ -322,7 +340,9 @@
     <div class="dashboard">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">Faculty<span>Flow</span></div>
+            <div class="logo">
+                <img src="/assets/ReadySetClass_alpha_full.png" alt="ReadySetClass" style="height: 40px; width: auto; margin-top: 2rem;">
+            </div>
             <ul class="nav-menu">
                 <li class="nav-item active" onclick="showSection('courses')">📚 My Courses</li>
                 <li class="nav-item" onclick="showSection('quiz')">📝 Create Quiz</li>
@@ -339,8 +359,8 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="header">
-                <h1>Welcome to FacultyFlow v2.0</h1>
-                <p>Your daily Canvas tasks, simplified with AI</p>
+                <h1>Welcome to ReadySetClass</h1>
+                <p>Less time setting up. More time teaching.</p>
             </div>
 
             <div class="content-wrapper">
@@ -374,7 +394,7 @@
                                 <li>Click the button below to open <span id="instructionSchoolName">your Canvas</span> Settings</li>
                                 <li>Scroll to "Approved Integrations"</li>
                                 <li>Click "+ New Access Token"</li>
-                                <li>Set purpose: "FacultyFlow"</li>
+                                <li>Set purpose: "ReadySetClass"</li>
                                 <li>Click "Generate Token"</li>
                                 <li>Copy the entire token and paste it above</li>
                             </ol>
@@ -990,7 +1010,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
     <!-- /dashboard -->
 
     <script>
-        const API_URL = 'https://facultyflow-production.up.railway.app';
+        const API_URL = 'https://readysetclass-production.up.railway.app';
         let selectedCourse = null;
         let authToken = 'dummy-token';
 

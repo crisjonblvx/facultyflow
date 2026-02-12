@@ -1,9 +1,10 @@
 """
-FacultyFlow Backend API
+ReadySetClass Backend API
 FastAPI server with Bonita AI integration
 
 Built by: Sonny (Claude) for CJ
-Purpose: Power FacultyFlow SaaS with smart AI routing
+Purpose: Power ReadySetClass SaaS with smart AI routing
+Less time setting up. More time teaching.
 """
 
 from fastapi import FastAPI, HTTPException, Depends, Header
@@ -22,15 +23,15 @@ from sqlalchemy.orm import Session
 from openai import OpenAI
 from groq import Groq
 
-# FacultyFlow v2.0 imports
+# ReadySetClass v2.0 imports
 from database import init_db, get_db, CanvasCredentials, UserCourse
 from canvas_client import CanvasClient
 from canvas_auth import CanvasAuth, encrypt_token, decrypt_token
 
 # Initialize FastAPI
 app = FastAPI(
-    title="FacultyFlow API",
-    description="AI Course Builder for Canvas",
+    title="ReadySetClass API",
+    description="AI Course Builder for Canvas - Less time setting up. More time teaching.",
     version="2.0.0"
 )
 
@@ -150,7 +151,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 
 class BonitaEngine:
     """
-    Smart AI routing for FacultyFlow
+    Smart AI routing for ReadySetClass
     Supports: OpenAI (cheap), Groq (FREE!), Anthropic (premium)
     Provider priority: OpenAI > Groq > Anthropic
     """
@@ -509,9 +510,10 @@ class CanvasAPI:
 @app.get("/")
 async def root():
     return {
-        "service": "FacultyFlow API",
-        "version": "1.0.0",
-        "status": "operational"
+        "service": "ReadySetClass API",
+        "version": "2.0.0",
+        "status": "operational",
+        "tagline": "Less time setting up. More time teaching."
     }
 
 @app.post("/api/auth/signup")
@@ -641,7 +643,7 @@ async def health_check():
     }
 
 # ============================================================================
-# FACULTYFLOW V2.0 - CANVAS INTEGRATION
+# READYSETCLASS V2.0 - CANVAS INTEGRATION
 # ============================================================================
 
 class CanvasConnectionRequest(BaseModel):
