@@ -4,7 +4,7 @@ Run this once to create CJ's admin account
 """
 import os
 import psycopg2
-from passlib.hash import bcrypt
+import bcrypt
 from getpass import getpass
 
 def create_admin():
@@ -40,10 +40,17 @@ def create_admin():
             print("❌ Password must be at least 8 characters! Try again.\n")
             continue
 
+        # Check password length (bcrypt max is 72 bytes)
+        if len(password.encode('utf-8')) > 72:
+            print("❌ Password too long! Keep it under 72 characters. Try again.\n")
+            continue
+
         break
 
-    # Hash password
-    password_hash = bcrypt.hash(password)
+    # Hash password with bcrypt
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    password_hash = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
     # Connect to database
     print("\n🔄 Connecting to database...")
