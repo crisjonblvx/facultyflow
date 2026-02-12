@@ -2743,7 +2743,7 @@ async def create_demo_account(db: Session = Depends(get_db)):
         cursor.execute("""
             INSERT INTO users
             (email, password_hash, full_name, role, institution, notes, is_active, is_demo, demo_expires_at)
-            VALUES (%s, %s, %s, 'user', %s, %s, TRUE, TRUE, %s)
+            VALUES (%s, %s, %s, 'demo', %s, %s, TRUE, TRUE, %s)
             RETURNING id
         """, (
             email,
