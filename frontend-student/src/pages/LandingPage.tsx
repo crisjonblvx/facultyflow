@@ -14,7 +14,7 @@ export default function LandingPage() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-medium-gray/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <img src="/logo.png" alt="ReadySetClass" className="h-10" />
+          <img src="/logo.png" alt="ReadySetClass" className="h-14" />
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/login')}
@@ -229,7 +229,7 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="px-4 py-16 md:py-24 bg-navy-primary text-white text-center">
         <div className="max-w-xl mx-auto">
-          <img src="/logo.png" alt="ReadySetClass" className="h-14 mx-auto mb-4 brightness-0 invert" />
+          <img src="/logo.png" alt="ReadySetClass" className="w-64 mx-auto mb-6 brightness-0 invert" />
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             Stop fighting Canvas.
           </h2>
@@ -252,7 +252,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-navy-hover text-white/60 text-xs px-4 py-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <img src="/logo.png" alt="ReadySetClass" className="h-5 brightness-0 invert opacity-60" />
+          <img src="/logo.png" alt="ReadySetClass" className="h-10 brightness-0 invert opacity-70" />
           <p>&copy; {new Date().getFullYear()} ReadySetClass. All rights reserved.</p>
         </div>
       </footer>
