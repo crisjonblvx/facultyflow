@@ -47,10 +47,16 @@ async def startup_event():
     """Initialize database tables on startup"""
     init_db()
 
-# CORS middleware - Allow all origins (broadest compatibility)
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://student.readysetclass.com",
+        "https://www.readysetclass.com",
+        "https://readysetclass.com",
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
