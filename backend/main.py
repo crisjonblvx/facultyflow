@@ -954,6 +954,7 @@ class CheckoutRequest(BaseModel):
     price_id: str
     success_url: str
     cancel_url: str
+    tier: str = "pro"
 
 @app.post("/api/stripe/create-checkout")
 async def create_checkout_session(
@@ -997,7 +998,8 @@ async def create_checkout_session(
             success_url=request.success_url,
             cancel_url=request.cancel_url,
             metadata={
-                'user_id': current_user['user_id']
+                'user_id': current_user['user_id'],
+                'tier': request.tier,
             }
         )
 
@@ -1030,15 +1032,19 @@ async def stripe_webhook(request: Request):
             session = event['data']['object']
             user_id = session['metadata']['user_id']
 
+            # Determine tier from metadata, default to 'pro'
+            tier = session.get('metadata', {}).get('tier', 'pro')
+
             # Update user subscription
             cursor.execute("""
                 UPDATE users
                 SET subscription_status = 'active',
-                    subscription_tier = 'pro',
+                    subscription_tier = %s,
                     stripe_subscription_id = %s,
-                    trial_ends_at = NULL
+                    trial_ends_at = NULL,
+                    ai_generations_this_month = 0
                 WHERE id = %s
-            """, (session['subscription'], user_id))
+            """, (tier, session['subscription'], user_id))
 
         elif event['type'] == 'customer.subscription.updated':
             subscription = event['data']['object']

@@ -117,7 +117,11 @@
     "writing": "Ayuda para escribir",
     "writingDesc": "Retroalimentación, esquemas y lluvia de ideas",
     "schedule": "Horario de estudio",
-    "scheduleDesc": "Plan diario con IA basado en tus entregas"
+    "scheduleDesc": "Plan diario con IA basado en tus entregas",
+    "limitReached": "Usos gratuitos de IA agotados este mes",
+    "freeUsage": "{{used}} / {{limit}} usos gratuitos de IA este mes",
+    "upgradeHint": "Toca para actualizar a Pro y obtener herramientas de IA ilimitadas",
+    "proActive": "Pro — Herramientas de estudio con IA ilimitadas"
   },
   "flashcards": {
     "title": "Tarjetas",
@@ -223,6 +227,41 @@
     "reconnect": "Reconectar Canvas",
     "signOut": "Cerrar sesión",
     "language": "Idioma",
-    "version": "ReadySetClass Edición Estudiante v1.0"
+    "version": "ReadySetClass Edición Estudiante v1.0",
+    "subscription": "Suscripción",
+    "upgradeSuccess": "¡Bienvenido a Pro! Herramientas de IA ilimitadas desbloqueadas.",
+    "aiUsage": "Usos de IA: {{used}} / {{limit}} este mes",
+    "upgradeToPro": "Actualizar a Pro",
+    "proActive": "Herramientas de estudio con IA ilimitadas incluidas en tu plan Pro.",
+    "cancelSubscription": "Cancelar suscripción",
+    "cancelConfirm": "¿Seguro que quieres cancelar tu suscripción Pro? Perderás el acceso a herramientas de IA ilimitadas."
+  },
+  "pricing": {
+    "title": "Mejora tu forma de estudiar",
+    "subtitle": "Desbloquea herramientas de estudio con IA ilimitadas",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "savePercent": "(ahorra 17%)",
+    "free": "Gratis",
+    "pro": "Estudiante Pro",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "currentPlan": "Plan actual",
+    "recommended": "MÁS POPULAR",
+    "yearlySavings": "Ahorra $9.89 vs. plan mensual",
+    "freeFeature1": "Sincronización con Canvas — cursos, notas, fechas",
+    "freeFeature2": "Alertas con detección de urgencia",
+    "freeFeature3": "3 usos gratuitos de IA al mes",
+    "proFeature1": "Todo lo del plan Gratis, más...",
+    "proFeature2": "Generación ilimitada de tarjetas con IA",
+    "proFeature3": "Asistencia de escritura con IA ilimitada",
+    "proFeature4": "Horarios de estudio con IA ilimitados",
+    "proFeature5": "Cuestionarios de práctica con IA ilimitados",
+    "upgradeToPro": "Actualizar a Estudiante Pro",
+    "freeUsage": "Has usado {{used}} de {{limit}} usos gratuitos de IA este mes",
+    "guarantee": "Cancela en cualquier momento. Sin preguntas.",
+    "alreadyPro": "¡Ya tienes Pro!",
+    "alreadyProDesc": "Tienes acceso ilimitado a todas las herramientas de estudio con IA.",
+    "goToStudyTools": "Ir a herramientas de estudio"
   }
 }

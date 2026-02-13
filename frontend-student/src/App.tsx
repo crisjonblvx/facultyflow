@@ -17,6 +17,7 @@ import FlashcardsPage from './pages/FlashcardsPage';
 import QuizPage from './pages/QuizPage';
 import WritingHelpPage from './pages/WritingHelpPage';
 import StudySchedulePage from './pages/StudySchedulePage';
+import PricingPage from './pages/PricingPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/grades" element={<GradesPage />} />
           <Route path="/submit/:assignmentId" element={<SubmissionChecker />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
 
           {/* AI Study Tools */}
           <Route path="/study" element={<StudyHubPage />} />

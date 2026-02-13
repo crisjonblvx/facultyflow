@@ -169,3 +169,14 @@ export interface StudySchedule {
   tips: string[];
   generated_for: string;
 }
+
+// Subscription
+export interface SubscriptionStatus {
+  tier: string;
+  status: string;
+  has_pro: boolean;
+  ai_generations_used: number;
+  ai_generations_limit: number;
+  trial_ends_at: string | null;
+  subscription_ends_at: string | null;
+}

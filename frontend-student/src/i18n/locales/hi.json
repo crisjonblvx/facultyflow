@@ -117,7 +117,11 @@
     "writing": "लेखन सहायता",
     "writingDesc": "फीडबैक, रूपरेखा और विचार-मंथन में मदद पाएँ",
     "schedule": "अध्ययन कार्यक्रम",
-    "scheduleDesc": "आपकी समय सीमाओं के आधार पर AI-निर्मित दैनिक योजना"
+    "scheduleDesc": "आपकी समय सीमाओं के आधार पर AI-निर्मित दैनिक योजना",
+    "limitReached": "इस महीने के मुफ्त AI उपयोग समाप्त हो गए",
+    "freeUsage": "{{used}} / {{limit}} मुफ्त AI उपयोग इस महीने",
+    "upgradeHint": "असीमित AI टूल्स के लिए Pro में अपग्रेड करने हेतु टैप करें",
+    "proActive": "Pro — असीमित AI अध्ययन उपकरण"
   },
   "flashcards": {
     "title": "फ्लैशकार्ड",
@@ -223,6 +227,41 @@
     "reconnect": "Canvas पुनः कनेक्ट करें",
     "signOut": "साइन आउट",
     "language": "भाषा",
-    "version": "ReadySetClass छात्र संस्करण v1.0"
+    "version": "ReadySetClass छात्र संस्करण v1.0",
+    "subscription": "सदस्यता",
+    "upgradeSuccess": "Pro में स्वागत है! असीमित AI टूल्स अनलॉक हो गए।",
+    "aiUsage": "AI उपयोग: इस महीने {{used}} / {{limit}}",
+    "upgradeToPro": "Pro में अपग्रेड करें",
+    "proActive": "आपके Pro प्लान में असीमित AI अध्ययन उपकरण शामिल हैं।",
+    "cancelSubscription": "सदस्यता रद्द करें",
+    "cancelConfirm": "क्या आप वाकई अपनी Pro सदस्यता रद्द करना चाहते हैं? आप असीमित AI अध्ययन उपकरणों तक पहुँच खो देंगे।"
+  },
+  "pricing": {
+    "title": "अपने अध्ययन को बेहतर बनाएँ",
+    "subtitle": "असीमित AI अध्ययन उपकरण अनलॉक करें",
+    "monthly": "मासिक",
+    "yearly": "वार्षिक",
+    "savePercent": "(17% बचाएँ)",
+    "free": "मुफ्त",
+    "pro": "छात्र Pro",
+    "perMonth": "/माह",
+    "perYear": "/वर्ष",
+    "currentPlan": "वर्तमान प्लान",
+    "recommended": "सबसे लोकप्रिय",
+    "yearlySavings": "मासिक की तुलना में $9.89 बचाएँ",
+    "freeFeature1": "Canvas सिंक — पाठ्यक्रम, ग्रेड, समय सीमाएँ",
+    "freeFeature2": "अत्यावश्यकता पहचान के साथ घोषणा अलर्ट",
+    "freeFeature3": "प्रति माह 3 मुफ्त AI उपयोग",
+    "proFeature1": "मुफ्त प्लान में सब कुछ, साथ में...",
+    "proFeature2": "असीमित AI फ्लैशकार्ड जनरेशन",
+    "proFeature3": "असीमित AI लेखन सहायता",
+    "proFeature4": "असीमित AI अध्ययन कार्यक्रम",
+    "proFeature5": "असीमित AI अभ्यास क्विज",
+    "upgradeToPro": "छात्र Pro में अपग्रेड करें",
+    "freeUsage": "आपने इस महीने {{limit}} में से {{used}} मुफ्त AI उपयोग किए हैं",
+    "guarantee": "कभी भी रद्द करें। कोई सवाल नहीं।",
+    "alreadyPro": "आप Pro पर हैं!",
+    "alreadyProDesc": "आपके पास सभी AI अध्ययन उपकरणों तक असीमित पहुँच है।",
+    "goToStudyTools": "अध्ययन उपकरणों पर जाएँ"
   }
 }

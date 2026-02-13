@@ -117,7 +117,11 @@
     "writing": "Aide à la rédaction",
     "writingDesc": "Obtenez des commentaires, des plans et de l'aide au brainstorming",
     "schedule": "Planning d'étude",
-    "scheduleDesc": "Plan quotidien créé par l'IA basé sur vos échéances"
+    "scheduleDesc": "Plan quotidien créé par l'IA basé sur vos échéances",
+    "limitReached": "Utilisations gratuites de l'IA épuisées ce mois-ci",
+    "freeUsage": "{{used}} / {{limit}} utilisations gratuites de l'IA ce mois-ci",
+    "upgradeHint": "Appuyez pour passer à Pro et obtenir des outils IA illimités",
+    "proActive": "Pro — Outils d'étude IA illimités"
   },
   "flashcards": {
     "title": "Cartes mémoire",
@@ -223,6 +227,41 @@
     "reconnect": "Reconnecter Canvas",
     "signOut": "Se déconnecter",
     "language": "Langue",
-    "version": "ReadySetClass Édition Étudiant v1.0"
+    "version": "ReadySetClass Édition Étudiant v1.0",
+    "subscription": "Abonnement",
+    "upgradeSuccess": "Bienvenue sur Pro ! Outils IA illimités débloqués.",
+    "aiUsage": "Utilisations IA : {{used}} / {{limit}} ce mois-ci",
+    "upgradeToPro": "Passer à Pro",
+    "proActive": "Outils d'étude IA illimités inclus dans votre forfait Pro.",
+    "cancelSubscription": "Annuler l'abonnement",
+    "cancelConfirm": "Êtes-vous sûr de vouloir annuler votre abonnement Pro ? Vous perdrez l'accès aux outils IA illimités."
+  },
+  "pricing": {
+    "title": "Améliorez votre façon d'étudier",
+    "subtitle": "Débloquez des outils d'étude IA illimités",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "savePercent": "(économisez 17 %)",
+    "free": "Gratuit",
+    "pro": "Étudiant Pro",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "currentPlan": "Forfait actuel",
+    "recommended": "LE PLUS POPULAIRE",
+    "yearlySavings": "Économisez 9,89 $ vs. mensuel",
+    "freeFeature1": "Synchronisation Canvas — cours, notes, échéances",
+    "freeFeature2": "Alertes avec détection d'urgence",
+    "freeFeature3": "3 utilisations gratuites d'IA par mois",
+    "proFeature1": "Tout du forfait Gratuit, plus...",
+    "proFeature2": "Génération illimitée de cartes mémoire IA",
+    "proFeature3": "Assistance à la rédaction IA illimitée",
+    "proFeature4": "Plannings d'étude IA illimités",
+    "proFeature5": "Quiz d'entraînement IA illimités",
+    "upgradeToPro": "Passer à Étudiant Pro",
+    "freeUsage": "Vous avez utilisé {{used}} de {{limit}} utilisations IA gratuites ce mois-ci",
+    "guarantee": "Annulez à tout moment. Sans engagement.",
+    "alreadyPro": "Vous êtes Pro !",
+    "alreadyProDesc": "Vous avez un accès illimité à tous les outils d'étude IA.",
+    "goToStudyTools": "Accéder aux outils d'étude"
   }
 }

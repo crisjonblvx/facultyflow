@@ -290,3 +290,17 @@ class StudyScheduleResponse(BaseModel):
     summary: str
     tips: list
     generated_for: str
+
+
+# ============================================================================
+# SUBSCRIPTION
+# ============================================================================
+
+class SubscriptionStatusResponse(BaseModel):
+    tier: str
+    status: str
+    has_pro: bool
+    ai_generations_used: int
+    ai_generations_limit: int  # -1 = unlimited
+    trial_ends_at: Optional[str] = None
+    subscription_ends_at: Optional[str] = None

@@ -117,7 +117,11 @@
     "writing": "写作帮助",
     "writingDesc": "获取反馈、大纲和头脑风暴帮助",
     "schedule": "学习计划",
-    "scheduleDesc": "AI 根据你的截止日期制定的每日计划"
+    "scheduleDesc": "AI 根据你的截止日期制定的每日计划",
+    "limitReached": "本月免费 AI 使用次数已用完",
+    "freeUsage": "{{used}} / {{limit}} 本月免费 AI 使用次数",
+    "upgradeHint": "点击升级到 Pro，解锁无限 AI 工具",
+    "proActive": "Pro — 无限 AI 学习工具"
   },
   "flashcards": {
     "title": "闪卡",
@@ -223,6 +227,41 @@
     "reconnect": "重新连接 Canvas",
     "signOut": "退出登录",
     "language": "语言",
-    "version": "ReadySetClass 学生版 v1.0"
+    "version": "ReadySetClass 学生版 v1.0",
+    "subscription": "订阅",
+    "upgradeSuccess": "欢迎使用 Pro！已解锁无限 AI 工具。",
+    "aiUsage": "AI 使用次数：本月 {{used}} / {{limit}}",
+    "upgradeToPro": "升级到 Pro",
+    "proActive": "Pro 计划包含无限 AI 学习工具。",
+    "cancelSubscription": "取消订阅",
+    "cancelConfirm": "确定要取消 Pro 订阅吗？你将失去无限 AI 学习工具的访问权限。"
+  },
+  "pricing": {
+    "title": "提升你的学习效率",
+    "subtitle": "解锁无限 AI 学习工具",
+    "monthly": "月付",
+    "yearly": "年付",
+    "savePercent": "(节省 17%)",
+    "free": "免费",
+    "pro": "学生 Pro",
+    "perMonth": "/月",
+    "perYear": "/年",
+    "currentPlan": "当前计划",
+    "recommended": "最受欢迎",
+    "yearlySavings": "比月付节省 $9.89",
+    "freeFeature1": "Canvas 同步 — 课程、成绩、截止日期",
+    "freeFeature2": "带紧急检测的公告提醒",
+    "freeFeature3": "每月 3 次免费 AI 使用",
+    "proFeature1": "包含免费版所有功能，加上...",
+    "proFeature2": "无限 AI 闪卡生成",
+    "proFeature3": "无限 AI 写作辅助",
+    "proFeature4": "无限 AI 学习计划",
+    "proFeature5": "无限 AI 练习测验",
+    "upgradeToPro": "升级到学生 Pro",
+    "freeUsage": "本月已使用 {{used}} / {{limit}} 次免费 AI",
+    "guarantee": "随时取消，无需理由。",
+    "alreadyPro": "你已是 Pro 用户！",
+    "alreadyProDesc": "你可以无限使用所有 AI 学习工具。",
+    "goToStudyTools": "前往学习工具"
   }
 }

@@ -117,7 +117,11 @@
     "writing": "Writing Help",
     "writingDesc": "Get feedback, outlines, and brainstorming help",
     "schedule": "Study Schedule",
-    "scheduleDesc": "AI-built daily plan based on your deadlines"
+    "scheduleDesc": "AI-built daily plan based on your deadlines",
+    "limitReached": "Free AI uses reached this month",
+    "freeUsage": "{{used}} / {{limit}} free AI uses this month",
+    "upgradeHint": "Tap to upgrade to Pro for unlimited AI tools",
+    "proActive": "Pro — Unlimited AI Study Tools"
   },
   "flashcards": {
     "title": "Flashcards",
@@ -223,6 +227,41 @@
     "reconnect": "Reconnect Canvas",
     "signOut": "Sign Out",
     "language": "Language",
-    "version": "ReadySetClass Student Edition v1.0"
+    "version": "ReadySetClass Student Edition v1.0",
+    "subscription": "Subscription",
+    "upgradeSuccess": "Welcome to Pro! Unlimited AI tools unlocked.",
+    "aiUsage": "AI uses: {{used}} / {{limit}} this month",
+    "upgradeToPro": "Upgrade to Pro",
+    "proActive": "Unlimited AI study tools included with your Pro plan.",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelConfirm": "Are you sure you want to cancel your Pro subscription? You'll lose access to unlimited AI study tools."
+  },
+  "pricing": {
+    "title": "Upgrade Your Study Game",
+    "subtitle": "Unlock unlimited AI-powered study tools",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "savePercent": "(save 17%)",
+    "free": "Free",
+    "pro": "Student Pro",
+    "perMonth": "/mo",
+    "perYear": "/yr",
+    "currentPlan": "Current Plan",
+    "recommended": "MOST POPULAR",
+    "yearlySavings": "Save $9.89 compared to monthly",
+    "freeFeature1": "Canvas sync — courses, grades, deadlines",
+    "freeFeature2": "Announcement alerts with urgency detection",
+    "freeFeature3": "3 free AI study tool uses per month",
+    "proFeature1": "Everything in Free, plus...",
+    "proFeature2": "Unlimited AI flashcard generation",
+    "proFeature3": "Unlimited AI writing assistance",
+    "proFeature4": "Unlimited AI study schedules",
+    "proFeature5": "Unlimited AI practice quizzes",
+    "upgradeToPro": "Upgrade to Student Pro",
+    "freeUsage": "You've used {{used}} of {{limit}} free AI generations this month",
+    "guarantee": "Cancel anytime. No questions asked.",
+    "alreadyPro": "You're on Pro!",
+    "alreadyProDesc": "You have unlimited access to all AI study tools.",
+    "goToStudyTools": "Go to Study Tools"
   }
 }

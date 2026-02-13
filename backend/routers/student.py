@@ -29,6 +29,7 @@ from schemas.student import (
     QuizGenerateRequest, QuizSessionResponse, QuizQuestionResponse, QuizSubmitRequest,
     WritingHelpRequest, WritingHelpResponse,
     StudyScheduleResponse,
+    SubscriptionStatusResponse,
 )
 
 router = APIRouter(prefix="/api/v1/student", tags=["student"])
@@ -1264,6 +1265,90 @@ async def get_submission_history(
 
 
 # ============================================================================
+# SUBSCRIPTION MANAGEMENT
+# ============================================================================
+
+FREE_AI_GENERATIONS_LIMIT = 3  # Free users get 3 AI uses per month
+
+
+def _check_ai_access(cursor, user_id):
+    """Check if user has access to AI study tools. Returns (allowed, info)."""
+    cursor.execute("""
+        SELECT subscription_tier, subscription_status, ai_generations_this_month
+        FROM users WHERE id = %s
+    """, (user_id,))
+    row = cursor.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    tier, status, ai_gens = row
+    ai_gens = ai_gens or 0
+
+    has_pro = tier in ('pro', 'team', 'enterprise') and status == 'active'
+
+    if has_pro:
+        return True, {"tier": tier, "remaining": -1}
+
+    if ai_gens >= FREE_AI_GENERATIONS_LIMIT:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "ai_limit_reached",
+                "message": f"You've used all {FREE_AI_GENERATIONS_LIMIT} free AI generations this month. Upgrade to Pro for unlimited access.",
+                "used": ai_gens,
+                "limit": FREE_AI_GENERATIONS_LIMIT,
+            }
+        )
+
+    return True, {"tier": tier, "remaining": FREE_AI_GENERATIONS_LIMIT - ai_gens}
+
+
+def _increment_ai_usage(cursor, user_id):
+    """Increment the AI generations counter for free-tier users."""
+    cursor.execute("""
+        UPDATE users SET ai_generations_this_month = COALESCE(ai_generations_this_month, 0) + 1
+        WHERE id = %s
+    """, (user_id,))
+
+
+@router.get("/subscription/status", response_model=SubscriptionStatusResponse)
+async def get_student_subscription_status(current_user=Depends(get_current_user_from_token)):
+    """Get current subscription status for the student"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT subscription_tier, subscription_status, trial_ends_at,
+                   subscription_ends_at, ai_generations_this_month
+            FROM users WHERE id = %s
+        """, (current_user["user_id"],))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        tier, status, trial_ends, sub_ends, ai_gens = row
+        tier = tier or "trial"
+        status = status or "trialing"
+        ai_gens = ai_gens or 0
+
+        has_pro = tier in ('pro', 'team', 'enterprise') and status == 'active'
+
+        return SubscriptionStatusResponse(
+            tier=tier,
+            status=status,
+            has_pro=has_pro,
+            ai_generations_used=ai_gens,
+            ai_generations_limit=-1 if has_pro else FREE_AI_GENERATIONS_LIMIT,
+            trial_ends_at=trial_ends.isoformat() if trial_ends else None,
+            subscription_ends_at=sub_ends.isoformat() if sub_ends else None,
+        )
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================================================================
 # AI STUDY TOOLS - FLASHCARDS
 # ============================================================================
 
@@ -1278,6 +1363,9 @@ async def generate_flashcards(
 
     try:
         user_id = current_user["user_id"]
+
+        # Check subscription / AI access
+        _check_ai_access(cursor, user_id)
 
         # Verify course belongs to user
         cursor.execute("SELECT course_name FROM student_courses WHERE id = %s AND user_id = %s",
@@ -1313,6 +1401,7 @@ async def generate_flashcards(
                 difficulty=card.get("difficulty", "medium")
             ))
 
+        _increment_ai_usage(cursor, user_id)
         conn.commit()
 
         return {
@@ -1460,6 +1549,9 @@ async def generate_quiz(
     try:
         user_id = current_user["user_id"]
 
+        # Check subscription / AI access
+        _check_ai_access(cursor, user_id)
+
         # Build context from course content if not provided
         context = request.context
         if not context:
@@ -1492,6 +1584,8 @@ async def generate_quiz(
             RETURNING id, created_at
         """, (user_id, request.course_id, request.topic, json.dumps(questions), len(questions)))
         session_id, created_at = cursor.fetchone()
+
+        _increment_ai_usage(cursor, user_id)
         conn.commit()
 
         return QuizSessionResponse(
@@ -1583,6 +1677,9 @@ async def get_writing_help(
     cursor = conn.cursor()
 
     try:
+        # Check subscription / AI access
+        _check_ai_access(cursor, current_user["user_id"])
+
         valid_types = ["outline", "brainstorm", "feedback", "strengthen", "cite"]
         if request.help_type not in valid_types:
             raise HTTPException(status_code=400, detail=f"help_type must be one of: {valid_types}")
@@ -1613,6 +1710,8 @@ async def get_writing_help(
             VALUES (%s, %s, %s, %s, %s)
         """, (current_user["user_id"], request.assignment_id, request.help_type,
               request.user_input, response_text))
+
+        _increment_ai_usage(cursor, current_user["user_id"])
         conn.commit()
 
         return WritingHelpResponse(
@@ -1643,6 +1742,14 @@ async def get_study_schedule(current_user=Depends(get_current_user_from_token)):
 
     try:
         user_id = current_user["user_id"]
+
+        # Check subscription / AI access (only counts when generating new, not cached)
+        cursor.execute("""
+            SELECT schedule_json FROM student_study_schedule
+            WHERE user_id = %s AND generated_for_date = %s
+        """, (user_id, date.today()))
+        if not cursor.fetchone():
+            _check_ai_access(cursor, user_id)
 
         # Check for cached schedule from today
         cursor.execute("""
@@ -1693,6 +1800,8 @@ async def get_study_schedule(current_user=Depends(get_current_user_from_token)):
             ON CONFLICT (user_id, generated_for_date) DO UPDATE SET
                 schedule_json = EXCLUDED.schedule_json
         """, (user_id, json.dumps(result), date.today()))
+
+        _increment_ai_usage(cursor, user_id)
         conn.commit()
 
         return StudyScheduleResponse(
