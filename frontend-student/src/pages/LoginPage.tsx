@@ -12,7 +12,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/announcements');
+      navigate('/dashboard');
     } catch {
       // Error is already set in the store
     }

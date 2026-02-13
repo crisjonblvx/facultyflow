@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link2, CheckCircle, ArrowRight, Loader2, ExternalLink, School } from 'lucide-react';
 import api from '../lib/api';
+import { useAuthStore } from '../stores/authStore';
 
 // School detection database — same as Educator Edition
 const SCHOOL_MAP: Record<string, string> = {
@@ -22,6 +23,26 @@ const SCHOOL_MAP: Record<string, string> = {
   'xula.instructure.com': 'Xavier University of Louisiana',
 };
 
+// Map email domains to Canvas URLs for auto-detection
+const EMAIL_TO_CANVAS: Record<string, string> = {
+  'mymail.vuu.edu': 'https://vuu.instructure.com',
+  'vuu.edu': 'https://vuu.instructure.com',
+  'howard.edu': 'https://howard.instructure.com',
+  'spelman.edu': 'https://spelman.instructure.com',
+  'morehouse.edu': 'https://morehouse.instructure.com',
+  'yale.edu': 'https://yale.instructure.com',
+  'harvard.edu': 'https://harvard.instructure.com',
+  'mit.edu': 'https://mit.instructure.com',
+  'stanford.edu': 'https://stanford.instructure.com',
+  'columbia.edu': 'https://columbia.instructure.com',
+  'ncat.edu': 'https://ncat.instructure.com',
+  'famu.edu': 'https://famu.instructure.com',
+  'hamptonu.edu': 'https://hampton.instructure.com',
+  'tuskegee.edu': 'https://tuskegee.instructure.com',
+  'cookman.edu': 'https://bcuedu.instructure.com',
+  'xula.edu': 'https://xula.instructure.com',
+};
+
 function detectSchool(url: string) {
   const clean = url.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
   const isCanvas = clean.includes('instructure.com');
@@ -31,12 +52,23 @@ function detectSchool(url: string) {
 }
 
 export default function CanvasSetupPage() {
+  const { user } = useAuthStore();
   const [canvasUrl, setCanvasUrl] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [status, setStatus] = useState<'idle' | 'connecting' | 'syncing' | 'done' | 'error'>('idle');
   const [error, setError] = useState('');
   const [coursesFound, setCoursesFound] = useState(0);
   const navigate = useNavigate();
+
+  // Auto-detect Canvas URL from user's email domain
+  useEffect(() => {
+    if (user?.email && !canvasUrl) {
+      const domain = user.email.split('@')[1]?.toLowerCase();
+      if (domain && EMAIL_TO_CANVAS[domain]) {
+        setCanvasUrl(EMAIL_TO_CANVAS[domain]);
+      }
+    }
+  }, [user]);
 
   const school = useMemo(() => detectSchool(canvasUrl), [canvasUrl]);
 
