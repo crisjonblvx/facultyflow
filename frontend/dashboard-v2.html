@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ReadySetClass</title>
+    <title>Dashboard - ReadySetClass™</title>
     <link rel="icon" href="/assets/ReadySetClass_alpha_badge.png" type="image/png">
 
     <meta name="description" content="AI-powered Canvas course setup. Your LMS organized and ready in days. Not hype. Just help.">
-    <meta property="og:title" content="ReadySetClass">
+
+    <!-- IP Protection Metadata -->
+    <meta name="copyright" content="© 2026 ContentCreators.life. All rights reserved.">
+    <meta name="trademark" content="ReadySetClass is a trademark of ContentCreators.life, first used February 2026">
+    <meta name="author" content="ContentCreators.life">
+    <meta name="rights" content="All content, branding, and intellectual property is protected by copyright and trademark law.">
+
+    <!-- Social Media Metadata -->
+    <meta property="og:title" content="ReadySetClass™">
     <meta property="og:description" content="Less time setting up. More time teaching.">
     <meta property="og:image" content="/assets/ReadySetClass_alpha_full.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ReadySetClass">
+    <meta name="twitter:title" content="ReadySetClass™">
     <meta name="twitter:description" content="Not hype. Just help.">
     <meta name="twitter:image" content="/assets/ReadySetClass_alpha_full.png">
 
     <!-- PWA Support -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1B3A52">
+    <meta name="theme-color" content="#1E3A5F">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ReadySetClass">
@@ -30,15 +38,15 @@
     <style>
         :root {
             /* ReadySetClass Brand Colors */
-            --primary-navy: #1B3A52;
-            --accent-gold: #B8945F;
+            --primary-navy: #1E3A5F;
+            --accent-gold: #C9A961;
             --background-cream: #F5F2E8;
             --text-dark: #2C3E50;
             --text-light: #666666;
 
             /* Legacy color mappings for compatibility */
-            --purple: #1B3A52;  /* Navy as primary */
-            --coral: #B8945F;   /* Gold as accent */
+            --purple: #1E3A5F;  /* Navy as primary */
+            --coral: #C9A961;   /* Gold as accent */
             --dark: #2C3E50;
             --gray: #666666;
             --light-gray: #F5F2E8;  /* Cream background */
@@ -128,6 +136,13 @@
             top: 0;
             z-index: 10;
             margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content {
+            flex: 1;
         }
 
         .header h1 {
@@ -137,6 +152,38 @@
         }
 
         .header p { color: var(--gray); }
+
+        .language-selector {
+            position: relative;
+            margin-left: 2rem;
+        }
+
+        .language-selector select {
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border: 2px solid var(--purple);
+            border-radius: 8px;
+            background: white;
+            color: var(--dark);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231E3A5F' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        .language-selector select:hover {
+            border-color: var(--coral);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .language-selector select:focus {
+            outline: none;
+            border-color: var(--coral);
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+        }
 
         /* Content Container - Proper padding, no layout issues */
         .content-wrapper {
@@ -227,7 +274,7 @@
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: #152A43;
         }
 
         .btn-secondary {
@@ -261,12 +308,12 @@
 
         .course-card:hover {
             border-color: var(--purple);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
         }
 
         .course-card.selected {
             border-color: var(--purple);
-            background: #f5f3ff;
+            background: #f0f4f8;
         }
 
         .course-name {
@@ -306,12 +353,12 @@
         /* Drag & Drop Styles */
         #dropZone:hover {
             border-color: var(--purple) !important;
-            background: #f5f7ff !important;
+            background: #f0f4f8 !important;
         }
 
         #dropZone.drag-over {
             border-color: var(--purple) !important;
-            background: #f0f4ff !important;
+            background: #e8eef4 !important;
             border-width: 3px !important;
         }
 
@@ -419,12 +466,12 @@
         }
 
         .voice-input-btn:hover {
-            background: #a37f4a;
+            background: #b39354;
             transform: translateY(-50%) scale(1.05);
         }
 
         .voice-input-btn:active {
-            background: #8f6b3d;
+            background: #a8874a;
         }
 
         .voice-input-btn.listening {
@@ -464,7 +511,7 @@
         }
 
         .photo-upload-btn:hover {
-            background: #a37f4a;
+            background: #b39354;
             transform: translateY(-1px);
         }
 
@@ -758,8 +805,20 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="header">
-                <h1>Welcome to ReadySetClass</h1>
-                <p>Less time setting up. More time teaching.</p>
+                <div class="header-content">
+                    <h1>Welcome to ReadySetClass</h1>
+                    <p>Less time setting up. More time teaching.</p>
+                </div>
+                <div class="language-selector">
+                    <select id="languageSelect" onchange="changeLanguage(this.value)">
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="pt">🇧🇷 Português</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                </div>
             </div>
 
             <div class="content-wrapper">
@@ -913,7 +972,7 @@
                         + Add Category
                     </button>
 
-                    <div id="weightTotal" style="margin-top: 1.5rem; padding: 1rem; background: #f0f4ff; border-radius: 8px; font-weight: 600;">
+                    <div id="weightTotal" style="margin-top: 1.5rem; padding: 1rem; background: #e8eef4; border-radius: 8px; font-weight: 600;">
                         Total: <span id="totalWeightDisplay">0</span>%
                     </div>
                 </div>
@@ -1632,6 +1691,35 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         })();
 
         // ============================================================================
+        // LANGUAGE MANAGEMENT
+        // ============================================================================
+        // Function to change language
+        async function changeLanguage(lang) {
+            await window.i18n.setLanguage(lang);
+            // Update the select to match
+            document.getElementById('languageSelect').value = lang;
+        }
+
+        // Listen for language changes and update UI
+        window.addEventListener('languageChanged', (e) => {
+            console.log('Language changed to:', e.detail.lang);
+            // Update language selector
+            const selector = document.getElementById('languageSelect');
+            if (selector) {
+                selector.value = e.detail.lang;
+            }
+        });
+
+        // Initialize language selector on page load
+        window.addEventListener('load', () => {
+            const currentLang = window.i18n?.getLang() || 'en';
+            const selector = document.getElementById('languageSelect');
+            if (selector) {
+                selector.value = currentLang;
+            }
+        });
+
+        // ============================================================================
         // APP INITIALIZATION
         // ============================================================================
         // (API_URL, authToken, selectedCourse declared at top of script)
@@ -1734,10 +1822,11 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             if (!courseName || !description) { alert('Enter course name and description'); return; }
             showAlert('syllabusAlert', 'info', '✨ AI is generating syllabus...');
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/generate-syllabus`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                    body: JSON.stringify({ course_name: courseName, description, objectives, grading })
+                    body: JSON.stringify({ course_name: courseName, description, objectives, grading, language: currentLang })
                 });
                 const result = await response.json();
                 if (response.ok) {
@@ -2063,6 +2152,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             showAlert('quizAlert', 'info', '✨ AI is generating quiz questions...');
 
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/quiz/generate`, {
                     method: 'POST',
                     headers: {
@@ -2073,7 +2163,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                         description: description,
                         num_questions: numQuestions,
                         difficulty: difficulty,
-                        grade_level: gradeLevel
+                        grade_level: gradeLevel,
+                        language: currentLang
                     })
                 });
 
@@ -2219,6 +2310,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             showAlert('announcementAlert', 'info', '📢 Creating announcement...');
 
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/announcement`, {
                     method: 'POST',
                     headers: {
@@ -2228,7 +2320,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     body: JSON.stringify({
                         course_id: selectedCourse.id,
                         topic: topic,
-                        details: document.getElementById('announcementDetails').value || null
+                        details: document.getElementById('announcementDetails').value || null,
+                        language: currentLang
                     })
                 });
 
@@ -2278,6 +2371,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             showAlert('assignmentAlert', 'info', '✨ AI is generating your assignment...');
 
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/generate-assignment`, {
                     method: 'POST',
                     headers: {
@@ -2288,7 +2382,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                         topic: topic,
                         assignment_type: type,
                         requirements: requirements,
-                        points: parseInt(document.getElementById('aiAssignmentPoints').value)
+                        points: parseInt(document.getElementById('aiAssignmentPoints').value),
+                        language: currentLang
                     })
                 });
 
@@ -2453,6 +2548,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             showAlert('pageAlert', 'info', '✨ AI is generating your page...');
 
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/generate-page`, {
                     method: 'POST',
                     headers: {
@@ -2463,7 +2559,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                         title: title,
                         page_type: pageType,
                         description: description,
-                        objectives: objectives
+                        objectives: objectives,
+                        language: currentLang
                     })
                 });
 
@@ -2599,10 +2696,11 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             if (!topic || !goals) { alert('Please enter topic and goals'); return; }
             showAlert('discussionAlert', 'info', '✨ AI is generating discussion...');
             try {
+                const currentLang = window.i18n?.getLang() || 'en';
                 const response = await fetch(`${API_URL}/api/v2/canvas/generate-discussion`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                    body: JSON.stringify({ topic, discussion_type: type, goals })
+                    body: JSON.stringify({ topic, discussion_type: type, goals, language: currentLang })
                 });
                 const result = await response.json();
                 if (response.ok) {
@@ -3512,5 +3610,13 @@ Participation: 10%" style="min-height: 80px;"></textarea>
             });
         }
     </script>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 1.5rem 1rem; background: #f5f5f5; margin-top: auto; font-size: 0.75rem; color: #666; border-top: 1px solid #e0e0e0;">
+        <p>&copy; 2026 ContentCreators.life. All rights reserved. | ReadySetClass™ is a trademark of ContentCreators.life</p>
+    </footer>
+
+    <!-- i18n Internationalization Support -->
+    <script src="/assets/i18n.js"></script>
 </body>
 </html>

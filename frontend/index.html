@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReadySetClass - AI Course Builder for Canvas</title>
-    <meta name="description" content="Less time setting up. More time teaching. Build complete Canvas courses in minutes. Syllabi, quizzes, assignments - all automated. $29/month for educators.">
-    
+    <title>ReadySetClass™ - AI Course Builder for Canvas</title>
+    <meta name="description" content="Less time setting up. More time teaching. Build complete Canvas courses in minutes. Syllabi, quizzes, assignments - all automated. $9.99-29/month for educators.">
+
+    <!-- IP Protection Metadata -->
+    <meta name="copyright" content="© 2026 ContentCreators.life. All rights reserved.">
+    <meta name="trademark" content="ReadySetClass is a trademark of ContentCreators.life, first used February 2026">
+    <meta name="author" content="ContentCreators.life">
+    <meta name="rights" content="All content, branding, and intellectual property is protected by copyright and trademark law.">
+
     <!-- Fonts: Distinctive choices that elevate the aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,18 +19,19 @@
     
     <style>
         :root {
-            /* Brand Colors */
-            --purple: #667eea;
-            --coral: #FF6B35;
-            --dark: #1a1a1a;
-            --gray: #666666;
-            --light-gray: #f5f5f5;
+            /* ReadySetClass™ Brand Colors */
+            --navy: #1E3A5F;
+            --gold: #C9A961;
+            --cream: #FAF8F3;
+            --charcoal: #2C2C2C;
+            --light-gray: #E8E8E8;
             --white: #ffffff;
-            
+
             /* Semantic */
             --success: #10b981;
             --error: #ef4444;
-            
+            --info: #3B82F6;
+
             /* Typography */
             --font-display: 'Sora', sans-serif;
             --font-body: 'DM Sans', sans-serif;
@@ -38,12 +45,12 @@
         
         body {
             font-family: var(--font-body);
-            color: var(--dark);
+            color: var(--charcoal);
             background: var(--white);
             line-height: 1.6;
             overflow-x: hidden;
         }
-        
+
         /* Animated background gradient mesh */
         body::before {
             content: '';
@@ -52,9 +59,9 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+            background:
+                radial-gradient(circle at 20% 50%, rgba(30, 58, 95, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(201, 169, 97, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 40% 90%, rgba(102, 126, 234, 0.08) 0%, transparent 50%);
             animation: meshMove 20s ease-in-out infinite;
             z-index: -1;
@@ -96,7 +103,7 @@
             font-family: var(--font-display);
             font-size: 1.5rem;
             font-weight: 800;
-            color: var(--dark);
+            color: var(--charcoal);
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -104,7 +111,7 @@
         }
         
         .logo span {
-            color: var(--purple);
+            color: var(--navy);
         }
         
         .nav-links {
@@ -121,12 +128,12 @@
         }
         
         .nav-links a:hover {
-            color: var(--purple);
+            color: var(--navy);
         }
         
         .cta-button {
             padding: 0.75rem 1.5rem;
-            background: var(--purple);
+            background: var(--navy);
             color: white;
             border-radius: 8px;
             text-decoration: none;
@@ -177,7 +184,7 @@
         }
         
         .hero-text h1 span {
-            background: linear-gradient(135deg, var(--purple), var(--coral));
+            background: linear-gradient(135deg, var(--navy), var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -205,7 +212,7 @@
         
         .primary-cta {
             padding: 1.25rem 2.5rem;
-            background: var(--coral);
+            background: var(--gold);
             color: white;
             border: none;
             border-radius: 12px;
@@ -225,8 +232,8 @@
         .secondary-cta {
             padding: 1.25rem 2.5rem;
             background: transparent;
-            color: var(--purple);
-            border: 2px solid var(--purple);
+            color: var(--navy);
+            border: 2px solid var(--navy);
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 700;
@@ -236,7 +243,7 @@
         }
         
         .secondary-cta:hover {
-            background: var(--purple);
+            background: var(--navy);
             color: white;
         }
         
@@ -264,7 +271,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--purple), var(--coral));
+            background: linear-gradient(90deg, var(--navy), var(--gold));
         }
         
         .stats-grid {
@@ -290,7 +297,7 @@
             font-family: var(--font-display);
             font-size: 2.5rem;
             font-weight: 800;
-            color: var(--purple);
+            color: var(--navy);
             margin-bottom: 0.5rem;
         }
         
@@ -358,7 +365,7 @@
         .feature-icon {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, var(--purple), var(--coral));
+            background: linear-gradient(135deg, var(--navy), var(--gold));
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -407,7 +414,7 @@
         .pricing-card:nth-child(1) { animation-delay: 0.1s; }
         .pricing-card:nth-child(2) { 
             animation-delay: 0.2s;
-            border-color: var(--purple);
+            border-color: var(--navy);
             box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
             transform: scale(1.05);
         }
@@ -424,7 +431,7 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--coral);
+            background: var(--gold);
             color: white;
             padding: 0.4rem 1.5rem;
             border-radius: 20px;
@@ -449,7 +456,7 @@
             font-family: var(--font-display);
             font-size: 3.5rem;
             font-weight: 800;
-            color: var(--purple);
+            color: var(--navy);
             margin-bottom: 0.5rem;
         }
         
@@ -483,7 +490,7 @@
         .pricing-cta {
             width: 100%;
             padding: 1rem 2rem;
-            background: var(--purple);
+            background: var(--navy);
             color: white;
             border: none;
             border-radius: 10px;
@@ -495,14 +502,14 @@
         }
         
         .pricing-cta:hover {
-            background: var(--coral);
+            background: var(--gold);
             transform: translateY(-2px);
         }
         
         /* CTA Section */
         .final-cta {
             padding: 6rem 2rem;
-            background: linear-gradient(135deg, var(--purple), var(--coral));
+            background: linear-gradient(135deg, var(--navy), var(--gold));
             color: white;
             text-align: center;
         }
@@ -523,7 +530,7 @@
         .final-cta button {
             padding: 1.5rem 3rem;
             background: white;
-            color: var(--purple);
+            color: var(--navy);
             border: none;
             border-radius: 12px;
             font-size: 1.2rem;
@@ -542,7 +549,7 @@
         /* Footer */
         footer {
             padding: 3rem 2rem;
-            background: var(--dark);
+            background: var(--charcoal);
             color: white;
             text-align: center;
         }
@@ -553,7 +560,7 @@
         }
         
         footer a {
-            color: var(--purple);
+            color: var(--navy);
             text-decoration: none;
         }
         
@@ -594,11 +601,19 @@
                 <img src="/assets/ReadySetClass_alpha_full.png" alt="ReadySetClass" style="height: 40px; width: auto;">
             </a>
             <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
-                <a href="login.html" style="margin-right: 1rem; color: var(--dark); text-decoration: none; font-weight: 600;">Login</a>
-                <a href="pricing.html" class="cta-button">Get Started</a>
+                <a href="#features" data-i18n="nav.features">Features</a>
+                <a href="#pricing" data-i18n="nav.pricing">Pricing</a>
+                <a href="login.html" style="margin-right: 1rem; color: var(--charcoal); text-decoration: none; font-weight: 600;" data-i18n="nav.login">Login</a>
+                <a href="pricing.html" class="cta-button" data-i18n="nav.signup">Get Started</a>
+                <div id="language-selector"></div>
             </div>
+            <script>
+                window.addEventListener('languageChanged', () => {
+                    createLanguageSelector();
+                });
+                // Initialize after i18n loads
+                setTimeout(() => createLanguageSelector(), 100);
+            </script>
         </div>
     </nav>
 
@@ -606,14 +621,14 @@
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
-                <h1>Reclaim your time.</h1>
-                <p class="tagline">Less time setting up. More time teaching.</p>
-                <p class="subtext">
+                <h1 data-i18n="hero.title">Reclaim your time.</h1>
+                <p class="tagline" data-i18n="app.tagline">Less time setting up. More time teaching.</p>
+                <p class="subtext" data-i18n="hero.subtitle">
                     Teachers spend 15 hours/week on Canvas busywork. Get that time back. Your weekends. Your evenings. Your life. Build complete courses in minutes with AI.
                 </p>
                 <div class="hero-actions">
-                    <button class="primary-cta" onclick="window.location.href='pricing.html'">Start Free Trial - Reclaim Your Time</button>
-                    <button class="secondary-cta" onclick="window.location.href='login.html'">Login</button>
+                    <button class="primary-cta" onclick="window.location.href='pricing.html'" data-i18n="hero.cta">Start Free Trial - Reclaim Your Time</button>
+                    <button class="secondary-cta" onclick="window.location.href='login.html'" data-i18n="nav.login">Login</button>
                 </div>
             </div>
             
@@ -648,8 +663,8 @@
     <!-- Features Section -->
     <section class="features" id="features">
         <div class="section-header">
-            <h2>Everything you need, nothing you don't</h2>
-            <p>FacultyFlow automates the tedious parts so you can focus on what matters</p>
+            <h2 data-i18n="features.title">Everything you need, nothing you don't</h2>
+            <p data-i18n="features.subtitle">FacultyFlow automates the tedious parts so you can focus on what matters</p>
         </div>
         
         <div class="features-grid">
@@ -658,31 +673,31 @@
                 <h3>Complete Syllabi</h3>
                 <p>Professional syllabi with course overview, objectives, schedule, grading breakdown, and policies.</p>
             </div>
-            
+
             <div class="feature-card">
                 <div class="feature-icon">📚</div>
-                <h3>15 Lesson Plans</h3>
-                <p>Weekly lesson plans with objectives, key concepts, activities, and discussion prompts.</p>
+                <h3 data-i18n="features.modules">15 Lesson Plans</h3>
+                <p data-i18n="features.modulesDesc">Weekly lesson plans with objectives, key concepts, activities, and discussion prompts.</p>
             </div>
-            
+
             <div class="feature-card">
                 <div class="feature-icon">🧪</div>
-                <h3>Auto-Generated Quizzes</h3>
-                <p>10-question quizzes for each week, complete with multiple choice questions and answer keys.</p>
+                <h3 data-i18n="features.quizzes">Auto-Generated Quizzes</h3>
+                <p data-i18n="features.quizzesDesc">10-question quizzes for each week, complete with multiple choice questions and answer keys.</p>
             </div>
-            
+
             <div class="feature-card">
                 <div class="feature-icon">🔗</div>
                 <h3>Study Packs with Links</h3>
                 <p>Curated study materials with real YouTube videos, articles, and resources - not fake links.</p>
             </div>
-            
+
             <div class="feature-card">
                 <div class="feature-icon">⚡</div>
                 <h3>Canvas Upload</h3>
                 <p>Everything automatically uploaded to your Canvas course. Modules, assignments, quizzes - all done.</p>
             </div>
-            
+
             <div class="feature-card">
                 <div class="feature-icon">🔒</div>
                 <h3>Secure & Private</h3>
@@ -694,62 +709,62 @@
     <!-- Pricing Section -->
     <section class="pricing" id="pricing">
         <div class="section-header">
-            <h2>Simple, affordable pricing</h2>
-            <p>Choose the plan that works for you. No hidden fees, cancel anytime.</p>
+            <h2 data-i18n="pricing.title">Simple, affordable pricing</h2>
+            <p data-i18n="pricing.subtitle">Choose the plan that works for you. No hidden fees, cancel anytime.</p>
         </div>
         
         <div class="pricing-grid">
             <div class="pricing-card">
-                <h3 class="tier-name">Educator</h3>
-                <p class="tier-target">K-12 teachers, adjuncts</p>
-                <div class="price">$19<span>/mo</span></div>
+                <h3 class="tier-name" data-i18n="pricing.educator">Educator</h3>
+                <p class="tier-target" data-i18n="pricing.educatorDesc">K-12 teachers, adjuncts</p>
+                <div class="price">$19<span data-i18n="pricing.perMonth">/mo</span></div>
                 <ul class="features-list">
                     <li>Unlimited courses</li>
                     <li>AI-generated content</li>
                     <li>Canvas upload</li>
                     <li>Email support</li>
                 </ul>
-                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Start Free Trial</button>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'" data-i18n="pricing.startTrial">Start Free Trial</button>
             </div>
 
             <div class="pricing-card">
-                <span class="recommended">Recommended</span>
-                <h3 class="tier-name">Pro</h3>
-                <p class="tier-target">College faculty</p>
-                <div class="price">$29<span>/mo</span></div>
+                <span class="recommended" data-i18n="pricing.mostPopular">Recommended</span>
+                <h3 class="tier-name" data-i18n="pricing.pro">Pro</h3>
+                <p class="tier-target" data-i18n="pricing.proDesc">College faculty</p>
+                <div class="price">$29<span data-i18n="pricing.perMonth">/mo</span></div>
                 <ul class="features-list">
                     <li>Everything in Educator</li>
                     <li>Custom templates</li>
-                    <li>Priority support</li>
-                    <li>Advanced analytics</li>
+                    <li data-i18n="pricing.features.support">Priority support</li>
+                    <li data-i18n="pricing.features.analytics">Advanced analytics</li>
                 </ul>
-                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Start Free Trial</button>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'" data-i18n="pricing.startTrial">Start Free Trial</button>
             </div>
-            
+
             <div class="pricing-card">
                 <h3 class="tier-name">Department</h3>
                 <p class="tier-target">Small departments</p>
-                <div class="price">$99<span>/mo</span></div>
+                <div class="price">$99<span data-i18n="pricing.perMonth">/mo</span></div>
                 <ul class="features-list">
                     <li>Everything in Pro</li>
                     <li>5 faculty seats</li>
                     <li>Shared templates</li>
                     <li>Team collaboration</li>
                 </ul>
-                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Contact Sales</button>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'" data-i18n="pricing.contactSales">Contact Sales</button>
             </div>
 
             <div class="pricing-card">
                 <h3 class="tier-name">Institution</h3>
                 <p class="tier-target">Schools & districts</p>
-                <div class="price">$499<span>/mo</span></div>
+                <div class="price">$499<span data-i18n="pricing.perMonth">/mo</span></div>
                 <ul class="features-list">
                     <li>Unlimited seats</li>
                     <li>White-label option</li>
-                    <li>Dedicated support</li>
+                    <li data-i18n="pricing.features.dedicated">Dedicated support</li>
                     <li>Custom integrations</li>
                 </ul>
-                <button class="pricing-cta" onclick="window.location.href='dashboard.html'">Contact Sales</button>
+                <button class="pricing-cta" onclick="window.location.href='dashboard.html'" data-i18n="pricing.contactSales">Contact Sales</button>
             </div>
         </div>
     </section>
@@ -758,13 +773,14 @@
     <section class="final-cta">
         <h2>Ready to reclaim your time?</h2>
         <p>Join educators who've saved 20+ hours per course with FacultyFlow</p>
-        <button onclick="window.location.href='dashboard.html'">Start Your Free Trial</button>
+        <button onclick="window.location.href='dashboard.html'" data-i18n="pricing.startTrial">Start Your Free Trial</button>
     </section>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 FacultyFlow. Built with 🦋 by <a href="https://contentcreators.life" target="_blank">ContentCreators.life</a></p>
-        <p>Powered by Bonita AI</p>
+        <p data-i18n="footer.copyright">&copy; 2026 ContentCreators.life. All rights reserved.</p>
+        <p data-i18n="footer.trademark">ReadySetClass™ is a trademark of ContentCreators.life</p>
+        <p><span data-i18n="footer.builtBy">Built with 🦋 by</span> <a href="https://contentcreators.life" target="_blank">ContentCreators.life</a> | <span data-i18n="footer.poweredBy">Powered by Bonita AI</span></p>
     </footer>
 
     <script>
@@ -772,5 +788,9 @@
             document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
+
+    <!-- i18n Scripts -->
+    <script src="/assets/i18n.js"></script>
+    <script src="/assets/language-selector.js"></script>
 </body>
 </html>

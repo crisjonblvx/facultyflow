@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing - ReadySetClass</title>
+    <title>Pricing - ReadySetClass™</title>
     <link rel="icon" href="/assets/ReadySetClass_alpha_badge.png" type="image/png">
 
+    <!-- IP Protection Metadata -->
+    <meta name="copyright" content="© 2026 ContentCreators.life. All rights reserved.">
+    <meta name="trademark" content="ReadySetClass is a trademark of ContentCreators.life, first used February 2026">
+    <meta name="author" content="ContentCreators.life">
+    <meta name="rights" content="All content, branding, and intellectual property is protected by copyright and trademark law.">
+
     <style>
+        :root {
+            /* ReadySetClass™ Brand Colors */
+            --navy: #1E3A5F;
+            --gold: #C9A961;
+            --cream: #FAF8F3;
+            --charcoal: #2C2C2C;
+            --light-gray: #E8E8E8;
+            --white: #ffffff;
+
+            /* Semantic */
+            --success: #10b981;
+            --error: #ef4444;
+            --info: #3B82F6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,12 +36,12 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #F5F2E8;
-            color: #2C3E50;
+            background: var(--cream);
+            color: var(--charcoal);
         }
 
         .header {
-            background: white;
+            background: var(--white);
             padding: 20px 40px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
@@ -39,7 +60,7 @@
         .campaign-line {
             font-size: 56px;
             font-weight: 700;
-            color: #1B3A52;
+            color: var(--navy);
             margin-bottom: 16px;
             line-height: 1.1;
         }
@@ -69,21 +90,21 @@
         }
 
         .pricing-card {
-            background: white;
+            background: var(--white);
             border-radius: 16px;
             padding: 40px 32px;
-            box-shadow: 0 4px 20px rgba(27, 58, 82, 0.08);
+            box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
         }
 
         .pricing-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(27, 58, 82, 0.12);
+            box-shadow: 0 8px 30px rgba(30, 58, 95, 0.12);
         }
 
         .pricing-card.featured {
-            border: 3px solid #1B3A52;
+            border: 3px solid var(--navy);
             transform: scale(1.05);
         }
 
@@ -92,8 +113,8 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1B3A52;
-            color: white;
+            background: var(--navy);
+            color: var(--white);
             padding: 4px 16px;
             border-radius: 20px;
             font-size: 12px;
@@ -104,7 +125,7 @@
         .plan-name {
             font-size: 24px;
             font-weight: 700;
-            color: #1B3A52;
+            color: var(--navy);
             margin-bottom: 8px;
         }
 
@@ -121,7 +142,7 @@
         .price-amount {
             font-size: 48px;
             font-weight: 700;
-            color: #1B3A52;
+            color: var(--navy);
         }
 
         .price-period {
@@ -158,7 +179,7 @@
         }
 
         .checkmark {
-            color: #10b981;
+            color: var(--success);
             font-weight: bold;
             font-size: 18px;
         }
@@ -166,8 +187,8 @@
         .cta-button {
             width: 100%;
             padding: 16px 32px;
-            background: linear-gradient(135deg, #1B3A52 0%, #2C5F7C 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--navy) 0%, rgba(201, 169, 97, 0.3) 100%);
+            color: var(--white);
             border: none;
             border-radius: 12px;
             font-size: 16px;
@@ -178,13 +199,13 @@
 
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(27, 58, 82, 0.3);
+            box-shadow: 0 8px 20px rgba(30, 58, 95, 0.3);
         }
 
         .cta-button.secondary {
-            background: white;
-            color: #1B3A52;
-            border: 2px solid #1B3A52;
+            background: var(--white);
+            color: var(--navy);
+            border: 2px solid var(--navy);
         }
 
         .footer {
@@ -195,7 +216,37 @@
         }
 
         .footer strong {
-            color: #1B3A52;
+            color: var(--navy);
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            border: 2px solid var(--navy);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--navy);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .language-selector select:hover {
+            background: var(--cream);
+        }
+
+        .language-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
         }
     </style>
 </head>
@@ -204,13 +255,26 @@
         <div class="logo">
             <img src="/assets/ReadySetClass_alpha_full.png" alt="ReadySetClass">
         </div>
+        <div class="language-selector">
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                <option value="en" data-i18n="lang.en">English</option>
+                <option value="es" data-i18n="lang.es">Español</option>
+                <option value="fr" data-i18n="lang.fr">Français</option>
+                <option value="de" data-i18n="lang.de">Deutsch</option>
+                <option value="zh" data-i18n="lang.zh">中文</option>
+                <option value="ja" data-i18n="lang.ja">日本語</option>
+                <option value="ko" data-i18n="lang.ko">한국어</option>
+                <option value="pt" data-i18n="lang.pt">Português</option>
+                <option value="hi" data-i18n="lang.hi">हिन्दी</option>
+            </select>
+        </div>
     </div>
 
     <div class="hero">
-        <h1 class="campaign-line">Reclaim your time.</h1>
-        <h2 class="brand-promise">Less time setting up. More time teaching.</h2>
+        <h1 class="campaign-line" data-i18n="hero.headline">Reclaim your time.</h1>
+        <h2 class="brand-promise" data-i18n="hero.tagline">Less time setting up. More time teaching.</h2>
 
-        <p class="hero-description">
+        <p class="hero-description" data-i18n="hero.description">
             Teachers spend 15 hours/week on Canvas busywork.
             Get that time back. Your weekends. Your evenings. Your life.
         </p>
@@ -219,81 +283,81 @@
     <div class="pricing-container">
         <!-- Free Trial -->
         <div class="pricing-card">
-            <div class="plan-name">Free Trial</div>
-            <div class="plan-description">Try ReadySetClass risk-free</div>
+            <div class="plan-name" data-i18n="plans.free.name">Free Trial</div>
+            <div class="plan-description" data-i18n="plans.free.description">Try ReadySetClass risk-free</div>
 
             <div class="price">
                 <span class="price-amount">$0</span>
-                <span class="price-period">/ 14 days</span>
+                <span class="price-period" data-i18n="plans.free.period">/ 14 days</span>
             </div>
 
-            <div class="trial-note">
+            <div class="trial-note" data-i18n="plans.free.trial_note">
                 ✨ 50 AI generations included
             </div>
 
             <ul class="features">
-                <li><span class="checkmark">✓</span> AI quiz generation</li>
-                <li><span class="checkmark">✓</span> Grade level adjustment</li>
-                <li><span class="checkmark">✓</span> Canvas integration</li>
-                <li><span class="checkmark">✓</span> All content types</li>
-                <li><span class="checkmark">✓</span> Email support</li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.ai_quiz">AI quiz generation</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.grade_level">Grade level adjustment</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.canvas">Canvas integration</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.content_types">All content types</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.email_support">Email support</span></li>
             </ul>
 
-            <button class="cta-button" onclick="startTrial()">
+            <button class="cta-button" onclick="startTrial()" data-i18n="cta.start_trial">
                 Start Free Trial
             </button>
         </div>
 
         <!-- Pro Plan -->
         <div class="pricing-card featured">
-            <div class="featured-badge">Most Popular</div>
-            <div class="plan-name">Pro</div>
-            <div class="plan-description">For individual teachers</div>
+            <div class="featured-badge" data-i18n="badge.popular">Most Popular</div>
+            <div class="plan-name" data-i18n="plans.pro.name">Pro</div>
+            <div class="plan-description" data-i18n="plans.pro.description">For individual teachers</div>
 
             <div class="price">
                 <span class="price-amount">$29</span>
-                <span class="price-period">/ month</span>
+                <span class="price-period" data-i18n="plans.pro.period">/ month</span>
             </div>
 
             <ul class="features">
-                <li><span class="checkmark">✓</span> Unlimited AI generations</li>
-                <li><span class="checkmark">✓</span> All grade levels (K-College)</li>
-                <li><span class="checkmark">✓</span> Priority support</li>
-                <li><span class="checkmark">✓</span> Advanced analytics</li>
-                <li><span class="checkmark">✓</span> Content library</li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.unlimited">Unlimited AI generations</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.all_grades">All grade levels (K-College)</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.priority_support">Priority support</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.analytics">Advanced analytics</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.library">Content library</span></li>
             </ul>
 
-            <button class="cta-button" onclick="subscribe('pro')">
+            <button class="cta-button" onclick="subscribe('pro-monthly')" data-i18n="cta.reclaim_time">
                 Reclaim Your Time - $29/mo
             </button>
         </div>
 
         <!-- Team Plan -->
         <div class="pricing-card">
-            <div class="plan-name">Team</div>
-            <div class="plan-description">For departments & schools</div>
+            <div class="plan-name" data-i18n="plans.team.name">Team</div>
+            <div class="plan-description" data-i18n="plans.team.description">For departments & schools</div>
 
             <div class="price">
                 <span class="price-amount">$99</span>
-                <span class="price-period">/ month</span>
+                <span class="price-period" data-i18n="plans.team.period">/ month</span>
             </div>
 
             <ul class="features">
-                <li><span class="checkmark">✓</span> Everything in Pro</li>
-                <li><span class="checkmark">✓</span> Up to 10 teachers</li>
-                <li><span class="checkmark">✓</span> Team content sharing</li>
-                <li><span class="checkmark">✓</span> Admin dashboard</li>
-                <li><span class="checkmark">✓</span> Dedicated support</li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.everything_pro">Everything in Pro</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.ten_teachers">Up to 10 teachers</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.team_sharing">Team content sharing</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.admin_dashboard">Admin dashboard</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.dedicated_support">Dedicated support</span></li>
             </ul>
 
-            <button class="cta-button" onclick="subscribe('team')">
-                Get Team Plan
+            <button class="cta-button" onclick="subscribe('school')" data-i18n="cta.get_school">
+                Get School Plan
             </button>
         </div>
     </div>
 
     <div class="footer">
-        <strong>Not hype. Just help.</strong>
+        <strong data-i18n="footer.tagline">Not hype. Just help.</strong>
     </div>
 
     <script>
@@ -314,8 +378,12 @@
 
             // Get Stripe price ID based on plan
             const priceIds = {
-                'pro': 'price_REPLACE_WITH_REAL_STRIPE_PRICE_ID',  // TODO: Replace with real Stripe price IDs
-                'team': 'price_REPLACE_WITH_REAL_STRIPE_PRICE_ID'
+                'educator-monthly': 'price_1T0FFFGKcotGCnJDC4jShxqY',
+                'educator-yearly': 'price_1T0FJnGKcotGCnJDGuf6bhAv',
+                'pro-monthly': 'price_1T0FLtGKcotGCnJDTKbwtYHu',
+                'pro-yearly': 'price_1T0FQXGKcotGCnJDIRJygEV0',
+                'school': 'price_1T0FrdGKcotGCnJDLCLHZxhK',
+                'district': 'price_1T0FbKGKcotGCnJDVrqbHUHu'
             };
 
             try {
@@ -344,6 +412,67 @@
                 console.error('Checkout error:', error);
                 alert('Error processing payment. Please try again.');
             }
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 1rem; background: #f5f5f5; margin-top: 4rem; font-size: 0.875rem; color: #666;">
+        <p>&copy; 2026 ContentCreators.life. All rights reserved.</p>
+        <p>ReadySetClass™ is a trademark of ContentCreators.life</p>
+        <p style="margin-top: 0.5rem;">Built with 🦋 by <a href="https://contentcreators.life" target="_blank" style="color: var(--navy); text-decoration: none;">ContentCreators.life</a> | Powered by Bonita AI</p>
+    </footer>
+
+    <!-- i18n Support -->
+    <script src="/js/i18n-loader.js"></script>
+    <script>
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('language') || 'en';
+            document.getElementById('languageSelect').value = savedLang;
+            loadLanguage(savedLang);
+        });
+
+        // Change language handler
+        function changeLanguage(lang) {
+            localStorage.setItem('language', lang);
+            loadLanguage(lang);
+        }
+
+        // Load and apply translations
+        async function loadLanguage(lang) {
+            try {
+                const response = await fetch(`/locales/${lang}.json`);
+                const translations = await response.json();
+
+                // Apply translations to all elements with data-i18n attribute
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    const translation = getNestedTranslation(translations, key);
+
+                    if (translation) {
+                        // For input placeholders
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            element.placeholder = translation;
+                        } else {
+                            element.textContent = translation;
+                        }
+                    }
+                });
+
+                // Update HTML lang attribute
+                document.documentElement.lang = lang;
+            } catch (error) {
+                console.error('Error loading language:', error);
+                // Fallback to English if translation fails
+                if (lang !== 'en') {
+                    loadLanguage('en');
+                }
+            }
+        }
+
+        // Helper function to get nested translation value
+        function getNestedTranslation(obj, path) {
+            return path.split('.').reduce((prev, curr) => prev?.[curr], obj);
         }
     </script>
 </body>
