@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Brain, ArrowLeft, Loader2, CheckCircle, XCircle, Trophy } from 'lucide-react';
+import { Brain, Loader2, CheckCircle, XCircle, Trophy } from 'lucide-react';
 import { useStudyStore } from '../stores/studyStore';
 import api from '../lib/api';
 import type { StudentCourse } from '../types';
