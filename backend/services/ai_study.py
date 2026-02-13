@@ -1,28 +1,43 @@
 """
 AI Study Service
 Powers flashcard generation, quiz creation, writing help, and study scheduling.
-Uses Anthropic Claude API.
+Uses Groq API with Llama 3.3 70B for fast, affordable inference.
 """
 
 import json
 import os
 from typing import Dict, List, Optional
-from anthropic import Anthropic
+from openai import OpenAI
 
 
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-MODEL = "claude-sonnet-4-5-20250929"
+client = OpenAI(
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1",
+)
+MODEL = "llama-3.3-70b-versatile"
 
 
-def _ask_claude(system: str, prompt: str, max_tokens: int = 2000) -> str:
-    """Send a prompt to Claude and return the response text."""
-    response = client.messages.create(
+def _ask_llm(system: str, prompt: str, max_tokens: int = 2000) -> str:
+    """Send a prompt to Groq and return the response text."""
+    response = client.chat.completions.create(
         model=MODEL,
         max_tokens=max_tokens,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.7,
     )
-    return response.content[0].text
+    return response.choices[0].message.content
+
+
+def _strip_code_fences(text: str) -> str:
+    """Strip markdown code fences from LLM output."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+        text = text.rsplit("```", 1)[0]
+    return text.strip()
 
 
 def generate_flashcards(topic: str, source_text: str, count: int = 10) -> List[Dict]:
@@ -48,13 +63,8 @@ Return a JSON array where each object has:
 Return ONLY the JSON array, nothing else."""
 
     try:
-        text = _ask_claude(system, prompt)
-        # Strip any markdown fences
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.rsplit("```", 1)[0]
-        return json.loads(text)
+        text = _ask_llm(system, prompt)
+        return json.loads(_strip_code_fences(text))
     except Exception as e:
         print(f"Flashcard generation error: {e}")
         return []
@@ -84,12 +94,8 @@ Return a JSON array where each object has:
 Return ONLY the JSON array, nothing else."""
 
     try:
-        text = _ask_claude(system, prompt)
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.rsplit("```", 1)[0]
-        return json.loads(text)
+        text = _ask_llm(system, prompt)
+        return json.loads(_strip_code_fences(text))
     except Exception as e:
         print(f"Quiz generation error: {e}")
         return []
@@ -163,7 +169,7 @@ Suggest what types of sources I should look for, where to find them, and how the
     prompt = type_prompts.get(help_type, type_prompts["feedback"])
 
     try:
-        return _ask_claude(system, prompt, max_tokens=1500)
+        return _ask_llm(system, prompt, max_tokens=1500)
     except Exception as e:
         print(f"Writing help error: {e}")
         return "Sorry, I couldn't generate a response. Please try again."
@@ -209,12 +215,8 @@ Return a JSON object with:
 Return ONLY the JSON object, nothing else."""
 
     try:
-        text = _ask_claude(system, prompt, max_tokens=2500)
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.rsplit("```", 1)[0]
-        return json.loads(text)
+        text = _ask_llm(system, prompt, max_tokens=2500)
+        return json.loads(_strip_code_fences(text))
     except Exception as e:
         print(f"Schedule generation error: {e}")
         return {"schedule": [], "summary": "Could not generate schedule", "tips": []}
