@@ -34,6 +34,10 @@ from canvas_client import CanvasClient
 from canvas_auth import CanvasAuth, encrypt_token, decrypt_token
 from grading_setup import GradingSetupService, GRADING_TEMPLATES, get_template
 
+# Student Edition routers
+from routers.auth import router as auth_router
+from routers.student import router as student_router
+
 # Initialize FastAPI
 app = FastAPI(
     title="ReadySetClass API",
@@ -56,6 +60,10 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Include Student Edition routers
+app.include_router(student_router)
+app.include_router(auth_router)
 
 # Security
 security = HTTPBearer()
