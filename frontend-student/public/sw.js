@@ -1,7 +1,5 @@
-const CACHE_NAME = 'rsc-student-v1';
+const CACHE_NAME = 'rsc-student-v2';
 const STATIC_ASSETS = [
-  '/',
-  '/dashboard',
   '/manifest.json',
   '/logo.png',
 ];
@@ -24,18 +22,25 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — network-first for API, cache-first for static assets
+// Fetch — network-first for navigation/HTML, stale-while-revalidate for assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
 
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
   // API calls — always go to network
-  if (url.pathname.startsWith('/api')) return;
+  if (new URL(request.url).pathname.startsWith('/api')) return;
 
-  // Static assets — cache-first with network fallback
+  // Navigation requests (HTML pages) — always network-first
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Static assets (JS, CSS, images) — stale-while-revalidate
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {
