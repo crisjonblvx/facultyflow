@@ -219,6 +219,75 @@
             color: var(--navy);
         }
 
+        /* Billing Toggle */
+        .billing-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .billing-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .billing-label.active {
+            color: var(--navy);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: var(--light-gray);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.yearly {
+            background: var(--navy);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: var(--white);
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.yearly .toggle-slider {
+            transform: translateX(28px);
+        }
+
+        .savings-badge {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: var(--gold);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .plan-target {
+            color: #888;
+            font-size: 13px;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
         .language-selector {
             position: absolute;
             top: 20px;
@@ -278,80 +347,129 @@
             Teachers spend 15 hours/week on Canvas busywork.
             Get that time back. Your weekends. Your evenings. Your life.
         </p>
+
+        <!-- Billing Toggle -->
+        <div class="billing-toggle-container">
+            <span class="billing-label active" id="monthlyLabel">Monthly</span>
+            <div class="toggle-switch" id="billingToggle" onclick="toggleBilling()">
+                <div class="toggle-slider"></div>
+            </div>
+            <span class="billing-label" id="yearlyLabel">Yearly</span>
+        </div>
     </div>
 
     <div class="pricing-container">
-        <!-- Free Trial -->
+        <!-- Educator Plan -->
         <div class="pricing-card">
-            <div class="plan-name" data-i18n="plans.free.name">Free Trial</div>
-            <div class="plan-description" data-i18n="plans.free.description">Try ReadySetClass risk-free</div>
+            <div class="plan-name" data-i18n="plans.educator.name">Educator</div>
+            <div class="plan-target" data-i18n="plans.educator.target">K-12 teachers, adjuncts</div>
 
-            <div class="price">
-                <span class="price-amount">$0</span>
-                <span class="price-period" data-i18n="plans.free.period">/ 14 days</span>
+            <!-- Monthly Price -->
+            <div class="price monthly-price">
+                <span class="price-amount">$9.99</span>
+                <span class="price-period" data-i18n="plans.educator.period_monthly">/ month</span>
             </div>
 
-            <div class="trial-note" data-i18n="plans.free.trial_note">
-                ✨ 50 AI generations included
+            <!-- Yearly Price -->
+            <div class="price yearly-price" style="display: none;">
+                <span class="savings-badge" data-i18n="badge.save_educator">Save $20/year</span>
+                <span class="price-amount">$99</span>
+                <span class="price-period" data-i18n="plans.educator.period_yearly">/ year</span>
             </div>
 
             <ul class="features">
-                <li><span class="checkmark">✓</span> <span data-i18n="features.ai_quiz">AI quiz generation</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.grade_level">Grade level adjustment</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.canvas">Canvas integration</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.content_types">All content types</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.unlimited_courses">Unlimited courses</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.ai_content">AI-generated content</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.canvas_upload">Canvas upload</span></li>
                 <li><span class="checkmark">✓</span> <span data-i18n="features.email_support">Email support</span></li>
             </ul>
 
-            <button class="cta-button" onclick="startTrial()" data-i18n="cta.start_trial">
+            <button class="cta-button monthly-button" onclick="subscribe('educator-monthly')" data-i18n="cta.start_trial">
+                Start Free Trial
+            </button>
+            <button class="cta-button yearly-button" style="display: none;" onclick="subscribe('educator-yearly')" data-i18n="cta.start_trial">
                 Start Free Trial
             </button>
         </div>
 
-        <!-- Pro Plan -->
+        <!-- Pro Plan (Featured) -->
         <div class="pricing-card featured">
             <div class="featured-badge" data-i18n="badge.popular">Most Popular</div>
             <div class="plan-name" data-i18n="plans.pro.name">Pro</div>
-            <div class="plan-description" data-i18n="plans.pro.description">For individual teachers</div>
+            <div class="plan-target" data-i18n="plans.pro.target">College faculty</div>
 
-            <div class="price">
+            <!-- Monthly Price -->
+            <div class="price monthly-price">
                 <span class="price-amount">$29</span>
-                <span class="price-period" data-i18n="plans.pro.period">/ month</span>
+                <span class="price-period" data-i18n="plans.pro.period_monthly">/ month</span>
+            </div>
+
+            <!-- Yearly Price -->
+            <div class="price yearly-price" style="display: none;">
+                <span class="savings-badge" data-i18n="badge.save_pro">Save $58/year</span>
+                <span class="price-amount">$290</span>
+                <span class="price-period" data-i18n="plans.pro.period_yearly">/ year</span>
             </div>
 
             <ul class="features">
-                <li><span class="checkmark">✓</span> <span data-i18n="features.unlimited">Unlimited AI generations</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.all_grades">All grade levels (K-College)</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.everything_educator">Everything in Educator</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.custom_templates">Custom templates</span></li>
                 <li><span class="checkmark">✓</span> <span data-i18n="features.priority_support">Priority support</span></li>
                 <li><span class="checkmark">✓</span> <span data-i18n="features.analytics">Advanced analytics</span></li>
                 <li><span class="checkmark">✓</span> <span data-i18n="features.library">Content library</span></li>
             </ul>
 
-            <button class="cta-button" onclick="subscribe('pro-monthly')" data-i18n="cta.reclaim_time">
-                Reclaim Your Time - $29/mo
+            <button class="cta-button monthly-button" onclick="subscribe('pro-monthly')" data-i18n="cta.start_trial">
+                Start Free Trial
+            </button>
+            <button class="cta-button yearly-button" style="display: none;" onclick="subscribe('pro-yearly')" data-i18n="cta.start_trial">
+                Start Free Trial
             </button>
         </div>
 
-        <!-- Team Plan -->
+        <!-- School Plan -->
         <div class="pricing-card">
-            <div class="plan-name" data-i18n="plans.team.name">Team</div>
-            <div class="plan-description" data-i18n="plans.team.description">For departments & schools</div>
+            <div class="plan-name" data-i18n="plans.school.name">School</div>
+            <div class="plan-target" data-i18n="plans.school.target">Small departments (up to 50 teachers)</div>
 
             <div class="price">
-                <span class="price-amount">$99</span>
-                <span class="price-period" data-i18n="plans.team.period">/ month</span>
+                <span class="price-amount">$1,999</span>
+                <span class="price-period" data-i18n="plans.school.period">/ year</span>
             </div>
 
             <ul class="features">
                 <li><span class="checkmark">✓</span> <span data-i18n="features.everything_pro">Everything in Pro</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.ten_teachers">Up to 10 teachers</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.team_sharing">Team content sharing</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.fifty_seats">50 teacher seats</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.shared_templates">Shared templates</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.team_collaboration">Team collaboration</span></li>
                 <li><span class="checkmark">✓</span> <span data-i18n="features.admin_dashboard">Admin dashboard</span></li>
-                <li><span class="checkmark">✓</span> <span data-i18n="features.dedicated_support">Dedicated support</span></li>
             </ul>
 
-            <button class="cta-button" onclick="subscribe('school')" data-i18n="cta.get_school">
-                Get School Plan
+            <button class="cta-button secondary" onclick="subscribe('school')" data-i18n="cta.contact_sales">
+                Contact Sales
+            </button>
+        </div>
+
+        <!-- District Plan -->
+        <div class="pricing-card">
+            <div class="plan-name" data-i18n="plans.district.name">District</div>
+            <div class="plan-target" data-i18n="plans.district.target">Large districts (50-500 teachers)</div>
+
+            <div class="price">
+                <span class="price-amount">$9,999</span>
+                <span class="price-period" data-i18n="plans.district.period">/ year</span>
+            </div>
+
+            <ul class="features">
+                <li><span class="checkmark">✓</span> <span data-i18n="features.everything_school">Everything in School</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.unlimited_seats">Unlimited seats</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.white_label">White-label option</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.dedicated_support">Dedicated support</span></li>
+                <li><span class="checkmark">✓</span> <span data-i18n="features.custom_integrations">Custom integrations</span></li>
+            </ul>
+
+            <button class="cta-button secondary" onclick="subscribe('district')" data-i18n="cta.contact_sales">
+                Contact Sales
             </button>
         </div>
     </div>
@@ -365,6 +483,37 @@
 
         function startTrial() {
             window.location.href = '/login.html?action=signup';
+        }
+
+        // Billing toggle function
+        function toggleBilling() {
+            const toggle = document.getElementById('billingToggle');
+            const monthlyLabel = document.getElementById('monthlyLabel');
+            const yearlyLabel = document.getElementById('yearlyLabel');
+            const monthlyPrices = document.querySelectorAll('.monthly-price');
+            const yearlyPrices = document.querySelectorAll('.yearly-price');
+            const monthlyButtons = document.querySelectorAll('.monthly-button');
+            const yearlyButtons = document.querySelectorAll('.yearly-button');
+
+            toggle.classList.toggle('yearly');
+
+            if (toggle.classList.contains('yearly')) {
+                // Show yearly
+                monthlyLabel.classList.remove('active');
+                yearlyLabel.classList.add('active');
+                monthlyPrices.forEach(el => el.style.display = 'none');
+                yearlyPrices.forEach(el => el.style.display = 'block');
+                monthlyButtons.forEach(el => el.style.display = 'none');
+                yearlyButtons.forEach(el => el.style.display = 'block');
+            } else {
+                // Show monthly
+                monthlyLabel.classList.add('active');
+                yearlyLabel.classList.remove('active');
+                monthlyPrices.forEach(el => el.style.display = 'block');
+                yearlyPrices.forEach(el => el.style.display = 'none');
+                monthlyButtons.forEach(el => el.style.display = 'block');
+                yearlyButtons.forEach(el => el.style.display = 'none');
+            }
         }
 
         async function subscribe(plan) {
