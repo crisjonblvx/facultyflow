@@ -1,12 +1,15 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Bell, Home, BarChart3, Calendar, Sparkles, Settings, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useAnnouncementStore } from '../stores/announcementStore';
 
 export default function Layout() {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuthStore();
   const { unreadCount } = useAnnouncementStore();
   const navigate = useNavigate();
+  const isRTL = i18n.dir() === 'rtl';
 
   const handleLogout = () => {
     logout();
@@ -14,7 +17,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-light-gray flex flex-col">
+    <div className="min-h-screen bg-light-gray flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Top Header */}
       <header className="bg-white border-b border-medium-gray px-4 py-2 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center">
@@ -29,14 +32,14 @@ export default function Layout() {
             className={({ isActive }) =>
               `p-2 rounded-lg transition ${isActive ? 'text-student-blue bg-student-blue/10' : 'text-dark-gray hover:bg-light-gray'}`
             }
-            title="Settings"
+            title={t('common.settings')}
           >
             <Settings className="w-4 h-4" />
           </NavLink>
           <button
             onClick={handleLogout}
             className="p-2 hover:bg-light-gray rounded-lg transition text-dark-gray"
-            title="Logout"
+            title={t('common.logout')}
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -51,7 +54,7 @@ export default function Layout() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-medium-gray safe-bottom z-20">
         <div className="flex items-center justify-around max-w-lg mx-auto">
-          <NavItem to="/dashboard" icon={<Home className="w-5 h-5" />} label="Home" />
+          <NavItem to="/dashboard" icon={<Home className="w-5 h-5" />} label={t('nav.home')} />
           <NavItem
             to="/announcements"
             icon={
@@ -64,11 +67,11 @@ export default function Layout() {
                 )}
               </div>
             }
-            label="Alerts"
+            label={t('nav.alerts')}
           />
-          <NavItem to="/deadlines" icon={<Calendar className="w-5 h-5" />} label="Due" />
-          <NavItem to="/grades" icon={<BarChart3 className="w-5 h-5" />} label="Grades" />
-          <NavItem to="/study" icon={<Sparkles className="w-5 h-5" />} label="Study" />
+          <NavItem to="/deadlines" icon={<Calendar className="w-5 h-5" />} label={t('nav.due')} />
+          <NavItem to="/grades" icon={<BarChart3 className="w-5 h-5" />} label={t('nav.grades')} />
+          <NavItem to="/study" icon={<Sparkles className="w-5 h-5" />} label={t('nav.study')} />
         </div>
       </nav>
     </div>

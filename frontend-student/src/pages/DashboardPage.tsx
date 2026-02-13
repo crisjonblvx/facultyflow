@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, BookOpen, Calendar, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useAnnouncementStore } from '../stores/announcementStore';
 import api from '../lib/api';
 import type { StudentCourse } from '../types';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { unreadCount, fetchAnnouncements } = useAnnouncementStore();
   const [courses, setCourses] = useState<StudentCourse[]>([]);
@@ -45,12 +47,13 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-navy-primary mb-1">Hey, {firstName}</h1>
-      <p className="text-dark-gray text-sm mb-6">Here's what's happening today</p>
+      <h1 className="text-2xl font-bold text-navy-primary mb-1">
+        {t('dashboard.hey', { name: firstName })}
+      </h1>
+      <p className="text-dark-gray text-sm mb-6">{t('dashboard.whatsHappening')}</p>
 
       {/* Quick Stats Row */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        {/* Unread Announcements */}
         <Link
           to="/announcements"
           className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition"
@@ -63,12 +66,11 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-xl font-bold text-text-primary">{unreadCount}</p>
-              <p className="text-[11px] text-dark-gray">Unread Alerts</p>
+              <p className="text-[11px] text-dark-gray">{t('dashboard.unreadAlerts')}</p>
             </div>
           </div>
         </Link>
 
-        {/* Deadlines */}
         <Link
           to="/deadlines"
           className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition"
@@ -84,7 +86,7 @@ export default function DashboardPage() {
                 {overdueCount > 0 ? overdueCount : upcomingCount}
               </p>
               <p className="text-[11px] text-dark-gray">
-                {overdueCount > 0 ? 'Overdue' : 'Due Soon'}
+                {overdueCount > 0 ? t('dashboard.overdue') : t('dashboard.dueSoon')}
               </p>
             </div>
           </div>
@@ -96,7 +98,7 @@ export default function DashboardPage() {
         <div>
           <h2 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
             <BookOpen className="w-5 h-5" />
-            Your Courses
+            {t('dashboard.yourCourses')}
           </h2>
           <div className="space-y-2">
             {courses.map((course) => (
@@ -128,7 +130,7 @@ export default function DashboardPage() {
           className="block bg-student-blue/10 border-2 border-dashed border-student-blue rounded-xl p-6 text-center hover:bg-student-blue/20 transition"
         >
           <BookOpen className="w-8 h-8 text-student-blue mx-auto mb-2" />
-          <p className="font-semibold text-student-blue">Connect Canvas to see your courses</p>
+          <p className="font-semibold text-student-blue">{t('dashboard.connectCanvas')}</p>
         </Link>
       )}
     </div>
