@@ -98,20 +98,6 @@ if not openai_client and not groq_client and not anthropic_client:
     print("   Set one of: OPENAI_API_KEY, GROQ_API_KEY, or ANTHROPIC_API_KEY")
 
 # ============================================================================
-# LANGUAGE SUPPORT
-# ============================================================================
-
-# Language code to full name mapping for AI content generation
-LANGUAGE_MAP = {
-    "en": "English",
-    "es": "Spanish",
-    "fr": "French",
-    "pt": "Portuguese",
-    "ar": "Arabic",
-    "zh": "Chinese"
-}
-
-# ============================================================================
 # DATA MODELS
 # ============================================================================
 
@@ -422,16 +408,12 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
         description: str = "",
         num_questions: int = 10,
         difficulty: str = "medium",
-        grade_level: str = "college",
-        language: str = "en"
+        grade_level: str = "college"
     ) -> Dict:
         """Generate quiz questions with detailed context and grade-appropriate language (Groq - FREE!)"""
 
         # Get reading level instructions
         level_info = get_reading_level_instructions(grade_level)
-
-        # Get language name
-        language_name = LANGUAGE_MAP.get(language, "English")
 
         system = f"You are Bonita, an AI assistant helping educators create {grade_level} quiz questions that assess student understanding at the appropriate reading level."
 
@@ -447,9 +429,6 @@ Format in clean HTML for Canvas. Keep it practical and actionable."""
             diff_mix = f"{easy_count} easy, {medium_count} medium, {hard_count} hard questions"
 
         prompt = f"""Create a {num_questions}-question multiple choice quiz for {grade_level} students.
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire quiz must be in {language_name}, including questions, answer options, and all text.
 
 TOPIC: {topic}
 
@@ -473,7 +452,6 @@ Requirements:
 - One correct answer per question
 - Use the detailed context to create relevant, targeted questions
 - IMPORTANT: Match vocabulary and complexity to the grade level above
-- CRITICAL: All content MUST be in {language_name}
 
 Format as JSON:
 {{
@@ -777,7 +755,6 @@ class QuizGenerateRequest(BaseModel):
     num_questions: int = 10
     difficulty: str = "medium"
     grade_level: str = "college"  # NEW: elementary-k2, elementary-35, middle-68, high-912, college
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 class QuizUploadRequest(BaseModel):
     """Request to upload generated quiz to Canvas"""
@@ -794,7 +771,6 @@ class QuizRequest(BaseModel):
     num_questions: int = 10
     difficulty: str = "medium"
     due_date: Optional[str] = None
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 # ============================================================================
 # AUTH MODELS
@@ -1347,8 +1323,7 @@ async def generate_quiz_questions(request: QuizGenerateRequest):
             description=request.description,
             num_questions=request.num_questions,
             difficulty=request.difficulty,
-            grade_level=request.grade_level,
-            language=request.language
+            grade_level=request.grade_level
         )
 
         return {
@@ -1481,8 +1456,7 @@ async def create_quiz_v2(
             topic=request.topic,
             description=request.description,
             num_questions=request.num_questions,
-            difficulty=request.difficulty,
-            language=request.language
+            difficulty=request.difficulty
         )
 
         # Step 2: Upload to Canvas
@@ -1548,14 +1522,12 @@ class AIAssignmentRequest(BaseModel):
     assignment_type: str
     requirements: str
     points: int = 100
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 
 class AnnouncementRequest(BaseModel):
     course_id: int
     topic: str
     details: Optional[str] = None
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 
 class AIPageRequest(BaseModel):
@@ -1563,7 +1535,6 @@ class AIPageRequest(BaseModel):
     page_type: str
     description: str
     objectives: Optional[str] = None
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 
 class PageRequest(BaseModel):
@@ -1638,14 +1609,8 @@ async def create_announcement_v2(
         # Generate announcement with AI
         print(f"📢 Generating announcement on: {request.topic}")
 
-        # Get language name
-        language_name = LANGUAGE_MAP.get(request.language, "English")
-
         system = "You are Bonita, helping professors create course announcements."
         prompt = f"""Create a professional course announcement about: {request.topic}
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire announcement must be in {language_name}.
 
 {f'Additional details: {request.details}' if request.details else ''}
 
@@ -1715,17 +1680,11 @@ async def generate_ai_page(
 
         page_type_desc = type_descriptions.get(request.page_type, "course page")
 
-        # Get language name
-        language_name = LANGUAGE_MAP.get(request.language, "English")
-
         system = """You are Bonita, an AI assistant helping college professors create course pages.
 Your output should be well-formatted HTML suitable for Canvas LMS.
 Use clear structure, headers, lists, and proper formatting."""
 
         prompt = f"""Create a professional course page titled: {request.title}
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire page must be in {language_name}, including all sections, headings, and content.
 
 Page Type: {page_type_desc}
 Description: {request.description}
@@ -1853,17 +1812,11 @@ async def generate_ai_assignment(
 
         assignment_type_desc = type_descriptions.get(request.assignment_type, "assignment")
 
-        # Get language name
-        language_name = LANGUAGE_MAP.get(request.language, "English")
-
         system = """You are Bonita, an AI assistant helping college professors create high-quality assignments.
 Your output should be professional, clear, and properly formatted for Canvas LMS.
 Use HTML formatting with headers, lists, and proper structure."""
 
         prompt = f"""Create a professional college assignment on: {request.topic}
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire response must be in {language_name}, including title, description, objectives, instructions, deliverables, and rubric.
 
 Assignment Type: {assignment_type_desc}
 Points: {request.points}
@@ -2337,7 +2290,6 @@ class AIDiscussionRequest(BaseModel):
     topic: str
     discussion_type: str
     goals: str
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 
 class AISyllabusRequest(BaseModel):
@@ -2345,7 +2297,6 @@ class AISyllabusRequest(BaseModel):
     description: str
     objectives: str
     grading: str
-    language: str = "en"  # Language code: en, es, fr, pt, ar, zh
 
 
 class SyllabusRequest(BaseModel):
@@ -2359,14 +2310,8 @@ async def generate_ai_discussion(request: AIDiscussionRequest):
     try:
         print(f"🤖 Generating AI discussion: {request.topic}")
 
-        # Get language name
-        language_name = LANGUAGE_MAP.get(request.language, "English")
-
         system = "You are Bonita, helping professors create engaging class discussions."
         prompt = f"""Create a discussion topic on: {request.topic}
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire discussion topic must be in {language_name}, including the prompt, questions, guidelines, and outcomes.
 
 Discussion Type: {request.discussion_type}
 Learning Goals: {request.goals}
@@ -2397,14 +2342,8 @@ async def generate_ai_syllabus(request: AISyllabusRequest):
     try:
         print(f"🤖 Generating AI syllabus: {request.course_name}")
 
-        # Get language name
-        language_name = LANGUAGE_MAP.get(request.language, "English")
-
         system = "You are Bonita, helping professors create comprehensive course syllabi."
         prompt = f"""Create a professional course syllabus for: {request.course_name}
-
-IMPORTANT: Generate ALL content in {language_name}.
-The entire syllabus must be in {language_name}, including all sections, policies, and schedule.
 
 Course Description: {request.description}
 Learning Objectives: {request.objectives}
