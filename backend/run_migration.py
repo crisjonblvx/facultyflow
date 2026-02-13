@@ -4,8 +4,33 @@ Run database migrations for ReadySetClass
 import os
 import psycopg2
 
+
+def run_migration(conn, cursor, filename):
+    """Execute a single migration file"""
+    migration_path = os.path.join(os.path.dirname(__file__), 'migrations', filename)
+
+    if not os.path.exists(migration_path):
+        print(f"  ⚠️  Migration file not found: {filename}")
+        return False
+
+    print(f"  🔄 Running: {filename}")
+
+    with open(migration_path, 'r') as f:
+        migration_sql = f.read()
+
+    try:
+        cursor.execute(migration_sql)
+        conn.commit()
+        print(f"  ✅ {filename} completed")
+        return True
+    except Exception as e:
+        print(f"  ❌ {filename} failed: {e}")
+        conn.rollback()
+        return False
+
+
 def run_migrations():
-    """Execute all migration files"""
+    """Execute all migration files in order"""
 
     DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -21,26 +46,24 @@ def run_migrations():
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
 
-    print("🔄 Running migration: 001_create_auth_tables.sql")
+    migrations = [
+        '001_create_auth_tables.sql',
+        '002_add_subscriptions.sql',
+        '003_student_announcement_tables.sql',
+        '004_assignments_grades_tables.sql',
+        '005_ai_study_tools_tables.sql',
+    ]
 
-    # Read and execute migration
-    migration_path = os.path.join(os.path.dirname(__file__), 'migrations', '001_create_auth_tables.sql')
+    print(f"📦 Running {len(migrations)} migrations...\n")
 
-    with open(migration_path, 'r') as f:
-        migration_sql = f.read()
+    for migration in migrations:
+        run_migration(conn, cursor, migration)
 
-    try:
-        cursor.execute(migration_sql)
-        conn.commit()
-        print("✅ Migration completed successfully!")
+    print("\n✅ All migrations complete!")
 
-    except Exception as e:
-        print(f"❌ Migration failed: {e}")
-        conn.rollback()
+    cursor.close()
+    conn.close()
 
-    finally:
-        cursor.close()
-        conn.close()
 
 if __name__ == "__main__":
     run_migrations()

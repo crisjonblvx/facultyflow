@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* ReadySetClass Student Edition Design System */
+@theme {
+  /* Primary Colors */
+  --color-navy-primary: #1B3A57;
+  --color-navy-hover: #0f2740;
+  --color-gold-accent: #D4AF37;
+
+  /* Student Edition Colors */
+  --color-student-blue: #4A90E2;
+  --color-sky-blue: #87CEEB;
+
+  /* Semantic Colors */
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2196F3;
+
+  /* Neutrals */
+  --color-light-gray: #F5F5F5;
+  --color-medium-gray: #E0E0E0;
+  --color-dark-gray: #757575;
+  --color-text-primary: #212121;
+}
+
+/* Global styles */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-light-gray);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-width: 320px;
+}
+
+/* Safe area padding for notched devices */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

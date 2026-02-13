@@ -44,3 +44,6 @@ dist/
 build/
 *.egg-info/
 .vercel
+
+# Node.js
+node_modules/

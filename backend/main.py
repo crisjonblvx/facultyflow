@@ -34,6 +34,10 @@ from canvas_client import CanvasClient
 from canvas_auth import CanvasAuth, encrypt_token, decrypt_token
 from grading_setup import GradingSetupService, GRADING_TEMPLATES, get_template
 
+# Student Edition routers
+from routers.auth import router as auth_router
+from routers.student import router as student_router
+
 # Initialize FastAPI
 app = FastAPI(
     title="ReadySetClass API",
@@ -62,6 +66,10 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Include Student Edition routers
+app.include_router(student_router)
+app.include_router(auth_router)
 
 # Security
 security = HTTPBearer()
@@ -976,6 +984,7 @@ class CheckoutRequest(BaseModel):
     price_id: str
     success_url: str
     cancel_url: str
+    tier: str = "pro"
 
 @app.post("/api/stripe/create-checkout")
 async def create_checkout_session(
@@ -1019,7 +1028,8 @@ async def create_checkout_session(
             success_url=request.success_url,
             cancel_url=request.cancel_url,
             metadata={
-                'user_id': current_user['user_id']
+                'user_id': current_user['user_id'],
+                'tier': request.tier,
             }
         )
 
@@ -1052,15 +1062,19 @@ async def stripe_webhook(request: Request):
             session = event['data']['object']
             user_id = session['metadata']['user_id']
 
+            # Determine tier from metadata, default to 'pro'
+            tier = session.get('metadata', {}).get('tier', 'pro')
+
             # Update user subscription
             cursor.execute("""
                 UPDATE users
                 SET subscription_status = 'active',
-                    subscription_tier = 'pro',
+                    subscription_tier = %s,
                     stripe_subscription_id = %s,
-                    trial_ends_at = NULL
+                    trial_ends_at = NULL,
+                    ai_generations_this_month = 0
                 WHERE id = %s
-            """, (session['subscription'], user_id))
+            """, (tier, session['subscription'], user_id))
 
         elif event['type'] == 'customer.subscription.updated':
             subscription = event['data']['object']
