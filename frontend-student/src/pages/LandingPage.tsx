@@ -35,7 +35,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="px-4 pt-12 pb-16 md:pt-20 md:pb-24 bg-gradient-to-b from-white to-light-gray">
         <div className="max-w-3xl mx-auto text-center">
-          <img src="/logo.png" alt="ReadySetClass Student Edition" className="h-20 md:h-28 mx-auto mb-6" />
+          <img src="/logo.png" alt="ReadySetClass Student Edition" className="w-72 md:w-96 mx-auto mb-8" />
           <h1 className="text-4xl md:text-5xl font-extrabold text-navy-primary leading-tight mb-4">
             Canvas, but it actually
             <span className="text-student-blue"> works for you</span>
