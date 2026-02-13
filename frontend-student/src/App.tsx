@@ -18,11 +18,12 @@ import QuizPage from './pages/QuizPage';
 import WritingHelpPage from './pages/WritingHelpPage';
 import StudySchedulePage from './pages/StudySchedulePage';
 import PricingPage from './pages/PricingPage';
+import LandingPage from './pages/LandingPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
   return <>{children}</>;
 }
@@ -38,6 +39,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
@@ -76,7 +78,7 @@ export default function App() {
         </Route>
 
         {/* Default redirect */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
