@@ -24,7 +24,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Da
 from sqlalchemy.ext.declarative import declarative_base
 from openai import OpenAI
 from groq import Groq
-from passlib.hash import bcrypt
+import bcrypt
 import psycopg2
 import stripe
 
@@ -863,7 +863,9 @@ async def login(request: LoginRequest):
         user_id, email, password_hash, role, is_active, is_demo, demo_expires_at, full_name = user
 
         # Check password
-        if not bcrypt.verify(request.password, password_hash):
+        password_bytes = request.password.encode('utf-8')
+        stored_hash_bytes = password_hash.encode('utf-8')
+        if not bcrypt.checkpw(password_bytes, stored_hash_bytes):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         # Check if active
@@ -2730,7 +2732,9 @@ async def create_demo_account(db: Session = Depends(get_db)):
         password = "demo2026"  # Simple password for all demos
 
         # Hash password
-        password_hash = bcrypt.hash(password)
+        password_bytes = password.encode('utf-8')
+        salt = bcrypt.gensalt()
+        password_hash = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
         # Calculate expiration (24 hours from now)
         expires_at = datetime.utcnow() + timedelta(hours=24)
