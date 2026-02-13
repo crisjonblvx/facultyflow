@@ -14,7 +14,7 @@ export default function LandingPage() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-medium-gray/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <img src="/logo.png" alt="ReadySetClass" className="h-8" />
+          <img src="/logo.png" alt="ReadySetClass" className="h-10" />
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/login')}
@@ -35,10 +35,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="px-4 pt-12 pb-16 md:pt-20 md:pb-24 bg-gradient-to-b from-white to-light-gray">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-1.5 bg-student-blue/10 text-student-blue text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            Student Edition
-          </div>
+          <img src="/logo.png" alt="ReadySetClass Student Edition" className="h-20 md:h-28 mx-auto mb-6" />
           <h1 className="text-4xl md:text-5xl font-extrabold text-navy-primary leading-tight mb-4">
             Canvas, but it actually
             <span className="text-student-blue"> works for you</span>
