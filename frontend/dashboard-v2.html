@@ -3401,7 +3401,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        course_id: currentCourse,
+                        course_id: currentCourse.id,
                         grading_method: gradingMethod,
                         categories: gradingCategories,
                         global_rules: Object.keys(globalRules).length > 0 ? globalRules : null
