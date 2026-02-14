@@ -1,5 +1,5 @@
 # Railway Deployment Configuration
-# This file tells Railway how to deploy the FacultyFlow backend
+# This file tells Railway how to deploy the ReadySetClass backend
 
 [build]
 builder = "NIXPACKS"

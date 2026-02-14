@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "facultyflow",
+  "name": "readysetclass",
   "routes": [
     {
       "src": "/",
@@ -29,6 +29,19 @@
     {
       "src": "/dashboard.html",
       "dest": "/dashboard.html"
+    },
+    {
+      "src": "/grading.html",
+      "dest": "/grading.html"
+    },
+    {
+      "src": "/grading",
+      "dest": "/grading.html"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
 }
