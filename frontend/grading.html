@@ -453,6 +453,383 @@
             position: relative;
         }
 
+        /* Review Interface */
+        .review-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .review-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .review-title h2 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .review-title p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .review-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--background-cream);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+        }
+
+        .stat-box value.success {
+            color: var(--success);
+        }
+
+        .stat-box value.warning {
+            color: var(--warning);
+        }
+
+        /* Review Controls */
+        .review-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--primary-navy);
+            background: white;
+            color: var(--primary-navy);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--background-cream);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-navy);
+            color: white;
+        }
+
+        .sort-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sort-buttons label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .sort-buttons select {
+            padding: 0.5rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: var(--font-body);
+            cursor: pointer;
+        }
+
+        .bulk-actions {
+            margin-left: auto;
+        }
+
+        /* Grade Cards */
+        .grade-cards-container {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grade-card {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .grade-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .grade-card.reviewed {
+            border-color: var(--success);
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05) 0%, white 10%);
+        }
+
+        .grade-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--background-cream);
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .student-info h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+        }
+
+        .confidence-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .confidence-badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .confidence-badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .confidence-badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flag-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .reviewed-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            background: #d1fae5;
+            color: #065f46;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .grade-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .score-input {
+            width: 80px;
+            padding: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            border: 2px solid var(--primary-navy);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            color: var(--primary-navy);
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.2);
+        }
+
+        .score-max {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        /* Grade Card Body */
+        .grade-card-body {
+            padding: 1.5rem;
+        }
+
+        .rubric-breakdown {
+            margin-bottom: 1.5rem;
+        }
+
+        .rubric-breakdown h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .rubric-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 3fr;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--background-cream);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .criterion-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .criterion-score {
+            font-weight: 700;
+            color: var(--primary-navy);
+        }
+
+        .criterion-feedback {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Feedback Section */
+        .feedback-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .feedback-section h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .feedback-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .feedback-textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        /* Grade Actions */
+        .grade-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        /* Submission Text */
+        .submission-text-container {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(0,0,0,0.05);
+        }
+
+        .submission-text-container h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .submission-text {
+            padding: 1rem;
+            background: var(--background-cream);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Review Footer */
+        .review-footer {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .review-footer .inline-hint {
+            display: block;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .assignment-stats {
@@ -466,6 +843,30 @@
             .modal-content {
                 max-width: 95%;
                 max-height: 95vh;
+            }
+
+            .review-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .bulk-actions {
+                margin-left: 0;
+            }
+
+            .grade-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .rubric-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .grade-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -915,20 +1316,368 @@
         }
 
         // Render review interface
+        let currentSession = null;
+        let currentGrades = [];
+        let filterMode = 'all';
+        let sortMode = 'confidence';
+
         function renderReviewInterface(data) {
+            currentSession = data.session;
+            currentGrades = data.grades;
+
+            // Sort grades by confidence (high first)
+            sortGrades();
+
+            const reviewedCount = currentGrades.filter(g => g.reviewed).length;
+            const highConfidenceCount = currentGrades.filter(g => g.ai_confidence === 'high').length;
+            const flaggedCount = currentGrades.filter(g => g.ai_flags && g.ai_flags.length > 0).length;
+            const avgScore = currentSession.average_score || 0;
+
             document.getElementById('app-container').innerHTML = `
-                <div style="text-align: center; padding: 3rem;">
-                    <h2 style="color: var(--success); font-size: 2rem; margin-bottom: 1rem;">
-                        ✅ Grading Complete!
-                    </h2>
-                    <p style="color: var(--text-light); margin-bottom: 2rem;">
-                        AI has graded ${data.session.total_submissions} submissions. Review interface coming soon!
-                    </p>
-                    <button class="btn btn-primary" onclick="init()">
-                        Back to Assignments
-                    </button>
+                <div class="review-container">
+                    <!-- Review Header -->
+                    <div class="review-header">
+                        <div class="review-title">
+                            <h2>✅ Review AI Grades</h2>
+                            <p>${currentSession.assignment_title}</p>
+                        </div>
+
+                        <div class="review-stats">
+                            <div class="stat-box">
+                                <label>Reviewed</label>
+                                <value>${reviewedCount} / ${currentSession.total_submissions}</value>
+                            </div>
+                            <div class="stat-box">
+                                <label>Avg Score</label>
+                                <value>${avgScore.toFixed(1)}%</value>
+                            </div>
+                            <div class="stat-box">
+                                <label>High Confidence</label>
+                                <value class="success">${highConfidenceCount}</value>
+                            </div>
+                            <div class="stat-box">
+                                <label>Flagged</label>
+                                <value class="warning">${flaggedCount}</value>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters and Actions -->
+                    <div class="review-controls">
+                        <div class="filter-buttons">
+                            <button class="filter-btn ${filterMode === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+                                All (${currentGrades.length})
+                            </button>
+                            <button class="filter-btn ${filterMode === 'flagged' ? 'active' : ''}" onclick="setFilter('flagged')">
+                                Flagged (${flaggedCount})
+                            </button>
+                            <button class="filter-btn ${filterMode === 'high' ? 'active' : ''}" onclick="setFilter('high')">
+                                High Confidence (${highConfidenceCount})
+                            </button>
+                            <button class="filter-btn ${filterMode === 'needs_review' ? 'active' : ''}" onclick="setFilter('needs_review')">
+                                Needs Review (${currentGrades.filter(g => !g.reviewed).length})
+                            </button>
+                        </div>
+
+                        <div class="sort-buttons">
+                            <label>Sort:</label>
+                            <select onchange="sortMode = this.value; sortGrades(); renderGradeCards();">
+                                <option value="confidence" ${sortMode === 'confidence' ? 'selected' : ''}>Confidence</option>
+                                <option value="score" ${sortMode === 'score' ? 'selected' : ''}>Score</option>
+                                <option value="name" ${sortMode === 'name' ? 'selected' : ''}>Student Name</option>
+                            </select>
+                        </div>
+
+                        <div class="bulk-actions">
+                            <button class="btn btn-secondary" onclick="approveAllHighConfidence()">
+                                Approve All High Confidence (${highConfidenceCount})
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grade Cards Container -->
+                    <div class="grade-cards-container" id="grade-cards">
+                        ${renderGradeCards()}
+                    </div>
+
+                    <!-- Post to Canvas Button -->
+                    <div class="review-footer">
+                        <p class="inline-hint">Review and approve grades above, then post them to Canvas for students to see.</p>
+                        <button class="btn btn-primary btn-large" onclick="confirmPostToCanvas()" ${reviewedCount === 0 ? 'disabled' : ''}>
+                            📤 Post ${reviewedCount} Reviewed Grade${reviewedCount !== 1 ? 's' : ''} to Canvas
+                        </button>
+                    </div>
                 </div>
             `;
+        }
+
+        // Sort grades
+        function sortGrades() {
+            if (sortMode === 'confidence') {
+                const order = {high: 0, medium: 1, low: 2};
+                currentGrades.sort((a, b) => order[a.ai_confidence] - order[b.ai_confidence]);
+            } else if (sortMode === 'score') {
+                currentGrades.sort((a, b) => (b.ai_total_score || 0) - (a.ai_total_score || 0));
+            } else if (sortMode === 'name') {
+                currentGrades.sort((a, b) => (a.student_name || '').localeCompare(b.student_name || ''));
+            }
+        }
+
+        // Set filter
+        function setFilter(mode) {
+            filterMode = mode;
+            renderReviewInterface({session: currentSession, grades: currentGrades});
+        }
+
+        // Filter grades based on mode
+        function getFilteredGrades() {
+            if (filterMode === 'all') return currentGrades;
+            if (filterMode === 'flagged') return currentGrades.filter(g => g.ai_flags && g.ai_flags.length > 0);
+            if (filterMode === 'high') return currentGrades.filter(g => g.ai_confidence === 'high');
+            if (filterMode === 'needs_review') return currentGrades.filter(g => !g.reviewed);
+            return currentGrades;
+        }
+
+        // Render grade cards
+        function renderGradeCards() {
+            const filtered = getFilteredGrades();
+
+            if (filtered.length === 0) {
+                return '<div class="empty-state"><p>No submissions match this filter.</p></div>';
+            }
+
+            return filtered.map(grade => {
+                const confidenceClass = grade.ai_confidence === 'high' ? 'success' : grade.ai_confidence === 'medium' ? 'warning' : 'danger';
+                const confidenceIcon = grade.ai_confidence === 'high' ? '✅' : grade.ai_confidence === 'medium' ? '⚠️' : '🔴';
+
+                const flags = grade.ai_flags || [];
+                const hasFlags = flags.length > 0;
+
+                // Parse rubric scores
+                const rubricScores = grade.ai_rubric_scores || {};
+                const criterionFeedback = grade.ai_criterion_feedback || {};
+
+                const displayScore = grade.final_score !== null ? grade.final_score : grade.ai_total_score;
+                const displayFeedback = grade.final_feedback || grade.ai_feedback;
+
+                return `
+                    <div class="grade-card ${grade.reviewed ? 'reviewed' : ''}" id="grade-${grade.id}">
+                        <div class="grade-card-header">
+                            <div class="student-info">
+                                <h3>${grade.student_name}</h3>
+                                <span class="confidence-badge ${confidenceClass}">
+                                    ${confidenceIcon} ${grade.ai_confidence.toUpperCase()} CONFIDENCE
+                                </span>
+                                ${hasFlags ? `<span class="flag-badge">🚩 ${flags.join(', ')}</span>` : ''}
+                                ${grade.reviewed ? '<span class="reviewed-badge">✓ Reviewed</span>' : ''}
+                            </div>
+                            <div class="grade-score">
+                                <span class="score-label">Score:</span>
+                                <input type="number"
+                                       class="score-input"
+                                       id="score-${grade.id}"
+                                       value="${displayScore || 0}"
+                                       min="0"
+                                       max="100"
+                                       onchange="updateGradeScore(${grade.id}, this.value)">
+                                <span class="score-max">/ 100</span>
+                            </div>
+                        </div>
+
+                        <div class="grade-card-body">
+                            <!-- Rubric Breakdown -->
+                            <div class="rubric-breakdown">
+                                <h4>Rubric Breakdown:</h4>
+                                ${Object.keys(rubricScores).map(criterion => `
+                                    <div class="rubric-row">
+                                        <span class="criterion-name">${criterion}</span>
+                                        <span class="criterion-score">${rubricScores[criterion]} pts</span>
+                                        ${criterionFeedback[criterion] ? `<span class="criterion-feedback">${criterionFeedback[criterion]}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Overall Feedback -->
+                            <div class="feedback-section">
+                                <h4>Overall Feedback:</h4>
+                                <textarea
+                                    class="feedback-textarea"
+                                    id="feedback-${grade.id}"
+                                    rows="4"
+                                    onchange="updateGradeFeedback(${grade.id}, this.value)"
+                                >${displayFeedback || ''}</textarea>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="grade-actions">
+                                <button class="btn btn-success" onclick="approveGrade(${grade.id})">
+                                    ${grade.reviewed ? '✓ Approved' : 'Approve'}
+                                </button>
+                                <button class="btn btn-secondary" onclick="regenerateGrade(${grade.id})">
+                                    🔄 Regenerate
+                                </button>
+                                <button class="btn btn-ghost" onclick="toggleSubmissionText(${grade.id})">
+                                    📄 View Submission
+                                </button>
+                            </div>
+
+                            <!-- Submission Text (Hidden by default) -->
+                            <div class="submission-text-container" id="submission-${grade.id}" style="display: none;">
+                                <h4>Student Submission:</h4>
+                                <div class="submission-text">${grade.submission_text || 'No submission text available.'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update grade score
+        function updateGradeScore(gradeId, score) {
+            const grade = currentGrades.find(g => g.id === gradeId);
+            if (grade) {
+                grade.final_score = parseFloat(score);
+            }
+        }
+
+        // Update grade feedback
+        function updateGradeFeedback(gradeId, feedback) {
+            const grade = currentGrades.find(g => g.id === gradeId);
+            if (grade) {
+                grade.final_feedback = feedback;
+            }
+        }
+
+        // Toggle submission text
+        function toggleSubmissionText(gradeId) {
+            const element = document.getElementById(`submission-${gradeId}`);
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Approve grade
+        async function approveGrade(gradeId) {
+            const grade = currentGrades.find(g => g.id === gradeId);
+            if (!grade) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai-grading/grades/${gradeId}/review`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        final_score: grade.final_score !== null ? grade.final_score : grade.ai_total_score,
+                        final_feedback: grade.final_feedback || grade.ai_feedback
+                    })
+                });
+
+                if (response.ok) {
+                    grade.reviewed = true;
+                    renderReviewInterface({session: currentSession, grades: currentGrades});
+                } else {
+                    alert('Failed to approve grade. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error approving grade:', error);
+                alert('Failed to approve grade. Please try again.');
+            }
+        }
+
+        // Approve all high confidence grades
+        async function approveAllHighConfidence() {
+            const highConfidenceGrades = currentGrades.filter(g => g.ai_confidence === 'high' && !g.reviewed);
+
+            if (highConfidenceGrades.length === 0) {
+                alert('No high confidence grades to approve.');
+                return;
+            }
+
+            if (!confirm(`Approve ${highConfidenceGrades.length} high confidence grades?`)) {
+                return;
+            }
+
+            for (const grade of highConfidenceGrades) {
+                await approveGrade(grade.id);
+            }
+        }
+
+        // Regenerate grade
+        async function regenerateGrade(gradeId) {
+            if (!confirm('Regenerate AI grade for this submission? This will overwrite the current grade.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/ai-grading/grades/${gradeId}/regenerate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const grade = currentGrades.find(g => g.id === gradeId);
+                    if (grade) {
+                        grade.ai_total_score = data.ai_total_score;
+                        grade.ai_feedback = data.ai_feedback;
+                        grade.final_score = null;
+                        grade.final_feedback = null;
+                        grade.reviewed = false;
+                        renderReviewInterface({session: currentSession, grades: currentGrades});
+                    }
+                } else {
+                    alert('Failed to regenerate grade. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error regenerating grade:', error);
+                alert('Failed to regenerate grade. Please try again.');
+            }
+        }
+
+        // Confirm post to Canvas
+        function confirmPostToCanvas() {
+            const reviewedGrades = currentGrades.filter(g => g.reviewed);
+            const unreviewedCount = currentGrades.length - reviewedGrades.length;
+
+            if (reviewedGrades.length === 0) {
+                alert('Please review at least one grade before posting to Canvas.');
+                return;
+            }
+
+            const scores = reviewedGrades.map(g => g.final_score || g.ai_total_score);
+            const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+            const minScore = Math.min(...scores);
+            const maxScore = Math.max(...scores);
+
+            const message = `Post ${reviewedGrades.length} grades to Canvas?\n\n` +
+                          `Grade Distribution:\n` +
+                          `- Average: ${avgScore.toFixed(1)}%\n` +
+                          `- Range: ${minScore.toFixed(1)}% - ${maxScore.toFixed(1)}%\n\n` +
+                          (unreviewedCount > 0 ? `Note: ${unreviewedCount} submission(s) not yet reviewed will NOT be posted.` : '');
+
+            if (confirm(message)) {
+                postToCanvas();
+            }
+        }
+
+        // Post to Canvas
+        async function postToCanvas() {
+            try {
+                const response = await fetch(`${API_BASE}/api/ai-grading/sessions/${currentSession.id}/post-to-canvas`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Success!\n\nPosted ${data.success_count} grades to Canvas.` +
+                          (data.failed_count > 0 ? `\n\n⚠️ ${data.failed_count} grades failed to post.` : ''));
+                    init(); // Return to assignment list
+                } else {
+                    alert('Failed to post grades to Canvas. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error posting to Canvas:', error);
+                alert('Failed to post grades to Canvas. Please try again.');
+            }
         }
 
         // Show error
