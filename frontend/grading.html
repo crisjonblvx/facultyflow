@@ -17,6 +17,9 @@
     <!-- i18n Support -->
     <script src="/assets/i18n.js"></script>
 
+    <!-- Tooltips System -->
+    <script src="/assets/tooltips.js"></script>
+
     <style>
         :root {
             --primary-navy: #1E3A5F;
@@ -471,8 +474,9 @@
 
     <!-- Header -->
     <div class="header">
-        <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
             <h1>✨ AI Grading</h1>
+            <span class="tooltip-trigger" data-tooltip="AI grades student submissions in 3-5 minutes, saving you ~90% of grading time. You review and approve all grades before posting.">?</span>
         </div>
         <div class="header-actions">
             <div id="language-selector-container"></div>
@@ -499,9 +503,29 @@
             </div>
 
             <div class="modal-body">
+                <!-- Help Section -->
+                <div class="help-section">
+                    <div class="help-section-header">
+                        <span class="help-arrow">▶</span>
+                        <span>How AI Grading Works</span>
+                    </div>
+                    <div class="help-section-content">
+                        <ul>
+                            <li><strong>Step 1:</strong> AI reads each submission and grades against your rubric</li>
+                            <li><strong>Step 2:</strong> AI generates personalized feedback for each criterion</li>
+                            <li><strong>Step 3:</strong> You review AI suggestions and approve/edit as needed</li>
+                            <li><strong>Step 4:</strong> Post approved grades to Canvas</li>
+                        </ul>
+                        <p style="margin-top: 12px;"><strong>Time savings:</strong> 25 submissions = 10 hours manual → 1 hour with AI (90% faster!)</p>
+                    </div>
+                </div>
+
                 <!-- Step 1: Rubric -->
                 <div class="setup-section">
-                    <h3>1. Grading Rubric</h3>
+                    <h3>
+                        1. Grading Rubric
+                        <span class="tooltip-trigger" data-tooltip="A rubric defines grading criteria (e.g., Thesis: 20pts, Evidence: 30pts). AI uses this to grade consistently across all submissions.">?</span>
+                    </h3>
                     <div id="rubric-preview">
                         <!-- Rubric will be inserted here -->
                     </div>
@@ -509,7 +533,10 @@
 
                 <!-- Step 2: Preferences -->
                 <div class="setup-section">
-                    <h3>2. Grading Preferences</h3>
+                    <h3>
+                        2. Grading Preferences
+                        <span class="tooltip-trigger" data-tooltip="Customize how AI grades submissions. You can change these anytime.">?</span>
+                    </h3>
 
                     <div class="preference-item">
                         <label>
@@ -536,12 +563,19 @@
                     </div>
 
                     <div class="preference-item">
-                        <label>Grading Strictness:</label>
+                        <label>
+                            Grading Strictness:
+                            <span class="tooltip-trigger" data-tooltip="Lenient = generous grading, Balanced = fair and objective, Strict = high standards and critical. Affects how AI interprets rubric criteria.">?</span>
+                        </label>
                         <select id="pref-strictness" style="margin-left: 1rem; padding: 0.5rem; border-radius: 6px; border: 1px solid #ddd;">
                             <option value="lenient">Lenient (grade generously)</option>
                             <option value="balanced" selected>Balanced (grade fairly)</option>
                             <option value="strict">Strict (high standards)</option>
                         </select>
+                    </div>
+
+                    <div class="quick-tip">
+                        <strong>Pro tip:</strong> Start with "Balanced" and adjust if grades seem too high or low
                     </div>
                 </div>
 
@@ -689,6 +723,7 @@
                             <button class="btn btn-primary btn-ai" onclick="openSetupModal()">
                                 ✨ Grade with AI (Recommended)
                             </button>
+                            <span class="inline-hint">AI grades in 3-5 min, you review in ~1 hour. Saves 90% of your time!</span>
                             <button class="btn btn-secondary" onclick="alert('Opens Canvas grading page')">
                                 Grade Manually in Canvas
                             </button>
