@@ -47,17 +47,18 @@ async def startup_event():
     """Initialize database tables on startup"""
     init_db()
 
-# CORS middleware
+# CORS middleware - Allow readysetclass.app and all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://student.readysetclass.app",
-        "https://student.readysetclass.com",
+        "https://www.readysetclass.app",
         "https://readysetclass.app",
         "https://www.readysetclass.com",
         "https://readysetclass.com",
+        "http://localhost:3000",
         "http://localhost:5173",
-        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "*"  # Allow all for development
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -2890,3 +2891,15 @@ async def cleanup_expired_demos(current_user=Depends(get_current_user_from_token
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+
+# ============================================================================
+# AI GRADING ROUTES
+# ============================================================================
+
+# Import AI grading router
+from routes_ai_grading import router as ai_grading_router
+
+# Include AI grading routes
+app.include_router(ai_grading_router)
+
