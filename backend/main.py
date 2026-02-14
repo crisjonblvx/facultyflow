@@ -51,7 +51,9 @@ async def startup_event():
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://student.readysetclass.app",
         "https://student.readysetclass.com",
+        "https://readysetclass.app",
         "https://www.readysetclass.com",
         "https://readysetclass.com",
         "http://localhost:5173",
