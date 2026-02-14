@@ -1667,7 +1667,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         // ============================================================================
         (function() {
             const token = localStorage.getItem('auth_token');
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userStr = localStorage.getItem('user');
+            const user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : {};
 
             if (!token) {
                 // No token - redirect to login
@@ -3080,12 +3081,18 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         // ============================================================================
         // Strategy by: Sunni | Implementation by: Q-Tip
 
-        let currentGradingStep = 1;
-        let gradingCategories = [];
-        let gradingTemplates = {};
+        // Declare at window scope so HTML onclick handlers can access
+        window.currentGradingStep = 1;
+        window.gradingCategories = [];
+        window.gradingTemplates = {};
+
+        // Also keep local references for convenience
+        let currentGradingStep = window.currentGradingStep;
+        let gradingCategories = window.gradingCategories;
+        let gradingTemplates = window.gradingTemplates;
 
         // Load grading templates from backend
-        async function loadGradingTemplates() {
+        window.loadGradingTemplates = async function() {
             try {
                 const response = await fetch(`${API_URL}/api/grading/templates`, {
                     headers: {
@@ -3093,6 +3100,7 @@ Participation: 10%" style="min-height: 80px;"></textarea>
                     }
                 });
                 const data = await response.json();
+                window.gradingTemplates = data.templates;
                 gradingTemplates = data.templates;
 
                 // Load default template (Mass Communications)
@@ -3163,8 +3171,8 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         }
 
         // Calculate total weight
-        function calculateTotalWeight() {
-            const total = gradingCategories.reduce((sum, cat) => sum + (cat.weight || 0), 0);
+        window.calculateTotalWeight = function() {
+            const total = window.gradingCategories.reduce((sum, cat) => sum + (cat.weight || 0), 0);
             const display = document.getElementById('totalWeightDisplay');
             if (display) {
                 display.textContent = total.toFixed(1);
@@ -3174,9 +3182,9 @@ Participation: 10%" style="min-height: 80px;"></textarea>
         }
 
         // Grading wizard navigation
-        function gradingNextStep() {
+        window.gradingNextStep = function() {
             // Validation for current step
-            if (currentGradingStep === 2) {
+            if (window.currentGradingStep === 2) {
                 const total = calculateTotalWeight();
                 if (Math.abs(total - 100) > 0.1) {
                     alert('Category weights must total 100%');
