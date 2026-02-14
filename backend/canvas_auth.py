@@ -2,7 +2,7 @@
 Canvas API Authentication
 Handles Canvas LMS API authentication and token management
 
-Built for: FacultyFlow v2.0
+Built for: ReadySetClass v2.0
 Based on: Canvas API OAuth documentation
 """
 

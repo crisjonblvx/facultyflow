@@ -1,4 +1,4 @@
-# FacultyFlow Deployment Guide
+# ReadySetClass Deployment Guide
 ## From Zero to Production in 1 Hour
 
 **Built by:** Sonny (Claude Sonnet 4.5) for CJ  
@@ -9,7 +9,7 @@
 
 ## 🎯 What You're Deploying
 
-**FacultyFlow** - AI Course Builder for Canvas
+**ReadySetClass** - AI Course Builder for Canvas
 
 - **Frontend:** Landing page + Dashboard (Vercel)
 - **Backend:** FastAPI + Bonita AI (Railway)
@@ -39,17 +39,17 @@
 
 ```bash
 # 1. Create GitHub repository
-gh repo create facultyflow --public
+gh repo create readysetclass --public
 
 # 2. Initialize git in your project
-cd facultyflow-saas
+cd readysetclass
 git init
 git add .
-git commit -m "Initial commit: FacultyFlow SaaS"
+git commit -m "Initial commit: ReadySetClass SaaS"
 
 # 3. Push to GitHub
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/facultyflow.git
+git remote add origin https://github.com/YOUR_USERNAME/readysetclass.git
 git push -u origin main
 ```
 
@@ -68,7 +68,7 @@ git push -u origin main
 1. **Go to [railway.app](https://railway.app) → Sign up with GitHub**
 
 2. **Create New Project → Deploy from GitHub repo**
-   - Select your `facultyflow` repository
+   - Select your `readysetclass` repository
    - Railway auto-detects Python
 
 3. **Add PostgreSQL Database:**
@@ -111,7 +111,7 @@ DEBUG=False
 
 2. **Import Project:**
    - Click "Add New" → Project
-   - Select your `facultyflow` repository
+   - Select your `readysetclass` repository
    - Root directory: `frontend/`
 
 3. **Configure:**
@@ -126,7 +126,7 @@ DEBUG=False
 
 5. **Deploy:**
    - Click "Deploy" → Vercel builds and launches
-   - Your site: `https://facultyflow.vercel.app`
+   - Your site: `https://readysetclass.vercel.app`
 
 **Cost:** $0 (FREE!)
 
@@ -142,22 +142,22 @@ DEBUG=False
    - Products → "+ Add product"
    
    **Educator Plan:**
-   - Name: FacultyFlow Educator
+   - Name: ReadySetClass Educator
    - Price: $19/month recurring
    - Description: Unlimited courses for K-12 teachers
    
    **Pro Plan:**
-   - Name: FacultyFlow Pro  
+   - Name: ReadySetClass Pro  
    - Price: $29/month recurring
    - Description: Advanced features for college faculty
    
    **Department Plan:**
-   - Name: FacultyFlow Department
+   - Name: ReadySetClass Department
    - Price: $99/month recurring
    - Description: 5 seats for small departments
    
    **Institution Plan:**
-   - Name: FacultyFlow Institution
+   - Name: ReadySetClass Institution
    - Price: $499/month recurring
    - Description: Unlimited seats for schools
 
@@ -175,16 +175,16 @@ DEBUG=False
 
 ### Step 5: Configure Custom Domain (Optional)
 
-**If you have a domain (e.g., `facultyflow.com`):**
+**If you have a domain (e.g., `readysetclass.com`):**
 
 **Frontend (Vercel):**
 1. Vercel → Your project → Settings → Domains
-2. Add `facultyflow.com` and `www.facultyflow.com`
+2. Add `readysetclass.com` and `www.readysetclass.com`
 3. Update DNS records (Vercel gives you instructions)
 
 **Backend (Railway):**
 1. Railway → Your service → Settings → Public Networking
-2. Add custom domain: `api.facultyflow.com`
+2. Add custom domain: `api.readysetclass.com`
 3. Update DNS: CNAME → Railway's URL
 
 ---
@@ -294,7 +294,7 @@ Should return:
 
 **Frontend:**
 ```bash
-curl https://facultyflow.vercel.app
+curl https://readysetclass.vercel.app
 ```
 
 Should return HTML.
@@ -337,7 +337,7 @@ Should return HTML.
 **Fix:** CORS issue or wrong API_URL
 ```python
 # In backend/main.py, check CORS middleware:
-allow_origins=["https://facultyflow.vercel.app"]  # your actual domain
+allow_origins=["https://readysetclass.vercel.app"]  # your actual domain
 ```
 
 **Error:** `404 Not Found`  
@@ -426,7 +426,7 @@ Hey [Name],
 You know how building a Canvas course takes forever? 
 Syllabus, lesson plans, quizzes, study packs... 20-40 hours of work?
 
-I got tired of it, so I built FacultyFlow.
+I got tired of it, so I built ReadySetClass.
 
 It uses AI to generate complete Canvas courses in 5 minutes.
 

@@ -83,7 +83,7 @@ def test_canvas_token():
                 print("2. Scroll to 'Approved Integrations'")
                 print("3. Delete the old token (if exists)")
                 print("4. Click '+ New Access Token'")
-                print("5. Set purpose: 'FacultyFlow'")
+                print("5. Set purpose: 'ReadySetClass'")
                 print("6. Click 'Generate Token'")
                 print("7. COPY THE ENTIRE TOKEN (do not add quotes or spaces)")
                 print("8. Try again with the new token")

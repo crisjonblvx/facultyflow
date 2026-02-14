@@ -1,8 +1,8 @@
 """
-Database Models for FacultyFlow v2.0
+Database Models for ReadySetClass v2.0
 SQLAlchemy models for Canvas integration
 
-Built for: FacultyFlow v2.0
+Built for: ReadySetClass v2.0
 Database: PostgreSQL (Railway)
 """
 

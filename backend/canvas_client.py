@@ -1,8 +1,8 @@
 """
 Canvas LMS API Client
-Complete Canvas API wrapper for FacultyFlow
+Complete Canvas API wrapper for ReadySetClass
 
-Built for: FacultyFlow v2.0
+Built for: ReadySetClass v2.0
 Based on: Official Canvas API documentation
 Documentation: https://canvas.instructure.com/doc/api/
 """
@@ -16,7 +16,7 @@ from rate_limiter import RateLimiter
 class CanvasClient:
     """
     Canvas LMS API Client
-    Provides methods for all Canvas operations needed by FacultyFlow
+    Provides methods for all Canvas operations needed by ReadySetClass
     """
 
     def __init__(self, base_url: str, access_token: str):

@@ -2,7 +2,7 @@
 Canvas API Rate Limiter
 Enforces Canvas API rate limits (3000 requests per hour)
 
-Built for: FacultyFlow v2.0
+Built for: ReadySetClass v2.0
 Based on: Canvas API rate limit documentation
 """
 

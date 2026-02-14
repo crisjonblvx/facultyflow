@@ -1,4 +1,4 @@
-# 🦋 FacultyFlow
+# 🦋 ReadySetClass
 
 **AI Course Builder for Canvas**
 
@@ -10,7 +10,7 @@ Build complete Canvas courses in 5 minutes. Syllabi, lesson plans, quizzes, and 
 
 ## 🎯 What Is This?
 
-**FacultyFlow** is a SaaS platform that automates Canvas course creation for educators.
+**ReadySetClass** is a SaaS platform that automates Canvas course creation for educators.
 
 ### The Problem:
 - Building a Canvas course takes 20-40 hours
@@ -18,7 +18,7 @@ Build complete Canvas courses in 5 minutes. Syllabi, lesson plans, quizzes, and 
 - Costs $1,000-4,000 to hire an instructional designer
 
 ### The Solution:
-- FacultyFlow generates everything in 5 minutes
+- ReadySetClass generates everything in 5 minutes
 - Uploads directly to Canvas
 - Costs $19-29/month
 
@@ -70,9 +70,9 @@ Build complete Canvas courses in 5 minutes. Syllabi, lesson plans, quizzes, and 
 ## 📁 Project Structure
 
 ```
-facultyflow-saas/
+readysetclass/
 ├── branding/
-│   ├── logo.svg                    # FacultyFlow logo
+│   ├── logo.svg                    # ReadySetClass logo
 │   ├── icon.svg                    # App icon
 │   └── BRAND_GUIDELINES.md         # Brand identity guide
 ├── frontend/
@@ -96,8 +96,8 @@ facultyflow-saas/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/facultyflow.git
-cd facultyflow
+git clone https://github.com/YOUR_USERNAME/readysetclass.git
+cd readysetclass
 ```
 
 ### 2. Set Up Backend
@@ -208,14 +208,14 @@ curl -X POST http://localhost:8000/api/build-course \
 
 ## 🎓 Built For Educators
 
-**Why FacultyFlow exists:**
+**Why ReadySetClass exists:**
 
 CJ (the creator) is a Mass Communications professor at VUU who got tired of:
 - Spending 40 hours building Canvas courses
 - Paying $1,200/month for Moltbot (a scam)
 - Watching colleagues struggle with the same problems
 
-So he built FacultyFlow with Bonita AI to:
+So he built ReadySetClass with Bonita AI to:
 - Save educators time (25+ hours per course)
 - Keep it affordable ($19-29/mo vs. $1,000+ alternatives)
 - Preserve quality (AI-generated but human-reviewed)
@@ -233,9 +233,9 @@ Bonita is CJ's AI sovereignty stack that:
 - Routes tasks to the best AI model (Claude/Qwen/Gemini)
 - Saves 95% on AI costs vs. always using expensive models
 - Preserves cultural identity and values
-- Powers multiple products (FacultyFlow, heybonita.ai, BLVX, HBCU.news)
+- Powers multiple products (ReadySetClass, heybonita.ai, BLVX, HBCU.news)
 
-**FacultyFlow is the first product built on Bonita.**
+**ReadySetClass is the first product built on Bonita.**
 
 More coming soon. 🚀
 
@@ -286,7 +286,7 @@ Unauthorized copying, distribution, or use is prohibited.
 ## 💬 Support
 
 **Need help?**
-- 📧 Email: support@facultyflow.com
+- 📧 Email: support@readysetclass.com
 - 📚 Docs: [DEPLOYMENT_GUIDE.md](deployment/DEPLOYMENT_GUIDE.md)
 - 🐛 Bugs: Open an issue on GitHub
 
@@ -309,9 +309,9 @@ Unauthorized copying, distribution, or use is prohibited.
 
 ## 📱 Connect
 
-- 🌐 Website: [facultyflow.com](https://facultyflow.com)
-- 🐦 Twitter: [@FacultyFlow](https://twitter.com/facultyflow)
-- 💼 LinkedIn: [FacultyFlow](https://linkedin.com/company/facultyflow)
+- 🌐 Website: [readysetclass.com](https://readysetclass.com)
+- 🐦 Twitter: [@ReadySetClass](https://twitter.com/readysetclass)
+- 💼 LinkedIn: [ReadySetClass](https://linkedin.com/company/readysetclass)
 
 ---
 

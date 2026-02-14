@@ -9,7 +9,7 @@
 ### 1. Run Database Migrations
 
 ```bash
-cd ~/Desktop/FFfiles/facultyflow-saas/backend
+cd ~/Desktop/readysetclass/backend
 
 # Get your DATABASE_URL from Railway dashboard
 export DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@containers-us-west-XXX.railway.app:XXXX/railway"
@@ -141,7 +141,7 @@ const priceIds = {
 
 Deploy:
 ```bash
-cd ~/Desktop/FFfiles/facultyflow-saas/frontend
+cd ~/Desktop/readysetclass/frontend
 vercel --prod
 ```
 

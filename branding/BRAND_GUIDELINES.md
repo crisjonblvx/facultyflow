@@ -1,7 +1,17 @@
-# FacultyFlow Brand Guidelines
+# [ARCHIVED] FacultyFlow Brand Guidelines
 
-**Version:** 1.0  
-**Date:** February 10, 2026  
+**⚠️ NOTE:** This document is archived. FacultyFlow has been rebranded to **ReadySetClass™**.
+
+**New branding:**
+- Brand name: ReadySetClass™
+- Colors: Navy (#1e3a8a) + Gold (#eab308)
+- Trademark: Always use ™ symbol
+- See `.context/READYSETCLASS_REORGANIZATION.md` for current branding status
+
+---
+
+**Original Version:** 1.0
+**Original Date:** February 10, 2026
 **Built for:** CJ @ ContentCreators.life
 
 ---
