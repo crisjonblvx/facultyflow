@@ -6,7 +6,7 @@ Built for: FacultyFlow v2.0
 Database: PostgreSQL (Railway)
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -71,6 +71,113 @@ class ReferenceMaterial(Base):
     extracted_text = Column(Text, nullable=False)
     course_name = Column(String(255))  # Optional: which course this is for
     upload_date = Column(DateTime, default=datetime.utcnow)
+
+
+class AIGradingSession(Base):
+    """
+    Tracks AI grading sessions
+    One session = grading all submissions for one assignment
+    """
+    __tablename__ = "ai_grading_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)  # Professor who started grading
+    course_id = Column(String(50), nullable=False)  # Canvas course ID
+    assignment_id = Column(String(50), nullable=False)  # Canvas assignment ID
+    assignment_title = Column(String(255))
+
+    # Session configuration
+    rubric = Column(JSON)  # The rubric used for grading
+    preferences = Column(JSON)  # Grading preferences (strictness, flags, etc.)
+
+    # Status tracking
+    status = Column(String(50), default="in_progress")  # in_progress, completed, posted
+    total_submissions = Column(Integer, default=0)
+    graded_count = Column(Integer, default=0)
+    reviewed_count = Column(Integer, default=0)
+    posted_count = Column(Integer, default=0)
+
+    # Timestamps
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+    posted_at = Column(DateTime)
+
+    # Metadata
+    average_score = Column(Float)
+    average_confidence = Column(Float)
+    flagged_count = Column(Integer, default=0)
+
+    # Relationship to individual grades
+    grades = relationship("AIGrade", back_populates="session")
+
+
+class AIGrade(Base):
+    """
+    Individual AI-generated grade for one student submission
+    """
+    __tablename__ = "ai_grades"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("ai_grading_sessions.id"), nullable=False)
+
+    # Student info
+    student_id = Column(String(50), nullable=False)  # Canvas user ID
+    student_name = Column(String(255))
+    submission_id = Column(String(50), nullable=False)  # Canvas submission ID
+    submission_text = Column(Text)
+    submitted_at = Column(DateTime)
+
+    # AI Grading Results
+    ai_total_score = Column(Float)
+    ai_rubric_scores = Column(JSON)  # Score for each rubric criterion
+    ai_feedback = Column(Text)  # Overall feedback
+    ai_criterion_feedback = Column(JSON)  # Feedback for each criterion
+    ai_confidence = Column(String(20))  # 'high', 'medium', 'low'
+    ai_flags = Column(JSON)  # Array of flags (plagiarism, ai-generated, etc.)
+
+    # Professor Review
+    reviewed = Column(Boolean, default=False)
+    reviewed_at = Column(DateTime)
+    final_score = Column(Float)  # May differ from ai_total_score after review
+    final_feedback = Column(Text)  # May be edited
+    professor_adjustments = Column(JSON)  # What professor changed
+
+    # Canvas Posting
+    posted_to_canvas = Column(Boolean, default=False)
+    posted_at = Column(DateTime)
+    canvas_grade_id = Column(String(50))
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship to session
+    session = relationship("AIGradingSession", back_populates="grades")
+
+
+class AIGradingAnalytics(Base):
+    """
+    Analytics for improving AI grading over time
+    Tracks accuracy, time savings, user satisfaction
+    """
+    __tablename__ = "ai_grading_analytics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    grade_id = Column(Integer, ForeignKey("ai_grades.id"))
+
+    # Accuracy tracking
+    ai_score = Column(Float)
+    final_score = Column(Float)
+    score_difference = Column(Float)  # How much professor adjusted
+
+    # Feedback quality
+    feedback_edited = Column(Boolean, default=False)
+    feedback_regenerated = Column(Boolean, default=False)
+
+    # Time savings
+    estimated_manual_time = Column(Integer)  # Minutes
+    actual_review_time = Column(Integer)  # Minutes
+    time_saved = Column(Integer)  # Minutes
+
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 def init_db():
